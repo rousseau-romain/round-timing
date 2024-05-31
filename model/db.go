@@ -2,8 +2,8 @@ package model
 
 import (
 	"database/sql"
-	"examples/config"
 	"log"
+	"round-timing/config"
 
 	"github.com/go-sql-driver/mysql"
 )

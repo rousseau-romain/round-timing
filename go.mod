@@ -1,4 +1,4 @@
-module examples
+module round-timing
 
 go 1.21
 

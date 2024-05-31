@@ -2,7 +2,7 @@ package api
 
 // import (
 // 	"encoding/json"
-// 	"examples/model"
+// 	"round-timing/model"
 // 	"io"
 // 	"log"
 // 	"net/http"

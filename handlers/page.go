@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	"examples/model"
-	"examples/shared/components"
-	"examples/views/page"
 	"fmt"
 	"log"
 	"net/http"
+	"round-timing/model"
+	"round-timing/shared/components"
+	"round-timing/views/page"
 	"strconv"
 
 	"github.com/gorilla/mux"
