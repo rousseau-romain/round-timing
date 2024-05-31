@@ -1,0 +1,94 @@
+package page
+
+import "examples/shared/components"
+import "examples/model"
+import "fmt"
+import "github.com/markbates/goth"
+
+templ Match(m model.Match) {
+	<tr>
+		<td class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">
+			{ m.Name }
+		</td>
+		<td class="whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">{ m.CreatedAt }</td>
+		<td class="whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">{ m.UpdatedAt }</td>
+		<td class="whitespace-nowrap px-4 py-2">
+			<a
+				href={ templ.SafeURL("/match/" + fmt.Sprintf("%d", m.Id)) }
+				class="inline-block rounded bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700"
+			>
+				View
+			</a>
+		</td>
+		<td class="whitespace-nowrap px-4 py-2">
+			<button
+				hx-delete={ "/match/" + fmt.Sprintf("%d", m.Id) }
+				class="inline-block rounded bg-red-600 px-4 py-2 text-xs font-medium text-white hover:bg-red-700"
+			>
+				Delete
+			</button>
+		</td>
+	</tr>
+}
+
+templ MatchTable(matchs []model.Match) {
+	<div class="overflow-x-auto">
+		<table
+			class="min-w-full divide-y-2 divide-gray-200 bg-white text-sm dark:divide-gray-700 dark:bg-gray-900"
+		>
+			<thead class="ltr:text-left rtl:text-right">
+				<tr>
+					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">Name</th>
+					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">
+						CreatedAt
+					</th>
+					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">UpdatedAt</th>
+					<th class="px-4 py-2"></th>
+					<th class="px-4 py-2"></th>
+				</tr>
+			</thead>
+			<tbody
+				hx-confirm="Are you sure?"
+				hx-swap="outerHTML swap:0.5s"
+				hx-target="closest tr"
+				class="divide-y divide-gray-200 dark:divide-gray-700"
+			>
+				for _, match := range matchs {
+					@Match(match)
+				}
+			</tbody>
+		</table>
+	</div>
+}
+
+templ MatchListPage(user goth.User, navItems []components.NavItem, modelUser model.User, matchs[]model.Match) {
+	@components.Layout("Create match", user, navItems) {
+		<div class="container mx-auto">
+			<h1>Create match</h1>
+			<form
+				class="space-y-4"
+				hx-post="/match"
+				hx-swap="beforebegin"
+				hx-target="next tbody"
+			>
+				<div>
+					<label class="sr-only" for="name">Name</label>
+					<input
+						class="w-full rounded-lg border-gray-200 p-3 text-sm"
+						placeholder="Name"
+						required
+						type="text"
+						name="name"
+					/>
+				</div>
+				<button
+					type="submit"
+					class="inline-block w-full rounded-lg bg-black px-5 py-3 font-medium text-white sm:w-auto"
+				>
+					Create match
+				</button>
+			</form>
+			@MatchTable(matchs)
+		</div>
+	}
+}

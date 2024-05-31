@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  [type="text"],
+  [type="password"],
+  [type="email"],
+  [type="number"],
+  [type="url"],
+  [type="date"],
+  [type="datetime-local"],
+  [type="month"],
+  [type="week"],
+  [type="time"],
+  [type="search"],
+  [type="tel"],
+  select,
+  select[multiple],
+  textarea {
+    @apply shadow-sm rounded-md block w-full sm:text-sm border-gray-300
+        focus:ring-orange-400 focus:border-orange-400 focus:outline-none focus:ring-inset
+        dark:focus:border-orange-400 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200;
+  }
+
+  [type="checkbox"],
+  [type="radio"] {
+    @apply rounded focus:ring-orange-400 dark:bg-gray-900;
+  }
+
+  h1 {
+    @apply text-2xl;
+  }
+  h2 {
+    @apply text-xl;
+  }
+  h3 {
+    @apply text-lg;
+  }
+  .content a,
+  .breadcrumbs a {
+    @apply text-green-500 hover:text-green-700;
+  }
+  footer a {
+    @apply text-gray-500 hover:text-gray-700 font-bold;
+  }
+}
+
+.btn {
+  @apply inline-flex justify-center py-2 px-4 mr-1 rounded-md whitespace-nowrap
+    bg-green-400 hover:bg-green-500
+    text-sm text-white font-bold
+    focus:outline-none focus:ring-2 focus:ring-green-800;
+}
+
+tr.htmx-swapping td {
+  opacity: 0;
+  transition: opacity 1s ease-out;
+}

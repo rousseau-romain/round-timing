@@ -1,0 +1,3 @@
+ALTER TABLE user MODIFY COLUMN email varchar(255) NOT NULL;
+ALTER TABLE user MODIFY COLUMN hash varchar(255) NOT NULL;
+ALTER TABLE user DROP COLUMN oauth2_id;

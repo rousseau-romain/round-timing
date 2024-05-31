@@ -1,0 +1,33 @@
+CREATE TABLE color_team (
+    id int(11) AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE team (
+    id int(11) AUTO_INCREMENT PRIMARY KEY,
+    id_match int(11) NOT NULL,
+    id_color_team int(11) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_match) REFERENCES `match`(id),
+    FOREIGN KEY (id_color_team) REFERENCES color_team(id)
+);
+
+CREATE TABLE player (
+    id int(11) AUTO_INCREMENT PRIMARY KEY,
+    id_team int(11) NOT NULL,
+    id_class int(11) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_class) REFERENCES class(id),
+    FOREIGN KEY (id_team) REFERENCES team(id)
+);
+
+
+INSERT INTO color_team (name) VALUES 
+('red'),
+('indigo');   

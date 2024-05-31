@@ -1,0 +1,131 @@
+package page
+
+import "examples/shared/components"
+import "github.com/markbates/goth"
+import "examples/model"
+import "strconv"
+import "fmt"
+
+templ StartMatchPage(user goth.User, navItems []components.NavItem, match model.Match,  players []model.Player, playersSpells []model.MatchPlayerSpell) {
+	@components.Layout("Start match", user, navItems) {
+		<a
+			href={ templ.SafeURL("/match/" + fmt.Sprintf("%d", match.Id)) }
+			class="inline-block w-full rounded-lg bg-indigo-600 px-5 py-3 font-medium text-white sm:w-auto"
+		>
+			Go back to match { match.Name } ({ strconv.Itoa(match.Id) })
+		</a>
+		<button
+			type="submit"
+			class="inline-block w-full rounded-lg bg-red-600 px-5 py-3 font-medium text-white sm:w-auto"
+			hx-patch={ fmt.Sprintf("/match/%d/reset", match.Id) }
+		>
+			Reset match
+		</button>
+		<button
+			type="submit"
+			class="inline-block w-full rounded-lg bg-green-600 px-5 py-3 font-medium text-white sm:w-auto"
+			hx-get={ fmt.Sprintf("/match/%d/increase-round", match.Id) }
+			hx-target="next tbody"
+		>
+			Next Round
+		</button>
+		@PlayerTable(players, playersSpells)
+	}
+}
+
+templ Spell(mps model.MatchPlayerSpell) {
+	<div
+		class={
+			"relative border-2 rounded",
+			templ.KV("cursor-pointer transition-all hover:scale-110", mps.RoundBeforeRecovery == 0),
+			templ.KV("border-red-500", mps.RoundBeforeRecovery == 1),
+			templ.KV("border-yellow-500", mps.RoundBeforeRecovery == 2),
+			templ.KV("border-cyan-500", mps.RoundBeforeRecovery >= 3),
+		}
+		if mps.RoundBeforeRecovery == 0 {
+			hx-get={ fmt.Sprintf("/match/%d/player-spell/%d/use", mps.MatchId, mps.Id) }
+			hx-target="this"
+			skipConfirmation
+		}
+	>
+		<img
+			alt={ mps.Spell.Name }
+			src={ mps.Spell.UrlImage }
+			class={
+				"h-12 img-class",
+				templ.KV("grayscale", mps.RoundBeforeRecovery > 0),
+			}
+		/>
+		if mps.RoundBeforeRecovery > 0 {
+			<span
+				class={
+					"absolute", "-right-0.5", "-top-0.5", "whitespace-nowrap", "rounded-full", "px-1.5", "text-sm",
+					templ.KV("bg-red-100 text-red-700 dark:bg-red-700 dark:text-red-100", mps.RoundBeforeRecovery == 1),
+					templ.KV("bg-yellow-100 text-yellow-700 dark:bg-yellow-700 dark:text-yellow-100", mps.RoundBeforeRecovery == 2),
+					templ.KV("bg-cyan-100 text-cyan-700 dark:bg-cyan-700 dark:text-cyan-100", mps.RoundBeforeRecovery >= 3),
+				}
+			>
+				{ strconv.Itoa(mps.RoundBeforeRecovery) }
+			</span>
+		}
+	</div>
+}
+
+templ Player(p model.Player, playersSpells []model.MatchPlayerSpell) {
+	<tr
+		class={
+			templ.KV("bg-red-200", p.Team.Color == "red"),
+			templ.KV("bg-indigo-200", p.Team.Color == "indigo"),
+		}
+	>
+		<td class="whitespace-nowrap px-4 py-2">
+			<img onclick="handleClickImage(this)" alt={ p.Class.Name } title={ p.Name } src={ p.Class.UrlImage + "F.svg" } class="h-8 img-class  cursor-pointer transition-all hover:scale-110"/>
+		</td>
+		<td class="whitespace-nowrap px-4 py-2">
+			<div class="flex gap-1 flex-wrap">
+				for _, ps := range playersSpells {
+					if ps.PlayerId == p.Id {
+						@Spell(ps)
+					}
+				}
+			</div>
+		</td>
+	</tr>
+}
+
+templ PlayerTbody(players []model.Player, spells []model.MatchPlayerSpell) {
+	<tbody
+		hx-swap="outerHTML swap:0.5s"
+		hx-target="closest tr"
+		class="divide-y divide-gray-200 dark:divide-gray-700"
+	>
+		for _, player := range players {
+			@Player(player, spells)
+		}
+	</tbody>
+}
+
+templ PlayerTable(players []model.Player, spells []model.MatchPlayerSpell) {
+	<script>
+		function handleClickImage(img) {
+			if (img.src.includes("F")) {
+				img.src = img.src.replace("F", "M");
+			} else {
+				img.src = img.src.replace("M", "F");
+			}
+		}
+	</script>
+	<div class="overflow-x-auto">
+		<table
+			class="min-w-full divide-y-2 divide-gray-200 bg-white text-sm dark:divide-gray-700 dark:bg-gray-900"
+		>
+			<thead class="ltr:text-left rtl:text-right">
+				<tr>
+					<th class="whitespace-nowrap  text-left px-4 py-2 font-medium text-gray-900 dark:text-white">Class</th>
+					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">Spells</th>
+				</tr>
+			</thead>
+			@PlayerTbody(players, spells)
+		</table>
+	</div>
+}

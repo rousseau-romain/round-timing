@@ -1,0 +1,34 @@
+package model
+
+import (
+	"database/sql"
+	"examples/config"
+	"log"
+
+	"github.com/go-sql-driver/mysql"
+)
+
+func ConnectDb() *sql.DB {
+	cfg := mysql.Config{
+		User:                 config.DB_USER,
+		Passwd:               config.DB_PASSWORD,
+		Net:                  "tcp",
+		Addr:                 config.DB_HOST + ":" + config.DB_PORT,
+		DBName:               config.DB_NAME,
+		AllowNativePasswords: true,
+	}
+
+	db, err := sql.Open("mysql", cfg.FormatDSN())
+	if err != nil {
+		log.Println("err", err)
+
+		log.Fatal(err)
+	}
+	return db
+}
+
+func CloseDb(db *sql.DB) {
+	db.Close()
+}
+
+var db = ConnectDb()
