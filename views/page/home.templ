@@ -1,0 +1,29 @@
+package page
+
+import "examples/shared/components"
+import "github.com/markbates/goth"
+
+type Pages struct {
+	Name, Slug string
+}
+
+templ HomePage(user goth.User, navItems []components.NavItem) {
+	@components.Layout("Home", user, navItems) {
+		<h2 class="title">Pages:</h2>
+		<table class="table is-fullwidth">
+			<thead>
+				<tr>
+					<th>Pattern</th>
+					<th>Description</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, n := range navItems {
+					<tr>
+						<td><a href={ templ.SafeURL("/" + n.Url) }>{ n.Name }</a></td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	}
+}
