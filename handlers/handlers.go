@@ -1,6 +1,6 @@
 package handlers
 
-import "examples/service/auth"
+import "round-timing/service/auth"
 
 type Handler struct {
 	auth *auth.AuthService

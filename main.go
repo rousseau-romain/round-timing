@@ -1,11 +1,11 @@
 package main
 
 import (
-	"examples/config"
-	"examples/handlers"
-	"examples/service/auth"
 	"log"
 	"net/http"
+	"round-timing/config"
+	"round-timing/handlers"
+	"round-timing/service/auth"
 
 	"github.com/gorilla/mux"
 )

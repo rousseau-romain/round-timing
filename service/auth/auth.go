@@ -1,11 +1,11 @@
 package auth
 
 import (
-	"examples/config"
-	"examples/model"
 	"fmt"
 	"log"
 	"net/http"
+	"round-timing/config"
+	"round-timing/model"
 	"strconv"
 
 	"github.com/gorilla/mux"

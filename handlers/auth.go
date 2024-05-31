@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"examples/model"
-	"examples/views/page"
 	"fmt"
 	"log"
 	"net/http"
+	"round-timing/model"
+	"round-timing/views/page"
 
 	"github.com/markbates/goth/gothic"
 )
