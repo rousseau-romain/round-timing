@@ -153,5 +153,5 @@ func RequireAuthAndHisMatch(handlerFunc http.HandlerFunc, auth *AuthService) htt
 }
 
 func buildCallbackURL(provider string) string {
-	return fmt.Sprintf("%s:%s/auth/%s/callback", config.PUBLIC_HOST, config.PORT, provider)
+	return fmt.Sprintf("%s/auth/%s/callback", config.PUBLIC_HOST_PORT, provider)
 }

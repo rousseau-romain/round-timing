@@ -17,8 +17,7 @@ var (
 	DB_DRIVER,
 	JWT_SECRET_KEY,
 	DB_PORT,
-	PUBLIC_HOST,
-	PORT,
+	PUBLIC_HOST_PORT,
 	COOKIES_AUTH_SECRET,
 	DISCORD_CLIENT_ID,
 	DISCORD_CLIENT_SECRET,
@@ -44,8 +43,7 @@ func init() {
 	DB_URL = DB_DRIVER + "://" + os.Getenv("DB_USER") + ":" + os.Getenv("DB_PASSWORD") + "@tcp(" + os.Getenv("DB_HOST") + ":" + DB_PORT + ")/" + os.Getenv("DB_NAME")
 	JWT_SECRET_KEY = os.Getenv("JWT_SECRET_KEY")
 
-	PUBLIC_HOST = os.Getenv("PUBLIC_HOST")
-	PORT = os.Getenv("PORT")
+	PUBLIC_HOST_PORT = os.Getenv("PUBLIC_HOST_PORT")
 	COOKIES_AUTH_SECRET = os.Getenv("COOKIES_AUTH_SECRET")
 
 	COOKIES_AUTH_AGE_IN_SECONDS = 60 * 60 * 24 * 2
