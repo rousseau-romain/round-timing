@@ -88,7 +88,6 @@ func GetLastMatchByUserId(idUser int) (Match, error) {
 	}
 	err := rows.Scan(&match.Id, &match.IdUser, &match.Name, &match.Round, &match.CreatedAt, &match.UpdatedAt)
 	if err != nil && err.Error() == "sql: no rows in result set" {
-
 		return match, nil
 	}
 
@@ -112,7 +111,6 @@ func CreateMatch(m MatchCreate) (int, error) {
 }
 
 func UpdateMatch(idMatch int, match MatchUpdate) error {
-	log.Println("match", match)
 	canUpdate := false
 	sb := sqlbuilder.NewUpdateBuilder()
 	sb.Update("`match`").Where(sb.Equal("id", idMatch))

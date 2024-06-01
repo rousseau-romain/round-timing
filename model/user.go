@@ -62,7 +62,9 @@ func GetUserIdByMatch(idmatch int) (User, error) {
 	`, "`match`")
 
 	err := db.QueryRow(sql, idmatch).Scan(&user.Id, &user.Oauth2Id)
-
+	if err != nil && err.Error() == "sql: no rows in result set" {
+		return user, nil
+	}
 	if err != nil {
 		log.Println(err)
 	}
@@ -78,7 +80,9 @@ func GetUserByOauth2Id(oauth2Id string) (User, error) {
 	sql, args := sb.Build()
 
 	err := db.QueryRow(sql, args...).Scan(&user.Id, &user.Oauth2Id)
-
+	if err != nil && err.Error() == "sql: no rows in result set" {
+		return user, nil
+	}
 	return user, err
 }
 

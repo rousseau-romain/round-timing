@@ -146,8 +146,6 @@ func RequireAuthAndHisMatch(handlerFunc http.HandlerFunc, auth *AuthService) htt
 			return
 		}
 
-		log.Printf("user is authenticated! user: %v!", session.FirstName)
-
 		handlerFunc(w, r)
 	}
 }
