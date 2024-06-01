@@ -167,6 +167,20 @@ func UsePlayerSpellByIdPlayerSpell(idPlayerSpell int) error {
 	return err
 }
 
+func RemoveRoundRecoverySpellByIdPlayerSpell(idPlayerSpell int) error {
+	sql := `
+		UPDATE match_player_spell 
+		SET round_before_recovery = CASE
+			WHEN round_before_recovery > 0 THEN round_before_recovery - 1
+			ELSE 0
+		END
+		WHERE id = ?
+	`
+	_, err := db.Exec(sql, idPlayerSpell)
+
+	return err
+}
+
 func ResetMatchPlayersSpells(idMatch int) error {
 	sql := `
 		DELETE FROM match_player_spell

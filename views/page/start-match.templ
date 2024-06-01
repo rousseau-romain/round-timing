@@ -25,11 +25,22 @@ templ StartMatchPage(user goth.User, navItems []components.NavItem, match model.
 			type="submit"
 			class="inline-block w-full rounded-lg bg-green-600 px-5 py-3 font-medium text-white sm:w-auto"
 			hx-get={ fmt.Sprintf("/match/%d/increase-round", match.Id) }
-			hx-target="next tbody"
+			hx-target="next table"
 		>
 			Next Round
 		</button>
-		@PlayerTable(players, playersSpells)
+		<div class="overflow-x-auto">
+			<script>
+				function handleClickImage(img) {
+					if (img.src.includes("F")) {
+						img.src = img.src.replace("F", "M");
+					} else {
+						img.src = img.src.replace("M", "F");
+					}
+				}
+			</script>
+			@PlayerTable(match, players, playersSpells)
+		</div>
 	}
 }
 
@@ -42,10 +53,13 @@ templ Spell(mps model.MatchPlayerSpell) {
 			templ.KV("border-yellow-500", mps.RoundBeforeRecovery == 2),
 			templ.KV("border-cyan-500", mps.RoundBeforeRecovery >= 3),
 		}
+		hx-target="this"
+		skipConfirmation
 		if mps.RoundBeforeRecovery == 0 {
 			hx-get={ fmt.Sprintf("/match/%d/player-spell/%d/use", mps.MatchId, mps.Id) }
-			hx-target="this"
-			skipConfirmation
+		} else {
+			hx-get={ fmt.Sprintf("/match/%d/player-spell/%d/remove-round-recovery", mps.MatchId, mps.Id) }
+			hx-trigger="dblclick"
 		}
 	>
 		<img
@@ -93,39 +107,24 @@ templ Player(p model.Player, playersSpells []model.MatchPlayerSpell) {
 	</tr>
 }
 
-templ PlayerTbody(players []model.Player, spells []model.MatchPlayerSpell) {
-	<tbody
-		hx-swap="outerHTML swap:0.5s"
-		hx-target="closest tr"
-		class="divide-y divide-gray-200 dark:divide-gray-700"
+templ PlayerTable(match model.Match, players []model.Player, spells []model.MatchPlayerSpell) {
+	<table
+		class="min-w-full divide-y-2 divide-gray-200 bg-white text-sm dark:divide-gray-700 dark:bg-gray-900"
 	>
-		for _, player := range players {
-			@Player(player, spells)
-		}
-	</tbody>
-}
-
-templ PlayerTable(players []model.Player, spells []model.MatchPlayerSpell) {
-	<script>
-		function handleClickImage(img) {
-			if (img.src.includes("F")) {
-				img.src = img.src.replace("F", "M");
-			} else {
-				img.src = img.src.replace("M", "F");
-			}
-		}
-	</script>
-	<div class="overflow-x-auto">
-		<table
-			class="min-w-full divide-y-2 divide-gray-200 bg-white text-sm dark:divide-gray-700 dark:bg-gray-900"
+		<thead class="ltr:text-left rtl:text-right">
+			<tr>
+				<th class="whitespace-nowrap  text-left px-4 py-2 font-medium text-gray-900 dark:text-white">Round n° { strconv.Itoa(match.Round) }</th>
+				<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white"></th>
+			</tr>
+		</thead>
+		<tbody
+			hx-swap="outerHTML swap:0.5s"
+			hx-target="closest tr"
+			class="divide-y divide-gray-200 dark:divide-gray-700"
 		>
-			<thead class="ltr:text-left rtl:text-right">
-				<tr>
-					<th class="whitespace-nowrap  text-left px-4 py-2 font-medium text-gray-900 dark:text-white">Class</th>
-					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">Spells</th>
-				</tr>
-			</thead>
-			@PlayerTbody(players, spells)
-		</table>
-	</div>
+			for _, player := range players {
+				@Player(player, spells)
+			}
+		</tbody>
+	</table>
 }

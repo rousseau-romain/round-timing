@@ -34,7 +34,6 @@ func (h *Handler) HandlersHome(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		lastMatch, err := model.GetLastMatchByUserId(user.Id)
-		log.Println(lastMatch, err)
 		if err != nil {
 			log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -180,6 +179,12 @@ func (h *Handler) HandlerMatchNextRound(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	match, err := model.GetMatch(matchId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	players, err := model.GetPlayersByIdMatch(matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -192,7 +197,7 @@ func (h *Handler) HandlerMatchNextRound(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	page.PlayerTbody(players, spellsPlayers).Render(r.Context(), w)
+	page.PlayerTable(match, players, spellsPlayers).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerUsePlayerSpell(w http.ResponseWriter, r *http.Request) {
@@ -200,6 +205,26 @@ func (h *Handler) HandlerUsePlayerSpell(w http.ResponseWriter, r *http.Request) 
 	idPlayerSpell, _ := strconv.Atoi(vars["idPlayerSpell"])
 
 	err := model.UsePlayerSpellByIdPlayerSpell(idPlayerSpell)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	spellPlayer, err := model.GetSpellPlayerByIdSpellsPlayers(idPlayerSpell)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	page.Spell(spellPlayer).Render(r.Context(), w)
+}
+
+func (h *Handler) HandlerRemoveRoundRecoveryPlayerSpell(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	idPlayerSpell, _ := strconv.Atoi(vars["idPlayerSpell"])
+
+	err := model.RemoveRoundRecoverySpellByIdPlayerSpell(idPlayerSpell)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
