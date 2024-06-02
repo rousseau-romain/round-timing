@@ -41,3 +41,6 @@ migration_down:
 
 migration_fix: 
 	migrate -path database/migration/ -database "${DATABASE_URL}" force ${VERSION}
+
+show_deadcode:
+	deadcode .
