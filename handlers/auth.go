@@ -59,8 +59,6 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 }
 
 func (h *Handler) HandleLogout(w http.ResponseWriter, r *http.Request) {
-	log.Println("Logging out...")
-
 	err := gothic.Logout(w, r)
 	if err != nil {
 		log.Println(err)

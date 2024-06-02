@@ -2,6 +2,7 @@ package model
 
 import (
 	"log"
+	"round-timing/helper"
 )
 
 type MatchPlayerSpell struct {
@@ -35,7 +36,7 @@ func GetSpellPlayerByIdSpellsPlayers(idSpellPlayer int) (MatchPlayerSpell, error
 			mps.player_id,
 			s.id,
 			s.name,
-			CONCAT("/public/img/spell/", s.id, ".svg") AS url_image,
+			` + helper.GetUrlImageSpellClause("s.id") + ` AS url_image,
 			mps.round_before_recovery,
 			mps.created_at,
 			mps.updated_at
@@ -74,7 +75,7 @@ func GetSpellsPlayersByIdMatch(idMatch int) ([]MatchPlayerSpell, error) {
 			mps.player_id,
 			s.id,
 			s.name,
-			CONCAT("/public/img/spell/", s.id, ".svg") AS url_image,
+			` + helper.GetUrlImageSpellClause("s.id") + ` AS url_image,
 			mps.round_before_recovery,
 			mps.created_at,
 			mps.updated_at

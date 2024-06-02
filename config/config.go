@@ -29,7 +29,7 @@ var (
 )
 
 func init() {
-	// log.SetFlags(log.Llongfile)
+	log.SetFlags(log.Llongfile)
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatalln("Coudn't load env file!!")
