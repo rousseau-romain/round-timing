@@ -84,8 +84,6 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	log.Println("match.Round", match.Round)
-
 	if match.Round == 0 {
 		classeIds := []int{idClassGlobal}
 		for _, player := range players {
@@ -112,7 +110,7 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 		}
 
 		var matchPlayerSpells []model.MatchPlayerSpellCreate
-		log.Println(players)
+
 		for _, player := range players {
 			for _, spell := range spells {
 				if spell.IdClass == player.Class.Id {
