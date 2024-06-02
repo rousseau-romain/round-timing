@@ -1,10 +1,7 @@
 package model
 
 import (
-	"errors"
 	"log"
-
-	"github.com/huandu/go-sqlbuilder"
 )
 
 type Team struct {
@@ -24,39 +21,6 @@ type TeamCreate struct {
 type TeamUpdate struct {
 	IdColorTeam *int
 	Name        *string
-}
-
-func GetTeam(idTeam int) (Team, error) {
-	team := Team{}
-
-	sql := `
-		SELECT
-			t.id,
-			t.id_match,
-			t.id_color_team,
-			t.name,
-			ct.name AS color
-		FROM team AS t
-		JOIN color_team AS ct ON t.id_color_team = ct.id
-		JOIN ` + "`match`" + ` AS m ON t.id_match = m.id
-		JOIN user AS u ON m.id_user = u.id
-		WHERE m.id = ?
-	`
-
-	err := db.QueryRow(sql, idTeam).Scan(
-		&team.Id,
-		&team.IdMatch,
-		&team.IdColorTeam,
-		&team.Name,
-		&team.Color,
-	)
-
-	if err != nil {
-		log.Println(err)
-		return Team{}, err
-	}
-
-	return team, err
 }
 
 func GetTeamsByIdMatch(idMatch int) ([]Team, error) {
@@ -120,30 +84,6 @@ func CreateTeam(m TeamCreate) (int, error) {
 	return int(id), err
 }
 
-func UpdateTeam(idTeam int, team TeamUpdate) error {
-	canUpdate := false
-	sb := sqlbuilder.NewUpdateBuilder()
-	sb.Update("team").Where(sb.Equal("id", idTeam))
-
-	if team.IdColorTeam != nil {
-		sb.Set(sb.Assign("id_color_team", *team.IdColorTeam))
-		canUpdate = true
-	}
-
-	if team.Name != nil {
-		sb.Set(sb.Assign("name", *team.Name))
-		canUpdate = true
-	}
-
-	if canUpdate {
-		sql, args := sb.Build()
-		_, err := db.Exec(sql, args...)
-		return err
-	}
-
-	return errors.New("no parameters to update Team")
-}
-
 func DeleteTeamsByMatchId(idMatch int) error {
 	sql := `
 		DELETE t FROM team AS t
@@ -152,13 +92,6 @@ func DeleteTeamsByMatchId(idMatch int) error {
 	`
 
 	_, err := db.Exec(sql, idMatch)
-
-	return err
-}
-
-func DeleteTeam(idTeam int) error {
-	sql := "DELETE FROM team WHERE id = ?"
-	_, err := db.Exec(sql, idTeam)
 
 	return err
 }

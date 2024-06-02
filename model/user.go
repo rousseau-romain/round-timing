@@ -17,38 +17,6 @@ type UserCreate struct {
 	Oauth2Id *string
 }
 
-func GetUsers() ([]User, error) {
-	sb := sqlbuilder.NewSelectBuilder()
-	sb.Select("id", "oauth2_id").From("user")
-	sql, _ := sb.Build()
-
-	rows, err := db.Query(sql)
-	var users []User
-
-	for rows.Next() {
-		var user User
-		err := rows.Scan(&user.Id, &user.Oauth2Id)
-		if err != nil {
-			return users, err
-		}
-		users = append(users, user)
-	}
-
-	return users, err
-}
-
-func GetUser(userId int) (User, error) {
-	user := User{}
-
-	sb := sqlbuilder.NewSelectBuilder()
-	sb.Select("id", "oauth2_id").From("user").Where(sb.Equal("id", userId))
-	sql, args := sb.Build()
-
-	err := db.QueryRow(sql, args...).Scan(&user.Id, &user.Oauth2Id)
-
-	return user, err
-}
-
 func GetUserIdByMatch(idmatch int) (User, error) {
 	user := User{}
 
@@ -116,14 +84,4 @@ func CreateUser(oauth2Id string) (int64, error) {
 	id, _ := response.LastInsertId()
 
 	return id, err
-}
-
-func DeleteUser(userId int64) error {
-	sb := sqlbuilder.NewDeleteBuilder()
-	sb.DeleteFrom("user").Where(sb.Equal("id", userId))
-	sql, args := sb.Build()
-
-	_, err := db.Exec(sql, args...)
-
-	return err
 }
