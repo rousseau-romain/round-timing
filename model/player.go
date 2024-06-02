@@ -36,7 +36,7 @@ func GetPlayersByIdMatch(idMatch int) ([]Player, error) {
 			p.name,
 			p.id_class,
 			c.name AS class_name,
-			` + helper.GetUrlImageClassClause("c.id") + ` AS url_image
+			` + helper.GetUrlImageClassClause("c.id") + ` AS url_image,
 			t.id AS id_team,
 			t.name AS team_name,
 			ct.name AS color_team
