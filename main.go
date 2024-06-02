@@ -29,9 +29,6 @@ func run() error {
 
 	handler := handlers.New(authService)
 
-	// API ROUTE
-	// api.HandlerApi(r.PathPrefix("/api").Subrouter())
-
 	// PUBLIC ROUTE
 	r.PathPrefix("/public/").Handler(http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
 

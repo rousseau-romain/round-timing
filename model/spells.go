@@ -2,6 +2,7 @@ package model
 
 import (
 	"log"
+	"round-timing/helper"
 	"strconv"
 	"strings"
 )
@@ -26,7 +27,7 @@ func GetSpellsByIdCLass(idClass []int) ([]Spell, error) {
 	sql := `
 		SELECT
 			id,
-			CONCAT("/public/img/spell/", id, ".svg") AS url_image,
+			` + helper.GetUrlImageSpellClause("id") + ` AS url_image,
 			id_class,
 			name,
 			delay,

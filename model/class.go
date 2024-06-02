@@ -2,6 +2,7 @@ package model
 
 import (
 	"log"
+	"round-timing/helper"
 )
 
 type Class struct {
@@ -15,7 +16,7 @@ func GetClasses() ([]Class, error) {
 		SELECT
 			id,
 			name,
-			CONCAT("/public/img/class/", id) AS url_image
+			` + helper.GetUrlImageClassClause("id") + ` AS url_image
 		FROM class
 		WHERE id != 13
 	`
