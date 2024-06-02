@@ -136,8 +136,6 @@ func CreatePlayer(p PlayerCreate) (int, error) {
 
 	id, _ := response.LastInsertId()
 
-	log.Println("zefsdfsdfsd", id)
-
 	return int(id), err
 }
 

@@ -27,8 +27,4 @@ func ConnectDb() *sql.DB {
 	return db
 }
 
-func CloseDb(db *sql.DB) {
-	db.Close()
-}
-
 var db = ConnectDb()
