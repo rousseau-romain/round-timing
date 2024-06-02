@@ -9,21 +9,23 @@ type Pages struct {
 
 templ HomePage(user goth.User, navItems []components.NavItem) {
 	@components.Layout("Home", user, navItems) {
-		<h2 class="title">Pages:</h2>
-		<table class="table is-fullwidth">
-			<thead>
-				<tr>
-					<th>Pattern</th>
-					<th>Description</th>
-				</tr>
-			</thead>
-			<tbody>
-				for _, n := range navItems {
-					<tr>
-						<td><a href={ templ.SafeURL("/" + n.Url) }>{ n.Name }</a></td>
-					</tr>
-				}
-			</tbody>
-		</table>
+		<div class="container mx-auto p-4">
+			<div class="bg-white rounded-lg p-6">
+				<h1 class="text-3xl font-bold mb-4">Round Timing</h1>
+				<p class="text-lg mb-4">
+					Découvrez <strong>Round Timing</strong>, l'application indispensable pour tous les joueurs de Dofus souhaitant optimiser l'utilisation de leurs sorts en combat !
+				</p>
+				<h2 class="text-2xl font-semibold mb-3">Fonctionnalités principales :</h2>
+				<ul class="list-disc list-inside mb-4">
+					<li class="mb-2">
+						<strong>Gestion du timing des rounds :</strong>
+						<ul class="list-disc list-inside ml-6">
+							<li>Planifiez vos actions à l'avance avec des outils de gestion du timing des rounds.</li>
+							<li>Visualisez le déroulement optimal des tours pour maximiser l'impact de vos sorts et minimiser les temps morts.</li>
+						</ul>
+					</li>
+				</ul>
+			</div>
+		</div>
 	}
 }

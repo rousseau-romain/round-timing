@@ -181,4 +181,5 @@ INSERT INTO spell (id_class, name, delay) VALUES
 (13, "Maîtrise des Baguettes", 6),
 (13, "Maîtrise des Dagues", 6),
 (13, "Maîtrise des Pelles", 6),
-(13, "Maîtrise des Haches", 6);
+(13, "Maîtrise des Haches", 6),
+(13, "Libération", 2);

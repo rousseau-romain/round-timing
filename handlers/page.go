@@ -14,7 +14,7 @@ import (
 )
 
 var PagesNav = []components.NavItem{
-	{Name: "Create match", Url: "match"},
+	{Name: "Match list", Url: "match"},
 }
 
 func (h *Handler) HandlersNotFound(w http.ResponseWriter, r *http.Request) {
