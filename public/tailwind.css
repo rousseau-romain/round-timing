@@ -935,6 +935,10 @@ footer a:hover {
   left: -0.25rem;
 }
 
+.-left-full {
+  left: -100%;
+}
+
 .-right-0 {
   right: -0px;
 }
@@ -949,6 +953,10 @@ footer a:hover {
 
 .-top-0\.5 {
   top: -0.125rem;
+}
+
+.-top-3\/4 {
+  top: -75%;
 }
 
 .right-0 {
@@ -968,18 +976,6 @@ footer a:hover {
   margin-right: auto;
 }
 
-.mb-5 {
-  margin-bottom: 1.25rem;
-}
-
-.mt-4 {
-  margin-top: 1rem;
-}
-
-.mt-6 {
-  margin-top: 1.5rem;
-}
-
 .mb-2 {
   margin-bottom: 0.5rem;
 }
@@ -992,8 +988,20 @@ footer a:hover {
   margin-bottom: 1rem;
 }
 
+.mb-5 {
+  margin-bottom: 1.25rem;
+}
+
 .ml-6 {
   margin-left: 1.5rem;
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.mt-6 {
+  margin-top: 1.5rem;
 }
 
 .block {
@@ -1101,12 +1109,20 @@ footer a:hover {
   align-items: center;
 }
 
+.justify-center {
+  justify-content: center;
+}
+
 .justify-between {
   justify-content: space-between;
 }
 
 .gap-1 {
   gap: 0.25rem;
+}
+
+.gap-2 {
+  gap: 0.5rem;
 }
 
 .gap-4 {
@@ -1349,6 +1365,11 @@ footer a:hover {
   line-height: 2rem;
 }
 
+.text-3xl {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+
 .text-9xl {
   font-size: 8rem;
   line-height: 1;
@@ -1369,11 +1390,6 @@ footer a:hover {
   line-height: 1rem;
 }
 
-.text-3xl {
-  font-size: 1.875rem;
-  line-height: 2.25rem;
-}
-
 .font-black {
   font-weight: 900;
 }
@@ -1392,6 +1408,11 @@ footer a:hover {
 
 .tracking-tight {
   letter-spacing: -0.025em;
+}
+
+.text-black {
+  --tw-text-opacity: 1;
+  color: rgb(0 0 0 / var(--tw-text-opacity));
 }
 
 .text-cyan-700 {
@@ -1527,6 +1548,16 @@ footer a:hover {
 tr.htmx-swapping td {
   opacity: 0;
   transition: opacity 1s ease-out;
+}
+
+.tooltip {
+  visibility: hidden;
+  position: absolute;
+}
+
+.has-tooltip:hover .tooltip {
+  visibility: visible;
+  z-index: 50;
 }
 
 .hover\:scale-110:hover {
