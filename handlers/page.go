@@ -17,6 +17,31 @@ var PagesNav = []components.NavItem{
 	{Name: "Match list", Url: "match"},
 }
 
+func getPageNavCustom(user model.User, match model.Match) []components.NavItem {
+	var pageNav = PagesNav
+	if user.Id != 0 {
+		if match.Id != 0 {
+			pageNav = append(pageNav, components.NavItem{
+				Name: fmt.Sprintf("Match %s (%d)", match.Name, match.Id),
+				Url:  fmt.Sprintf("match/%d", match.Id),
+			})
+		} else {
+			lastMatch, err := model.GetLastMatchByUserId(user.Id)
+			if err != nil {
+				log.Println(err)
+				return pageNav
+			}
+			if lastMatch.Id != 0 {
+				pageNav = append(pageNav, components.NavItem{
+					Name: fmt.Sprintf("Last match %s (%d)", lastMatch.Name, lastMatch.Id),
+					Url:  fmt.Sprintf("match/%d", lastMatch.Id),
+				})
+			}
+		}
+	}
+	return pageNav
+}
+
 func (h *Handler) HandlersNotFound(w http.ResponseWriter, r *http.Request) {
 	userOauth2, _ := h.auth.GetSessionUser(r)
 	page.NotFoundPage(userOauth2, PagesNav).Render(r.Context(), w)
@@ -33,18 +58,7 @@ func (h *Handler) HandlersHome(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		lastMatch, err := model.GetLastMatchByUserId(user.Id)
-		if err != nil {
-			log.Println(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		if lastMatch.Id != 0 {
-			pageNav = append(pageNav, components.NavItem{
-				Name: fmt.Sprintf("Last match (%s)", lastMatch.Name),
-				Url:  fmt.Sprintf("match/%d", lastMatch.Id),
-			})
-		}
+		pageNav = getPageNavCustom(user, model.Match{})
 		log.Println(pageNav)
 		page.HomePage(userOauth2, pageNav).Render(r.Context(), w)
 		return
@@ -53,15 +67,26 @@ func (h *Handler) HandlersHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandlersProfile(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetSessionUser(r)
-	page.ProfilePage(user, PagesNav).Render(r.Context(), w)
+	userOauth2, _ := h.auth.GetSessionUser(r)
+	user, err := model.GetUserByOauth2Id(userOauth2.UserID)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	page.ProfilePage(userOauth2, getPageNavCustom(user, model.Match{})).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) {
 	var idClassGlobal = 13
 
 	userOauth2, _ := h.auth.GetSessionUser(r)
-	// user, _ := model.GetUserByOauth2Id(userOauth2.UserID)
+	user, err := model.GetUserByOauth2Id(userOauth2.UserID)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	vars := mux.Vars(r)
 
@@ -146,7 +171,9 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	page.StartMatchPage(userOauth2, PagesNav, match, players, spellsPlayer).Render(r.Context(), w)
+	getPageNavCustom(user, model.Match{})
+
+	page.StartMatchPage(userOauth2, getPageNavCustom(user, match), match, players, spellsPlayer).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerResetMatchPage(w http.ResponseWriter, r *http.Request) {
