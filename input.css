@@ -57,3 +57,11 @@ tr.htmx-swapping td {
   opacity: 0;
   transition: opacity 1s ease-out;
 }
+
+.tooltip {
+  @apply invisible absolute;
+}
+
+.has-tooltip:hover .tooltip {
+  @apply visible z-50;
+}

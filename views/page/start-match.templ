@@ -8,27 +8,23 @@ import "fmt"
 
 templ StartMatchPage(user goth.User, navItems []components.NavItem, match model.Match,  players []model.Player, playersSpells []model.MatchPlayerSpell) {
 	@components.Layout("Start match", user, navItems) {
-		<a
-			href={ templ.SafeURL("/match/" + fmt.Sprintf("%d", match.Id)) }
-			class="inline-block w-full rounded-lg bg-indigo-600 px-5 py-3 font-medium text-white sm:w-auto"
-		>
-			Go back to match { match.Name } ({ strconv.Itoa(match.Id) })
-		</a>
-		<button
-			type="submit"
-			class="inline-block w-full rounded-lg bg-red-600 px-5 py-3 font-medium text-white sm:w-auto"
-			hx-patch={ fmt.Sprintf("/match/%d/reset", match.Id) }
-		>
-			Reset match
-		</button>
-		<button
-			type="submit"
-			class="inline-block w-full rounded-lg bg-green-600 px-5 py-3 font-medium text-white sm:w-auto"
-			hx-get={ fmt.Sprintf("/match/%d/increase-round", match.Id) }
-			hx-target="next table"
-		>
-			Next Round
-		</button>
+		<div class="flex justify-center gap-2">
+			<button
+				type="submit"
+				class="inline-block w-full rounded-lg bg-red-600 px-5 py-3 font-medium text-white sm:w-auto"
+				hx-patch={ fmt.Sprintf("/match/%d/reset", match.Id) }
+			>
+				Reset match
+			</button>
+			<button
+				type="submit"
+				class="inline-block w-full rounded-lg bg-green-600 px-5 py-3 font-medium text-white sm:w-auto"
+				hx-get={ fmt.Sprintf("/match/%d/increase-round", match.Id) }
+				hx-target="next table"
+			>
+				Next Round
+			</button>
+		</div>
 		<div class="overflow-x-auto">
 			<script>
 				function handleClickImage(img) {
@@ -47,8 +43,8 @@ templ StartMatchPage(user goth.User, navItems []components.NavItem, match model.
 templ Spell(mps model.MatchPlayerSpell) {
 	<div
 		class={
+			"has-tooltip",
 			"relative border-2 rounded",
-			templ.KV("cursor-pointer transition-all hover:scale-110", mps.RoundBeforeRecovery == 0),
 			templ.KV("border-red-500", mps.RoundBeforeRecovery == 1),
 			templ.KV("border-yellow-500", mps.RoundBeforeRecovery == 2),
 			templ.KV("border-cyan-500", mps.RoundBeforeRecovery >= 3),
@@ -62,11 +58,18 @@ templ Spell(mps model.MatchPlayerSpell) {
 			hx-trigger="dblclick"
 		}
 	>
+		<span class="tooltip rounded shadow-lg p-1 bg-gray-100 text-black -top-3/4 -left-full">
+			<ul>
+				<li class="font-bold">{ mps.Spell.Name }</li>
+				<li>Delay between use : <span class="font-bold">{ strconv.Itoa(mps.Spell.Delay) }</span></li>
+			</ul>
+		</span>
 		<img
 			alt={ mps.Spell.Name }
 			src={ mps.Spell.UrlImage }
 			class={
 				"h-12 img-class",
+				templ.KV("cursor-pointer transition-all hover:scale-110", mps.RoundBeforeRecovery == 0),
 				templ.KV("grayscale", mps.RoundBeforeRecovery > 0),
 			}
 		/>
