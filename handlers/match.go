@@ -142,5 +142,5 @@ func (h *Handler) HandlersMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page.TeamPlayerListPage(userOauth2, PagesNav, user, match, teams, classes, players).Render(r.Context(), w)
+	page.TeamPlayerListPage(userOauth2, getPageNavCustom(user, model.Match{}), user, match, teams, classes, players).Render(r.Context(), w)
 }
