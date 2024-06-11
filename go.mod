@@ -20,5 +20,4 @@ require (
 	github.com/huandu/go-sqlbuilder v1.25.0
 	github.com/joho/godotenv v1.5.1
 	github.com/markbates/goth v1.79.0
-	golang.org/x/crypto v0.20.0
 )
