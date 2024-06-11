@@ -7,6 +7,8 @@ WORKDIR /app
 # Copy the current directory contents into the container at /app
 COPY . /app
 
+RUN go install github.com/cosmtrek/air@latest
+
 # Download and install any required dependencies
 RUN go mod download
 
