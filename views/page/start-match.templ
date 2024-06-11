@@ -1,13 +1,13 @@
 package page
 
-import "round-timing/shared/components"
+import "github.com/rousseau-romain/round-timing/shared/components"
 import "github.com/markbates/goth"
-import "round-timing/model"
+import "github.com/rousseau-romain/round-timing/model"
 import "strconv"
 import "fmt"
 
-templ StartMatchPage(user goth.User, navItems []components.NavItem, match model.Match,  players []model.Player, playersSpells []model.MatchPlayerSpell) {
-	@components.Layout("Start match", user, navItems) {
+templ StartMatchPage(user goth.User, errors components.Error, navItems []components.NavItem, match model.Match,  players []model.Player, playersSpells []model.MatchPlayerSpell) {
+	@components.Layout("Start match", errors, user, navItems) {
 		<div class="flex justify-center gap-2">
 			<button
 				type="submit"

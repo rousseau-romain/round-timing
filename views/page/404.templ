@@ -1,10 +1,10 @@
 package page
 
-import "round-timing/shared/components"
+import "github.com/rousseau-romain/round-timing/shared/components"
 import "github.com/markbates/goth"
 
-templ NotFoundPage(user goth.User, navItems []components.NavItem) {
-	@components.Layout("Home", user, navItems) {
+templ NotFoundPage(user goth.User, errors components.Error, navItems []components.NavItem) {
+	@components.Layout("Home", errors, user, navItems) {
 		<div class="grid place-content-center bg-white px-4 dark:bg-gray-900">
 			<div class="text-center">
 				<h1 class="text-9xl font-black text-gray-200 dark:text-gray-700">404</h1>

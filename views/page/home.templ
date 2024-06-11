@@ -1,14 +1,14 @@
 package page
 
-import "round-timing/shared/components"
+import "github.com/rousseau-romain/round-timing/shared/components"
 import "github.com/markbates/goth"
 
 type Pages struct {
 	Name, Slug string
 }
 
-templ HomePage(user goth.User, navItems []components.NavItem) {
-	@components.Layout("Home", user, navItems) {
+templ HomePage(user goth.User, errors components.Error, navItems []components.NavItem) {
+	@components.Layout("Home", errors, user, navItems) {
 		<div class="container mx-auto p-4">
 			<div class="bg-white rounded-lg p-6">
 				<h1 class="text-3xl font-bold mb-4">Round Timing</h1>

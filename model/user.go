@@ -10,6 +10,7 @@ import (
 type User struct {
 	Id       int    `json:"id"`
 	Oauth2Id string `json:"oauth2_id"`
+	Enabled  bool   `json:"enabled"`
 }
 
 type UserCreate struct {
@@ -23,13 +24,14 @@ func GetUserIdByMatch(idmatch int) (User, error) {
 	sql := fmt.Sprintf(`
 		SELECT
 			u.id,
-			u.oauth2_id
+			u.oauth2_id,
+			u.enabled
 		FROM %s AS m
 		JOIN user AS u ON m.id_user = u.id
 		WHERE m.id = ?
 	`, "`match`")
 
-	err := db.QueryRow(sql, idmatch).Scan(&user.Id, &user.Oauth2Id)
+	err := db.QueryRow(sql, idmatch).Scan(&user.Id, &user.Oauth2Id, &user.Enabled)
 	if err != nil && err.Error() == "sql: no rows in result set" {
 		return user, nil
 	}
@@ -44,10 +46,10 @@ func GetUserByOauth2Id(oauth2Id string) (User, error) {
 	user := User{}
 
 	sb := sqlbuilder.NewSelectBuilder()
-	sb.Select("id", "oauth2_id").From("user").Where(sb.Equal("oauth2_id", oauth2Id))
+	sb.Select("id", "oauth2_id", "enabled").From("user").Where(sb.Equal("oauth2_id", oauth2Id))
 	sql, args := sb.Build()
 
-	err := db.QueryRow(sql, args...).Scan(&user.Id, &user.Oauth2Id)
+	err := db.QueryRow(sql, args...).Scan(&user.Id, &user.Oauth2Id, &user.Enabled)
 	if err != nil && err.Error() == "sql: no rows in result set" {
 		return user, nil
 	}

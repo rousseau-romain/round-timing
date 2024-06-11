@@ -3,9 +3,10 @@ package handlers
 import (
 	"log"
 	"net/http"
-	"round-timing/model"
-	"round-timing/views/page"
 	"strconv"
+
+	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/views/page"
 
 	"github.com/gorilla/mux"
 )

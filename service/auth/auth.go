@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"round-timing/config"
-	"round-timing/model"
 	"strconv"
+
+	"github.com/rousseau-romain/round-timing/config"
+	"github.com/rousseau-romain/round-timing/model"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
@@ -84,9 +85,6 @@ func (s *AuthService) RemoveUserSession(w http.ResponseWriter, r *http.Request) 
 
 func AllowToBeAuth(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		session, _ := auth.GetSessionUser(r)
-		log.Printf("user is authenticated! user: %v!", session.FirstName)
-
 		handlerFunc(w, r)
 	}
 }
@@ -97,6 +95,19 @@ func RequireAuth(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFu
 		if err != nil {
 			log.Println("User is not authenticated!")
 			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
+			return
+		}
+		user, err := model.GetUserByOauth2Id(session.UserID)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		log.Println(user)
+		if !user.Enabled {
+			log.Println("User is not enabled!")
+			http.Redirect(w, r, "?require-user-enabled", http.StatusTemporaryRedirect)
 			return
 		}
 
@@ -127,8 +138,18 @@ func RequireAuthAndHisMatch(handlerFunc http.HandlerFunc, auth *AuthService) htt
 			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
 			return
 		}
+		user, err := model.GetUserByOauth2Id(session.UserID)
 
-		user, _ := model.GetUserByOauth2Id(session.UserID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if !user.Enabled {
+			log.Println("User is not enabled!")
+			http.Redirect(w, r, "?require-user-enabled", http.StatusTemporaryRedirect)
+			return
+		}
 
 		vars := mux.Vars(r)
 

@@ -2,9 +2,10 @@ package model
 
 import (
 	"log"
-	"round-timing/helper"
 	"strconv"
 	"strings"
+
+	"github.com/rousseau-romain/round-timing/helper"
 )
 
 type Spell struct {
