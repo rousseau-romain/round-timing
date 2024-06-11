@@ -17,4 +17,4 @@ RUN air
 EXPOSE 8080
 
 # Define the command to run the app when the container starts
-CMD ["./main"]
+CMD ["air"]
