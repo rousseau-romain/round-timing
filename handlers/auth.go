@@ -4,14 +4,15 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"round-timing/model"
-	"round-timing/views/page"
+
+	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/views/page"
 
 	"github.com/markbates/goth/gothic"
 )
 
 func (h *Handler) HandleLogin(w http.ResponseWriter, r *http.Request) {
-	page.SigninPage(PagesNav).Render(r.Context(), w)
+	page.SigninPage(PagesNav, h.error).Render(r.Context(), w)
 }
 
 func (h *Handler) HandleProviderLogin(w http.ResponseWriter, r *http.Request) {
@@ -19,7 +20,7 @@ func (h *Handler) HandleProviderLogin(w http.ResponseWriter, r *http.Request) {
 	if u, err := gothic.CompleteUserAuth(w, r); err == nil {
 		log.Printf("User already authenticated! %v", u)
 
-		page.SigninPage(PagesNav).Render(r.Context(), w)
+		page.SigninPage(PagesNav, h.error).Render(r.Context(), w)
 	} else {
 		gothic.BeginAuthHandler(w, r)
 	}

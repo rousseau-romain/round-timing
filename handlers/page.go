@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"round-timing/model"
-	"round-timing/shared/components"
-	"round-timing/views/page"
 	"strconv"
+
+	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/shared/components"
+	"github.com/rousseau-romain/round-timing/views/page"
 
 	"github.com/gorilla/mux"
 	"github.com/markbates/goth"
@@ -44,7 +45,7 @@ func getPageNavCustom(user model.User, match model.Match) []components.NavItem {
 
 func (h *Handler) HandlersNotFound(w http.ResponseWriter, r *http.Request) {
 	userOauth2, _ := h.auth.GetSessionUser(r)
-	page.NotFoundPage(userOauth2, PagesNav).Render(r.Context(), w)
+	page.NotFoundPage(userOauth2, h.error, PagesNav).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersHome(w http.ResponseWriter, r *http.Request) {
@@ -59,11 +60,10 @@ func (h *Handler) HandlersHome(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		pageNav = getPageNavCustom(user, model.Match{})
-		log.Println(pageNav)
-		page.HomePage(userOauth2, pageNav).Render(r.Context(), w)
+		page.HomePage(userOauth2, h.error, pageNav).Render(r.Context(), w)
 		return
 	}
-	page.HomePage(goth.User{}, pageNav).Render(r.Context(), w)
+	page.HomePage(goth.User{}, h.error, pageNav).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersProfile(w http.ResponseWriter, r *http.Request) {
@@ -74,7 +74,7 @@ func (h *Handler) HandlersProfile(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	page.ProfilePage(userOauth2, getPageNavCustom(user, model.Match{})).Render(r.Context(), w)
+	page.ProfilePage(userOauth2, h.error, getPageNavCustom(user, model.Match{})).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) {
@@ -173,7 +173,7 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 
 	getPageNavCustom(user, model.Match{})
 
-	page.StartMatchPage(userOauth2, getPageNavCustom(user, match), match, players, spellsPlayer).Render(r.Context(), w)
+	page.StartMatchPage(userOauth2, h.error, getPageNavCustom(user, match), match, players, spellsPlayer).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerResetMatchPage(w http.ResponseWriter, r *http.Request) {

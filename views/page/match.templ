@@ -1,8 +1,8 @@
 package page
 
-import "round-timing/shared/components"
+import "github.com/rousseau-romain/round-timing/shared/components"
 import "github.com/markbates/goth"
-import "round-timing/model"
+import "github.com/rousseau-romain/round-timing/model"
 import "fmt"
 
 templ TeamPlayer(p model.Player, m model.Match) {
@@ -78,8 +78,8 @@ templ TeamPlayerTable(players []model.Player, match model.Match) {
 	</div>
 }
 
-templ TeamPlayerListPage(user goth.User,navItems []components.NavItem, modelUser model.User, match model.Match, teams []model.Team, classes []model.Class, players []model.Player) {
-	@components.Layout("Create match", user, navItems) {
+templ TeamPlayerListPage(user goth.User, errors components.Error,navItems []components.NavItem, modelUser model.User, match model.Match, teams []model.Team, classes []model.Class, players []model.Player) {
+	@components.Layout("Create match", errors, user, navItems) {
 		<div class="container mx-auto">
 			<h1>Add classes</h1>
 			if match.Round > 0 {

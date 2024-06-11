@@ -1,7 +1,7 @@
 package page
 
-import "round-timing/shared/components"
-import "round-timing/model"
+import "github.com/rousseau-romain/round-timing/shared/components"
+import "github.com/rousseau-romain/round-timing/model"
 import "fmt"
 import "github.com/markbates/goth"
 
@@ -61,8 +61,8 @@ templ MatchTable(matchs []model.Match) {
 	</div>
 }
 
-templ MatchListPage(user goth.User, navItems []components.NavItem, modelUser model.User, matchs[]model.Match) {
-	@components.Layout("Create match", user, navItems) {
+templ MatchListPage(user goth.User, errors components.Error, navItems []components.NavItem, modelUser model.User, matchs[]model.Match) {
+	@components.Layout("Create match", errors, user, navItems) {
 		<div class="container mx-auto">
 			<h1>Create match</h1>
 			<form

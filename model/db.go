@@ -3,7 +3,8 @@ package model
 import (
 	"database/sql"
 	"log"
-	"round-timing/config"
+
+	"github.com/rousseau-romain/round-timing/config"
 
 	"github.com/go-sql-driver/mysql"
 )

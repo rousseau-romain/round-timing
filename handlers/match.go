@@ -3,9 +3,10 @@ package handlers
 import (
 	"log"
 	"net/http"
-	"round-timing/model"
-	"round-timing/views/page"
 	"strconv"
+
+	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/views/page"
 
 	"github.com/gorilla/mux"
 )
@@ -15,7 +16,7 @@ func (h *Handler) HandlersListMatch(w http.ResponseWriter, r *http.Request) {
 	user, _ := model.GetUserByOauth2Id(userOauth2.UserID)
 	matchs, _ := model.GetMatchsByIdUser(user.Id)
 
-	page.MatchListPage(userOauth2, PagesNav, user, matchs).Render(r.Context(), w)
+	page.MatchListPage(userOauth2, h.error, PagesNav, user, matchs).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
@@ -142,5 +143,5 @@ func (h *Handler) HandlersMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page.TeamPlayerListPage(userOauth2, getPageNavCustom(user, model.Match{}), user, match, teams, classes, players).Render(r.Context(), w)
+	page.TeamPlayerListPage(userOauth2, h.error, getPageNavCustom(user, model.Match{}), user, match, teams, classes, players).Render(r.Context(), w)
 }
