@@ -8,6 +8,7 @@ WORKDIR /app
 COPY . /app
 
 RUN go get github.com/air-verse/air
+RUN go install github.com/air-verse/air
 
 # Download and install any required dependencies
 RUN go mod download
