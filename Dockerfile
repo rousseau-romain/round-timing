@@ -8,6 +8,7 @@ WORKDIR /app
 COPY . /app
 
 RUN go install github.com/air-verse/air
+RUN go install module github.com/rousseau-romain/round-timing
 
 RUN go mod vendor
 
