@@ -7,8 +7,9 @@ WORKDIR /app
 # Copy the current directory contents into the container at /app
 COPY . /app
 
-RUN go get github.com/air-verse/air
 RUN go install github.com/air-verse/air
+
+RUN go mod vendor
 
 # Download and install any required dependencies
 RUN go mod download
