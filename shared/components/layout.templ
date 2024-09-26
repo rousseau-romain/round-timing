@@ -14,7 +14,7 @@ templ Layout(title string, errors Error, user goth.User, navItems []NavItem) {
 		<head>
 			<title>Round Timing - { title }</title>
 			<link rel="stylesheet" type="text/css" href="/public/tailwind.css"/>
-			<script src="https://unpkg.com/htmx.org@1.9.11"></script>
+			<script src="/public/script/htmx1.9.11.js"></script>
 			if isDebug {
 				<script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/debug.js"></script>
 			}
