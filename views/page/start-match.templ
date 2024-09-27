@@ -8,25 +8,42 @@ import "fmt"
 
 templ StartMatchPage(user goth.User, errors components.Error, navItems []components.NavItem, match model.Match,  players []model.Player, playersSpells []model.MatchPlayerSpell) {
 	@components.Layout("Start match", errors, user, navItems) {
-		<div class="flex justify-center gap-2">
-			<button
-				type="submit"
-				class="inline-block w-full rounded-lg bg-red-600 px-5 py-3 font-medium text-white sm:w-auto"
-				hx-patch={ fmt.Sprintf("/match/%d/reset", match.Id) }
-			>
-				Reset match
-			</button>
-			<button
-				type="submit"
-				class="inline-block w-full rounded-lg bg-green-600 px-5 py-3 font-medium text-white sm:w-auto"
-				hx-get={ fmt.Sprintf("/match/%d/increase-round", match.Id) }
-				hx-target="next table"
-			>
-				Next Round
-			</button>
-		</div>
-		<div class="overflow-x-auto">
-			<script>
+		@MatchPageTable(user, errors, navItems, match, players, playersSpells)
+	}
+}
+
+templ MatchPageTable (user goth.User, errors components.Error, navItems []components.NavItem, match model.Match,  players []model.Player, playersSpells []model.MatchPlayerSpell) {
+	<div class="flex justify-center gap-2 testt">
+		<button
+			type="submit"
+			class="inline-block w-full rounded-lg bg-red-600 px-5 py-3 font-medium text-white sm:w-auto"
+			hx-patch={ fmt.Sprintf("/match/%d/reset", match.Id) }
+		>
+			Reset match
+		</button>
+		<button
+			type="submit"
+			class="inline-block w-full rounded-lg bg-green-600 px-5 py-3 font-medium text-white sm:w-auto"
+			hx-get={ fmt.Sprintf("/match/%d/increase-round", match.Id) }
+			hx-target="next table"
+		>
+			Next Round
+		</button>
+		<button
+			type="submit"
+			class="inline-block w-full rounded-lg bg-blue-600 px-5 py-3 font-medium text-white sm:w-auto"
+			if match.MultipleMasteryEnabled == 1 {
+				hx-get={ fmt.Sprintf("/match/%d/toggle-mastery/0", match.Id) }
+			} else {
+				hx-get={ fmt.Sprintf("/match/%d/toggle-mastery/1", match.Id) }
+			}
+			hx-target="#content"
+		>
+			Toggle multiple mastery
+		</button>
+	</div>
+	<div class="overflow-x-auto">
+		<script>
 				function handleClickImage(img) {
 					if (img.src.includes("F")) {
 						img.src = img.src.replace("F", "M");
@@ -35,9 +52,8 @@ templ StartMatchPage(user goth.User, errors components.Error, navItems []compone
 					}
 				}
 			</script>
-			@PlayerTable(match, players, playersSpells)
-		</div>
-	}
+		@PlayerTable(match, players, playersSpells)
+	</div>
 }
 
 templ Spell(mps model.MatchPlayerSpell) {

@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -20,11 +21,12 @@ type Spell struct {
 	IsEndingCaster bool   `json:"is_ending_caster"`
 }
 
-func GetSpellsByIdCLass(idClass []int) ([]Spell, error) {
+func GetSpellsByIdCLass(idClass []int, idsToExclude []int) ([]Spell, error) {
 	var strIdClass []string
 	for _, id := range idClass {
 		strIdClass = append(strIdClass, strconv.Itoa(id))
 	}
+
 	sql := `
 		SELECT
 			id,
@@ -39,6 +41,14 @@ func GetSpellsByIdCLass(idClass []int) ([]Spell, error) {
 		FROM spell
 		WHERE id_class IN (` + strings.Join(strIdClass, ",") + `)
 	`
+
+	if len(idsToExclude) > 0 {
+		var strIdsToExclude []string
+		for _, id := range idsToExclude {
+			strIdsToExclude = append(strIdClass, strconv.Itoa(id))
+		}
+		sql = sql + fmt.Sprintf("AND id NOT IN (%s)", strings.Join(strIdsToExclude, ","))
+	}
 
 	rows, err := db.Query(sql)
 

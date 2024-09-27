@@ -2,6 +2,7 @@ package model
 
 import (
 	"log"
+	"strings"
 
 	"github.com/rousseau-romain/round-timing/helper"
 )
@@ -69,6 +70,8 @@ func GetSpellPlayerByIdSpellsPlayers(idSpellPlayer int) (MatchPlayerSpell, error
 }
 
 func GetSpellsPlayersByIdMatch(idMatch int) ([]MatchPlayerSpell, error) {
+	// maitrise marteau id 138
+	masteryIdSpells := []string{"134", "135", "136", "137", "139", "140", "141", "142"}
 	matchSpells := []MatchPlayerSpell{}
 
 	sql := `
@@ -85,9 +88,12 @@ func GetSpellsPlayersByIdMatch(idMatch int) ([]MatchPlayerSpell, error) {
 			mps.updated_at
 		FROM match_player_spell AS mps
 		JOIN spell AS s ON s.id = mps.spell_id
+		JOIN ` + "`match`" + ` AS m ON m.id = mps.match_id 
 		WHERE match_id = ?
+		AND (m.multiple_mastery_enabled = 0 AND (s.id NOT IN (` + strings.Join(masteryIdSpells, ",") + `)))
+		OR (m.multiple_mastery_enabled = 1)
 	`
-
+	// why can't use ?
 	rows, err := db.Query(sql, idMatch)
 
 	if err != nil {

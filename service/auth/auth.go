@@ -104,7 +104,6 @@ func RequireAuth(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFu
 			return
 		}
 
-		log.Println(user)
 		if !user.Enabled {
 			log.Println("User is not enabled!")
 			http.Redirect(w, r, "?require-user-enabled", http.StatusTemporaryRedirect)

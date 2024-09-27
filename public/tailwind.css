@@ -1301,6 +1301,11 @@ footer a:hover {
   background-color: rgb(254 249 195 / var(--tw-bg-opacity));
 }
 
+.bg-blue-600 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(37 99 235 / var(--tw-bg-opacity));
+}
+
 .fill-sky-600 {
   fill: #0284c7;
 }

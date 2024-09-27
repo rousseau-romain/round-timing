@@ -1,0 +1,1 @@
+ALTER TABLE `match` DROP COLUMN multiple_mastery_enabled;
