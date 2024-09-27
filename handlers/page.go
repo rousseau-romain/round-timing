@@ -91,7 +91,7 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 	vars := mux.Vars(r)
 
 	matchId, _ := strconv.Atoi(vars["idMatch"])
-
+	log.Println(matchId)
 	match, err := model.GetMatch(matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -111,17 +111,23 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 
 	if match.Round == 0 {
 		classeIds := []int{idClassGlobal}
+		idSpellToExclude := []int{134, 135, 136, 137, 139, 140, 141, 142}
 		for _, player := range players {
 			classeIds = append(classeIds, player.Class.Id)
 		}
 
-		spells, err := model.GetSpellsByIdCLass(classeIds)
+		spells, err := model.GetSpellsByIdCLass(classeIds, idSpellToExclude)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		globalSpells, err := model.GetSpellsByIdCLass([]int{idClassGlobal})
+		// maitrise marteau id 138
+		if match.MultipleMasteryEnabled == 1 {
+			idSpellToExclude = []int{}
+		}
+
+		globalSpells, err := model.GetSpellsByIdCLass([]int{idClassGlobal}, idSpellToExclude)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -187,6 +193,43 @@ func (h *Handler) HandlerResetMatchPage(w http.ResponseWriter, r *http.Request) 
 	}
 
 	w.Header().Set("HX-Redirect", fmt.Sprintf("/match/%d", matchId))
+}
+
+func (h *Handler) HandlerToggleMatchMastery(w http.ResponseWriter, r *http.Request) {
+	userOauth2, _ := h.auth.GetSessionUser(r)
+	user, err := model.GetUserByOauth2Id(userOauth2.UserID)
+	vars := mux.Vars(r)
+	matchId, _ := strconv.Atoi(vars["idMatch"])
+	multipleMasteryEnabled, _ := strconv.Atoi(vars["toggleBool"])
+
+	err = model.UpdateMatch(matchId, model.MatchUpdate{
+		MultipleMasteryEnabled: &multipleMasteryEnabled,
+	})
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	match, err := model.GetMatch(matchId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	players, err := model.GetPlayersByIdMatch(matchId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	spellsPlayers, err := model.GetSpellsPlayersByIdMatch(matchId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	page.MatchPageTable(userOauth2, h.error, getPageNavCustom(user, match), match, players, spellsPlayers).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerMatchNextRound(w http.ResponseWriter, r *http.Request) {

@@ -8,12 +8,13 @@ import (
 )
 
 type Match struct {
-	Id        int    `json:"id"`
-	IdUser    int    `json:"id_user"`
-	Name      string `json:"name"`
-	Round     int    `json:"round"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
+	Id                     int    `json:"id"`
+	IdUser                 int    `json:"id_user"`
+	Name                   string `json:"name"`
+	Round                  int    `json:"round"`
+	MultipleMasteryEnabled int    `json:"multiple_mastery_enabled"`
+	CreatedAt              string `json:"created_at"`
+	UpdatedAt              string `json:"updated_at"`
 }
 
 type MatchCreate struct {
@@ -22,14 +23,15 @@ type MatchCreate struct {
 }
 
 type MatchUpdate struct {
-	Name   *string
-	IdUser *int
-	Round  *int
+	Name                   *string
+	IdUser                 *int
+	Round                  *int
+	MultipleMasteryEnabled *int
 }
 
 func GetMatchsByIdUser(idUser int) ([]Match, error) {
 	sb := sqlbuilder.NewSelectBuilder()
-	sb.Select("id", "id_user", "name", "round", "created_at", "updated_at").From("`match`").Where(sb.Equal("id_user", idUser))
+	sb.Select("id", "id_user", "name", "round", "multiple_mastery_enabled", "created_at", "updated_at").From("`match`").Where(sb.Equal("id_user", idUser))
 	sql, args := sb.Build()
 
 	rows, err := db.Query(sql, args...)
@@ -42,7 +44,7 @@ func GetMatchsByIdUser(idUser int) ([]Match, error) {
 
 	for rows.Next() {
 		var match Match
-		err := rows.Scan(&match.Id, &match.IdUser, &match.Name, &match.Round, &match.CreatedAt, &match.UpdatedAt)
+		err := rows.Scan(&match.Id, &match.IdUser, &match.Name, &match.Round, &match.MultipleMasteryEnabled, &match.CreatedAt, &match.UpdatedAt)
 		if err != nil {
 			return matchs, err
 		}
@@ -56,14 +58,15 @@ func GetMatch(idMatch int) (Match, error) {
 	match := Match{}
 
 	sb := sqlbuilder.NewSelectBuilder()
-	sb.Select("id", "id_user", "name", "round", "created_at", "updated_at").From("`match`").Where(sb.Equal("id", idMatch))
+	sb.Select("id", "id_user", "name", "round", "multiple_mastery_enabled", "created_at", "updated_at").From("`match`").Where(sb.Equal("id", idMatch))
 	sql, args := sb.Build()
 
 	rows := db.QueryRow(sql, args...)
 	if rows.Err() != nil {
 		return match, rows.Err()
 	}
-	err := rows.Scan(&match.Id, &match.IdUser, &match.Name, &match.Round, &match.CreatedAt, &match.UpdatedAt)
+	err := rows.Scan(&match.Id, &match.IdUser, &match.Name, &match.Round, &match.MultipleMasteryEnabled, &match.CreatedAt, &match.UpdatedAt)
+
 	return match, err
 }
 
@@ -76,6 +79,7 @@ func GetLastMatchByUserId(idUser int) (Match, error) {
 			id_user,
 			name,
 			round,
+			multiple_mastery_enabled,
 			created_at,
 			updated_at
 		FROM ` + "`match`" + `
@@ -86,7 +90,7 @@ func GetLastMatchByUserId(idUser int) (Match, error) {
 	if rows.Err() != nil {
 		return match, rows.Err()
 	}
-	err := rows.Scan(&match.Id, &match.IdUser, &match.Name, &match.Round, &match.CreatedAt, &match.UpdatedAt)
+	err := rows.Scan(&match.Id, &match.IdUser, &match.Name, &match.Round, &match.MultipleMasteryEnabled, &match.CreatedAt, &match.UpdatedAt)
 	if err != nil && err.Error() == "sql: no rows in result set" {
 		return match, nil
 	}
@@ -116,26 +120,29 @@ func UpdateMatch(idMatch int, match MatchUpdate) error {
 	sb.Update("`match`").Where(sb.Equal("id", idMatch))
 
 	if match.IdUser != nil {
-		sb.Set(sb.Assign("id_user", *match.IdUser))
+		sb.SetMore(sb.Assign("id_user", *match.IdUser))
 		canUpdate = true
 	}
 
 	if match.Name != nil {
-		sb.Set(sb.Assign("name", *match.Name))
+		sb.SetMore(sb.Assign("name", *match.Name))
 		canUpdate = true
 	}
 
 	if match.Round != nil {
-		sb.Set(sb.Assign("round", *match.Round))
+		sb.SetMore(sb.Assign("round", *match.Round))
 		canUpdate = true
 	}
 
+	if match.MultipleMasteryEnabled != nil {
+		sb.SetMore(sb.Assign("multiple_mastery_enabled", *match.MultipleMasteryEnabled))
+		canUpdate = true
+	}
 	if canUpdate {
 		sql, args := sb.Build()
 		_, err := db.Exec(sql, args...)
 		return err
 	}
-
 	return errors.New("no parameters to update Match")
 }
 
@@ -149,7 +156,8 @@ func IncreaseMatchRound(idMatch int) error {
 
 func ResetMatch(idMatch int) error {
 	var round = 0
-	err := UpdateMatch(idMatch, MatchUpdate{Round: &round})
+	var multipleMasteryEnabled = 1
+	err := UpdateMatch(idMatch, MatchUpdate{Round: &round, MultipleMasteryEnabled: &multipleMasteryEnabled})
 	if err != nil {
 		log.Println(err)
 		return err

@@ -43,6 +43,7 @@ func run() error {
 	r.Handle("/match/{idMatch:[0-9]+}/start", auth.RequireAuthAndHisMatch(handler.HandlerStartMatchPage, authService)).Methods("GET")
 	r.Handle("/match/{idMatch:[0-9]+}/reset", auth.RequireAuthAndHisMatch(handler.HandlerResetMatchPage, authService)).Methods("PATCH")
 	r.Handle("/match/{idMatch:[0-9]+}/increase-round", auth.RequireAuthAndHisMatch(handler.HandlerMatchNextRound, authService)).Methods("GET")
+	r.Handle("/match/{idMatch:[0-9]+}/toggle-mastery/{toggleBool:[0-1]}", auth.RequireAuthAndHisMatch(handler.HandlerToggleMatchMastery, authService)).Methods("GET")
 	r.Handle("/match/{idMatch:[0-9]+}/player-spell/{idPlayerSpell:[0-9]+}/use", auth.RequireAuthAndHisMatch(handler.HandlerUsePlayerSpell, authService)).Methods("GET")
 	r.Handle("/match/{idMatch:[0-9]+}/player-spell/{idPlayerSpell:[0-9]+}/remove-round-recovery", auth.RequireAuthAndHisMatch(handler.HandlerRemoveRoundRecoveryPlayerSpell, authService)).Methods("GET")
 	r.Handle("/match/{idMatch:[0-9]+}/player", auth.RequireAuthAndHisMatch(handler.HandlersCreatePlayer, authService)).Methods("POST")

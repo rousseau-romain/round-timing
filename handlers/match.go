@@ -14,7 +14,13 @@ import (
 func (h *Handler) HandlersListMatch(w http.ResponseWriter, r *http.Request) {
 	userOauth2, _ := h.auth.GetSessionUser(r)
 	user, _ := model.GetUserByOauth2Id(userOauth2.UserID)
-	matchs, _ := model.GetMatchsByIdUser(user.Id)
+
+	matchs, err := model.GetMatchsByIdUser(user.Id)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	page.MatchListPage(userOauth2, h.error, PagesNav, user, matchs).Render(r.Context(), w)
 }
@@ -84,7 +90,6 @@ func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) HandlersDeleteMatch(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	matchId := vars["idMatch"]
-	log.Println("matchId", matchId)
 
 	id, _ := strconv.Atoi(matchId)
 
