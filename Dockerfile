@@ -5,14 +5,21 @@ FROM golang:1.22
 WORKDIR /app
 
 # Copy the current directory contents into the container at /app
-COPY . .
+COPY . /app
 
 RUN go install github.com/air-verse/air
-RUN go build -o /server .
+RUN go install module github.com/rousseau-romain/round-timing
 
-FROM scratch
-COPY --from=build /server /server
-EXPOSE 3000
+RUN go mod vendor
+
+# Download and install any required dependencies
+RUN go mod download
+
+# Build the Go app
+RUN air
+
+# Expose port 8080 for incoming traffic
+EXPOSE 8080
 
 # Define the command to run the app when the container starts
 CMD ["air"]
