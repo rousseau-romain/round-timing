@@ -1,25 +1,19 @@
-# Use an official Golang runtime as a parent image
-FROM golang:1.22
+# Step 1: Use the official cosmtrek/air image
+FROM cosmtrek/air:latest
 
-# Set the working directory to /app
+# Step 2: Set the working directory inside the container
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-COPY . /app
+# Step 3: Copy go.mod and go.sum files to the workspace
+COPY go.mod go.sum ./
 
-RUN go install github.com/air-verse/air
-RUN go install module github.com/rousseau-romain/round-timing
-
-RUN go mod vendor
-
-# Download and install any required dependencies
+# Step 4: Download dependencies
 RUN go mod download
 
-# Build the Go app
-RUN air
+# Step 5: Copy the rest of the application source code to the container
+COPY . .
 
-# Expose port 8080 for incoming traffic
-EXPOSE 8080
+EXPOSE 2468:2468
 
-# Define the command to run the app when the container starts
+# Step 6: Start the app with air for hot-reloading
 CMD ["air"]
