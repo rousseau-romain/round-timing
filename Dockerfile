@@ -5,10 +5,8 @@ WORKDIR /app
 COPY . .
 
 RUN go mod tidy 
-# try again
 
 RUN go build -o /main . 
-#if . is main package -> /app
 
 EXPOSE 2468
 
