@@ -57,5 +57,5 @@ func run() error {
 	r.HandleFunc("/auth/logout/{provider}", handler.HandleLogout).Methods("GET")
 
 	r.NotFoundHandler = http.HandlerFunc(handler.HandlersNotFound)
-	return http.ListenAndServe("localhost:2468", r)
+	return http.ListenAndServe(":2468", r)
 }
