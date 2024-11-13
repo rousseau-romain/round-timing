@@ -6,7 +6,7 @@ tailwind:
 	./tailwindcss -i input.css -o public/tailwind.css --watch
 
 templ:
-	templ generate -watch -proxy=http://localhost:2468
+	templ generate -watch
 
 install:
 	brew install golang-migrate
