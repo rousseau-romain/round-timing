@@ -8,20 +8,18 @@ tailwind:
 templ:
 	templ generate -watch
 
+air:
+	air -c .air.toml
+
 install:
 	brew install golang-migrate
 
-	# GO PACKAGES
-	go get -u github.com/go-chi/chi/v5
-	go get golang.org/x/crypto/bcrypt
-	go get github.com/joho/godotenv
-	go get github.com/go-sql-driver/mysql
-	go get github.com/go-chi/jwtauth/v5
-
-	go get github.com/golang-jwt/jwt/v5
+start: 
+	@@ ./tailwindcss -i input.css -o public/tailwind.css --watch & \
+	templ generate -watch & \
+	air -c .air.toml
 
 # DB commands
-
 db_init:
 	docker-compose up -d
 
