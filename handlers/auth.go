@@ -42,7 +42,7 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 	}
 
 	if !userAlreadyExists {
-		_, err = model.CreateUser(user.UserID)
+		_, err = model.CreateUser(user.UserID, user.Email)
 		if err != nil {
 			fmt.Fprintln(w, err)
 			return

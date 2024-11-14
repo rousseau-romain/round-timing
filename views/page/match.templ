@@ -120,6 +120,8 @@ templ TeamPlayerListPage(user goth.User, errors components.Error,navItems []comp
 							class="w-full rounded-lg border-gray-200 p-3 text-sm"
 							required
 							name="idClass"
+							id="idClass"
+							onchange="updateInput(this)"
 						>
 							for _, class := range classes {
 								<option value={ fmt.Sprintf("%d", class.Id) }>{ class.Name }</option>
@@ -134,8 +136,20 @@ templ TeamPlayerListPage(user goth.User, errors components.Error,navItems []comp
 							required
 							type="text"
 							name="name"
+							id="name"
 						/>
 					</div>
+					<script>
+						function updateInput(option){
+							const inputElement = document.getElementById("name");
+							const textOption = option.options[option.selectedIndex].text
+
+							if (inputElement.value.trim() === "") {
+								inputElement.value = textOption || "";  // Optional fallback
+							}
+
+						}
+					</script>
 					<button
 						type="submit"
 						class="inline-block w-full rounded-lg bg-black px-5 py-3 font-medium text-white sm:w-auto"
