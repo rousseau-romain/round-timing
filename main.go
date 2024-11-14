@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"round-timing/config"
-	"round-timing/handlers"
-	"round-timing/service/auth"
+	"github.com/rousseau-romain/round-timing/config"
+	"github.com/rousseau-romain/round-timing/handlers"
+	"github.com/rousseau-romain/round-timing/service/auth"
 
 	"github.com/gorilla/mux"
 )

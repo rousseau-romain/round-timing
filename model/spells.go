@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"round-timing/helper"
+	"github.com/rousseau-romain/round-timing/helper"
 )
 
 type Spell struct {
