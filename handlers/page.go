@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"round-timing/model"
-	"round-timing/shared/components"
-	"round-timing/views/page"
+	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/shared/components"
+	"github.com/rousseau-romain/round-timing/views/page"
 
 	"github.com/gorilla/mux"
 	"github.com/markbates/goth"

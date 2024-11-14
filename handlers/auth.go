@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"round-timing/model"
-	"round-timing/views/page"
+	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/views/page"
 
 	"github.com/markbates/goth/gothic"
 )
