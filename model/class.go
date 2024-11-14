@@ -3,7 +3,7 @@ package model
 import (
 	"log"
 
-	"github.com/rousseau-romain/round-timing/helper"
+	"round-timing/helper"
 )
 
 type Class struct {

@@ -4,7 +4,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/rousseau-romain/round-timing/helper"
+	"round-timing/helper"
 )
 
 type MatchPlayerSpell struct {

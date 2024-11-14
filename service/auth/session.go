@@ -3,7 +3,7 @@ package auth
 import "github.com/gorilla/sessions"
 
 const (
-	SessionName = "sessionRoundTiming"
+	SessionName = "sessionRoundTiming2"
 )
 
 type SessionOptions struct {

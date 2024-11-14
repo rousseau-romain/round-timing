@@ -1,4 +1,4 @@
-module github.com/rousseau-romain/round-timing
+module round-timing
 
 go 1.22
 
