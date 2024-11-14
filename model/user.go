@@ -72,12 +72,14 @@ func UserExists(oauth2Id string) (bool, error) {
 	return userId != 0, err
 }
 
-func CreateUser(oauth2Id string) (int64, error) {
-	sb := sqlbuilder.NewInsertBuilder()
-	sb.InsertInto("user").Cols("oauth2_id").Values(oauth2Id)
-	sql, args := sb.Build()
+func CreateUser(oauth2Id, email string) (int64, error) {
 
-	response, err := db.Exec(sql, args...)
+	sql := `
+		INSERT INTO user (oauth2_id, email)
+		VALUES (?, ?)
+	`
+
+	response, err := db.Exec(sql, oauth2Id, email)
 
 	if err != nil {
 		return 0, err

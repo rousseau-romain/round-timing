@@ -44,14 +44,14 @@ templ MatchPageTable (user goth.User, errors components.Error, navItems []compon
 	</div>
 	<div class="overflow-x-auto">
 		<script>
-				function handleClickImage(img) {
-					if (img.src.includes("F")) {
-						img.src = img.src.replace("F", "M");
-					} else {
-						img.src = img.src.replace("M", "F");
-					}
+			function handleClickImage(img) {
+				if (img.src.includes("F")) {
+					img.src = img.src.replace("F", "M");
+				} else {
+					img.src = img.src.replace("M", "F");
 				}
-			</script>
+			}
+		</script>
 		@PlayerTable(match, players, playersSpells)
 	</div>
 }
