@@ -13,6 +13,8 @@ air:
 
 install:
 	brew install golang-migrate
+	go install github.com/air-verse/air@v1.52.3
+	@echo 'add "alias air=$$GOPATH/bin/air" in .bashrc / .zshrc' 
 
 start: 
 	@@ ./tailwindcss -i input.css -o public/tailwind.css --watch & \

@@ -2,7 +2,7 @@ module github.com/rousseau-romain/round-timing
 
 go 1.22
 
-toolchain go1.22.4
+toolchain go1.22.9
 
 require github.com/a-h/templ v0.2.543
 
