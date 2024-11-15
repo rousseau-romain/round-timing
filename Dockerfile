@@ -6,7 +6,7 @@ COPY . .
 
 RUN go mod tidy 
 
-RUN go build -o /main . 
+RUN go build -mod=vendor -o /main . 
 
 EXPOSE 2468
 
