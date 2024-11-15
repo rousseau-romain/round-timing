@@ -23,3 +23,5 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/markbates/goth v1.79.0
 )
+
+replace github.com/rousseau-romain/round-timing => .
