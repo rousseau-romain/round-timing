@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/rousseau-romain/round-timing/model"
-	"github.com/rousseau-romain/round-timing/views/page"
+	"github.com/rousseau-romain/round-timing/v0/model"
+	"github.com/rousseau-romain/round-timing/v0/views/page"
 
 	"github.com/gorilla/mux"
 )

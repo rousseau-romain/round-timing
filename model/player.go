@@ -4,7 +4,7 @@ import (
 	"errors"
 	"log"
 
-	"github.com/rousseau-romain/round-timing/helper"
+	"github.com/rousseau-romain/round-timing/v0/helper"
 
 	"github.com/huandu/go-sqlbuilder"
 )

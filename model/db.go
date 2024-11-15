@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/rousseau-romain/round-timing/config"
+	"github.com/rousseau-romain/round-timing/v0/config"
 
 	"github.com/go-sql-driver/mysql"
 )
