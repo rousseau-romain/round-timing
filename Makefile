@@ -6,7 +6,7 @@ live/templ:
 	@templ generate --watch --proxy="http://localhost:2468" --open-browser=false -v
 
 live/tailwind:
-	@./tailwindcss -i input.css -o public/tailwind.css --minify --watch
+	@npx tailwindcss -i input.css -o public/tailwind.css --minify --watch
 
 live/air:
 	@air -c .air.toml
@@ -14,10 +14,19 @@ live/air:
 live: 
 	@make -j3 live/templ live/air live/tailwind 
 
-install:
-	brew install golang-migrate
+build/tailwind:
+	npx tailwindcss -i input.css -o public/tailwind.css --minify
+
+build/templ:
+	templ generate
+
+build/install:
 	go install github.com/air-verse/air@v1.52.3
 	go install github.com/a-h/templ/cmd/templ@v0.2.793
+
+install:
+	brew install golang-migrate
+	make build/install
 
 	@echo 'add "alias air=$$GOPATH/bin/air" in .bashrc / .zshrc' 
 	@echo 'after run "make live' 
