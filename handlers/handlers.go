@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"github.com/rousseau-romain/round-timing/service/auth"
-	"github.com/rousseau-romain/round-timing/shared/components"
+	"round-timing/service/auth"
+	"round-timing/shared/components"
 )
 
 type Handler struct {
