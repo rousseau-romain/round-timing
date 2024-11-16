@@ -2,30 +2,30 @@ include .env
 
 DATABASE_URL=${DB_DRIVER}://${DB_USER}:${DB_PASSWORD}@tcp(${DB_HOST}:${DB_PORT})/${DB_NAME}
 
-tailwind:
-	./tailwindcss -i input.css -o public/tailwind.css --watch
+live/templ:
+	@templ generate --watch --proxy="http://localhost:2468" --open-browser=false -v
 
-templ:
-	templ generate -watch
+live/tailwind:
+	@./tailwindcss -i input.css -o public/tailwind.css --minify --watch
 
-air:
-	air -c .air.toml
+live/air:
+	@air -c .air.toml
+
+live: 
+	@make -j3 live/templ live/air live/tailwind 
 
 install:
 	brew install golang-migrate
 	go install github.com/air-verse/air@v1.52.3
-	go install github.com/a-h/templ/cmd/templ@v0.2.778
+	go install github.com/a-h/templ/cmd/templ@v0.2.793
 
 	@echo 'add "alias air=$$GOPATH/bin/air" in .bashrc / .zshrc' 
-
-start: 
-	@@ ./tailwindcss -i input.css -o public/tailwind.css --watch & \
-	templ generate -watch & \
-	air -c .air.toml
+	@echo 'after run "make live' 
 
 # DB commands
 db_init:
 	docker-compose up -d
+	make migration_up
 
 db_start: db_init
 	docker-compose start

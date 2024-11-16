@@ -1,17 +1,19 @@
 # RoundTiming readme
 
-```bash
-go install github.com/cespare/reflex@latest
-```
+You nedd to have:
+
+- brew
+- docker
+- docker-compose
 
 ## Run
 
 Runs the app and looks for changes.
 
 ```bash
-make templ
-make tailwind
-air
+make db_start
+make install
+make live
 ```
 
 ## Migrate
