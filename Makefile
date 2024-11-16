@@ -29,6 +29,7 @@ install:
 	make build/install
 
 	@echo 'add "alias air=$$GOPATH/bin/air" in .bashrc / .zshrc' 
+	@echo 'add "alias air=$$GOPATH/bin/templ" in .bashrc / .zshrc' 
 	@echo 'after run "make live' 
 
 # DB commands
