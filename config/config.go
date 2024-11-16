@@ -41,7 +41,7 @@ func init() {
 	DB_USER = os.Getenv("DB_USER")
 	DB_DRIVER = os.Getenv("DB_DRIVER")
 	DB_PORT = os.Getenv("DB_PORT")
-	DB_URL = DB_DRIVER + "://" + os.Getenv("DB_USER") + ":" + os.Getenv("DB_PASSWORD") + "@tcp(" + os.Getenv("DB_HOST") + ":" + DB_PORT + ")/" + os.Getenv("DB_NAME")
+	DB_URL = DB_DRIVER + "://" + DB_USER + ":" + DB_PASSWORD + "@tcp(" + DB_HOST + ":" + DB_PORT + ")/" + DB_NAME
 	JWT_SECRET_KEY = os.Getenv("JWT_SECRET_KEY")
 
 	PUBLIC_HOST_PORT = os.Getenv("PUBLIC_HOST_PORT")
