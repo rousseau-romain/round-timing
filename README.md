@@ -3,10 +3,11 @@
 You nedd to have:
 
 - brew
-- docker
-- docker-compose
-- node
-- npm
+- docker v27.3.1
+- docker-compose v2.30.3
+- go v1.22.9
+- node v23.2.0
+- npm 10.9.0
 
 ## Run
 

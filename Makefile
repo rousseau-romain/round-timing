@@ -20,30 +20,30 @@ build/tailwind:
 build/templ:
 	templ generate
 
-build/install:
-	go install github.com/air-verse/air@v1.52.3
-	go install github.com/a-h/templ/cmd/templ@v0.2.793
-
 install:
 	brew install golang-migrate
-	make build/install
+	go install github.com/air-verse/air@v1.52.3
+	go install github.com/a-h/templ/cmd/templ@v0.2.793
+	npm install
 
+	@echo 'add "go.goroot:"$$GOROOT" to settings.json VsCode'
 	@echo 'add "alias air=$$GOPATH/bin/air" in .bashrc / .zshrc' 
 	@echo 'after run "make live' 
 
 # DB commands
 db_init:
 	docker-compose up -d
+	echo "Wait 2s"
+	@sleep 3
 	make migration_up
 
-db_start: db_init
+db_start:
 	docker-compose start
 	
-db_stop: db_start
+db_stop:
 	docker-compose down
 
 # Migration commands
-
 migration_up: 
 	migrate -path database/migration/ -database "${DATABASE_URL}" -verbose up
 
