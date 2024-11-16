@@ -10,6 +10,8 @@ RUN apt-get install -y nodejs
 
 RUN apt-get install -y npm
 
+RUN go mod download
+
 RUN go mod tidy 
 
 RUN make build/install
