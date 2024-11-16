@@ -5,6 +5,8 @@ You nedd to have:
 - brew
 - docker
 - docker-compose
+- node
+- npm
 
 ## Run
 

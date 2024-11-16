@@ -5,13 +5,10 @@ WORKDIR /app
 COPY . .
 
 RUN apt update
+
 RUN apt-get install -y nodejs
+
 RUN apt-get install -y npm
-
-
-RUN echo node --version
-RUN npm --version
-
 
 RUN go mod tidy 
 
