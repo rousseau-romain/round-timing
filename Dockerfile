@@ -16,7 +16,7 @@ RUN npm install
 
 RUN go mod download
 
-RUN go mod tidy 
+# RUN go mod tidy 
 
 RUN make build/tailwind
 
