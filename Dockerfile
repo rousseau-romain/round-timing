@@ -10,15 +10,17 @@ RUN apt-get install -y nodejs
 
 RUN apt-get install -y npm
 
+RUN go install github.com/a-h/templ/cmd/templ@v0.2.793
+	
+RUN npm install
+
 RUN go mod download
 
 RUN go mod tidy 
 
-RUN make build/install
+RUN make build/tailwind
 
 RUN make build/templ
-
-RUN make build/tailwind
 
 RUN go build -o /main . 
 

@@ -20,9 +20,12 @@ build/templ:
 install:
 	brew install golang-migrate
 	go install github.com/a-h/templ/cmd/templ@v0.2.793
+	npm install
 
 	@echo 'add "go.goroot:"$$GOROOT" to settings.json VsCode'
 	@echo 'after run "make live' 
+
+
 
 # DB commands
 db_init:
