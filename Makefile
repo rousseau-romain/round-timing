@@ -3,16 +3,13 @@ include .env
 DATABASE_URL=${DB_DRIVER}://${DB_USER}:${DB_PASSWORD}@tcp(${DB_HOST}:${DB_PORT})/${DB_NAME}
 
 live/templ:
-	@templ generate --watch --proxy="http://localhost:2468" --open-browser=false -v
+	templ generate --watch --proxy="http://127.0.0.1:2468" --cmd="go run ."
 
 live/tailwind:
-	@npx tailwindcss -i input.css -o public/tailwind.css --minify --watch
-
-live/air:
-	@air -c .air.toml
+	@npx tailwindcss -i input.css -o public/tailwind.css --watch
 
 live: 
-	@make -j3 live/templ live/air live/tailwind 
+	make -j2 live/templ live/tailwind
 
 build/tailwind:
 	npx tailwindcss -i input.css -o public/tailwind.css --minify
@@ -22,12 +19,9 @@ build/templ:
 
 install:
 	brew install golang-migrate
-	go install github.com/air-verse/air@v1.52.3
 	go install github.com/a-h/templ/cmd/templ@v0.2.793
-	npm install
 
 	@echo 'add "go.goroot:"$$GOROOT" to settings.json VsCode'
-	@echo 'add "alias air=$$GOPATH/bin/air" in .bashrc / .zshrc' 
 	@echo 'after run "make live' 
 
 # DB commands

@@ -1,9 +1,11 @@
 package page
 
-import "github.com/rousseau-romain/round-timing/shared/components"
-import "github.com/markbates/goth"
-import "github.com/rousseau-romain/round-timing/model"
-import "fmt"
+import (
+	"fmt"
+	"github.com/markbates/goth"
+	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/shared/components"
+)
 
 templ TeamPlayer(p model.Player, m model.Match) {
 	<tr class={ "bg-" + p.Team.Color + "-200" }>
@@ -78,7 +80,7 @@ templ TeamPlayerTable(players []model.Player, match model.Match) {
 	</div>
 }
 
-templ TeamPlayerListPage(user goth.User, errors components.Error,navItems []components.NavItem, modelUser model.User, match model.Match, teams []model.Team, classes []model.Class, players []model.Player) {
+templ TeamPlayerListPage(user goth.User, errors components.Error, navItems []components.NavItem, modelUser model.User, match model.Match, teams []model.Team, classes []model.Class, players []model.Player) {
 	@components.Layout("Create match", errors, user, navItems) {
 		<div class="container mx-auto">
 			<h1>Add classes</h1>
@@ -104,6 +106,7 @@ templ TeamPlayerListPage(user goth.User, errors components.Error,navItems []comp
 							class="w-full rounded-lg border-gray-200 p-3 text-sm"
 							required
 							name="idTeam"
+							id="team"
 						>
 							for _, team := range teams {
 								<option
@@ -141,12 +144,14 @@ templ TeamPlayerListPage(user goth.User, errors components.Error,navItems []comp
 					</div>
 					<script>
 						function updateInput(option){
-							const inputElement = document.getElementById("name");
+							const inputElement = document.getElementById("name")
+							const selectorColor = document.getElementById("team")
 							const textOption = option.options[option.selectedIndex].text
+							const colorTeam = selectorColor.options[selectorColor.selectedIndex].text
 
-							if (inputElement.value.trim() === "") {
-								inputElement.value = textOption || "";  // Optional fallback
-							}
+							// if (inputElement.value.trim() === "") {
+								inputElement.value = `${textOption} - ${colorTeam}`
+							// }
 
 						}
 					</script>
