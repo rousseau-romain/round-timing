@@ -1,18 +1,20 @@
 package page
 
-import "github.com/rousseau-romain/round-timing/shared/components"
-import "github.com/markbates/goth"
-import "github.com/rousseau-romain/round-timing/model"
-import "strconv"
-import "fmt"
+import (
+	"fmt"
+	"github.com/markbates/goth"
+	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/shared/components"
+	"strconv"
+)
 
-templ StartMatchPage(user goth.User, errors components.Error, navItems []components.NavItem, match model.Match,  players []model.Player, playersSpells []model.MatchPlayerSpell) {
+templ StartMatchPage(user goth.User, errors components.Error, navItems []components.NavItem, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell) {
 	@components.Layout("Start match", errors, user, navItems) {
 		@MatchPageTable(user, errors, navItems, match, players, playersSpells)
 	}
 }
 
-templ MatchPageTable (user goth.User, errors components.Error, navItems []components.NavItem, match model.Match,  players []model.Player, playersSpells []model.MatchPlayerSpell) {
+templ MatchPageTable(user goth.User, errors components.Error, navItems []components.NavItem, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell) {
 	<div class="flex justify-center gap-2 testt">
 		<button
 			type="submit"
@@ -112,8 +114,9 @@ templ Player(p model.Player, playersSpells []model.MatchPlayerSpell) {
 		}
 	>
 		<td class="whitespace-nowrap px-4 py-2">
-			<img onclick="handleClickImage(this)" alt={ p.Class.Name } title={ p.Name } src={ p.Class.UrlImage + "F.svg" } class="h-8 img-class  cursor-pointer transition-all hover:scale-110"/>
+			<img onclick="handleClickImage(this)" alt={ p.Class.Name } title={ p.Name } src={ p.Class.UrlImage + "F.svg" } class="h-8 img-class  cursor-pointer transition-all hover:scale-110 m-auto"/>
 		</td>
+		<td class="whitespace-nowrap px-4 py-2">{ p.Name }</td>
 		<td class="whitespace-nowrap px-4 py-2">
 			<div class="flex gap-1 flex-wrap">
 				for _, ps := range playersSpells {
@@ -133,7 +136,8 @@ templ PlayerTable(match model.Match, players []model.Player, spells []model.Matc
 		<thead class="ltr:text-left rtl:text-right">
 			<tr>
 				<th class="whitespace-nowrap  text-left px-4 py-2 font-medium text-gray-900 dark:text-white">Round n° { strconv.Itoa(match.Round) }</th>
-				<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white"></th>
+				<th class="whitespace-nowrap px-4 py-2 font-medium"></th>
+				<th class="whitespace-nowrap px-4 py-2 font-medium"></th>
 			</tr>
 		</thead>
 		<tbody
