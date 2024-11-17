@@ -2,6 +2,9 @@ include .env
 
 DATABASE_URL=${DB_DRIVER}://${DB_USER}:${DB_PASSWORD}@tcp(${DB_HOST}:${DB_PORT})/${DB_NAME}
 
+db:
+	echo ${DATABASE_URL}
+
 live/templ:
 	templ generate --watch --proxy="http://127.0.0.1:2468" --cmd="go run ."
 
