@@ -27,15 +27,36 @@ func NewAuthService(store sessions.Store) *AuthService {
 			config.GITHUB_CLIENT_ID,
 			config.GITHUB_CLIENT_SECRET,
 			buildCallbackURL("github"),
+			"email",
 		),
 		discord.New(
 			config.DISCORD_CLIENT_ID,
 			config.DISCORD_CLIENT_SECRET,
 			buildCallbackURL("discord"),
+			"email",
 		),
 	)
 
 	return &AuthService{}
+}
+
+func enabledUserIfWhiteListed(w http.ResponseWriter, r *http.Request, user model.User) {
+	if !user.Enabled {
+		isWhiteListed, err := model.IsEmailWhiteListed(user.Email)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if isWhiteListed {
+			var t = true
+			model.UpdateUser(user.Id, model.UserUpdate{Enabled: &t})
+			return
+		}
+		log.Printf("User %v is not whiteisted!", user.Email)
+		http.Redirect(w, r, "?require-user-enabled", http.StatusTemporaryRedirect)
+		return
+	}
 }
 
 func (s *AuthService) GetSessionUser(r *http.Request) (goth.User, error) {
@@ -100,13 +121,40 @@ func RequireAuth(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFu
 		user, err := model.GetUserByOauth2Id(session.UserID)
 
 		if err != nil {
+			log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		if !user.Enabled {
-			log.Println("User is not enabled!")
-			http.Redirect(w, r, "?require-user-enabled", http.StatusTemporaryRedirect)
+		enabledUserIfWhiteListed(w, r, user)
+
+		log.Printf("user is authenticated! user: %v!", session.FirstName)
+
+		handlerFunc(w, r)
+	}
+}
+
+func RequireAuthAndAdmin(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		session, err := auth.GetSessionUser(r)
+		if err != nil {
+			log.Println("User is not authenticated!")
+			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
+			return
+		}
+		user, err := model.GetUserByOauth2Id(session.UserID)
+
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		enabledUserIfWhiteListed(w, r, user)
+
+		if !user.IsAdmin {
+			log.Printf("User %v is not admin!", user.Email)
+			http.Redirect(w, r, "?require-user-admin", http.StatusTemporaryRedirect)
 			return
 		}
 
@@ -140,15 +188,12 @@ func RequireAuthAndHisMatch(handlerFunc http.HandlerFunc, auth *AuthService) htt
 		user, err := model.GetUserByOauth2Id(session.UserID)
 
 		if err != nil {
+			log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		if !user.Enabled {
-			log.Println("User is not enabled!")
-			http.Redirect(w, r, "?require-user-enabled", http.StatusTemporaryRedirect)
-			return
-		}
+		enabledUserIfWhiteListed(w, r, user)
 
 		vars := mux.Vars(r)
 

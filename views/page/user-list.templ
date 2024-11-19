@@ -1,0 +1,65 @@
+package page
+
+import (
+	"fmt"
+	"github.com/markbates/goth"
+	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/shared/components"
+)
+
+templ User(u model.User) {
+	<tr>
+		<td class="whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">{ fmt.Sprintf("%d", u.Id) }</td>
+		<td class="whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">{ u.Email }</td>
+		<td class="whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">
+			if u.Enabled {
+				Actif
+			} else {
+				Non actif
+			}
+		</td>
+		<td class="whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">
+			if u.IsAdmin {
+				Admin
+			} else {
+				Non admin
+			}
+		</td>
+	</tr>
+}
+
+templ UserTable(users []model.User) {
+	<div class="overflow-x-auto">
+		<table
+			class="min-w-full divide-y-2 divide-gray-200 bg-white text-sm dark:divide-gray-700 dark:bg-gray-900"
+		>
+			<thead class="ltr:text-left rtl:text-right">
+				<tr>
+					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">Id</th>
+					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">Email</th>
+					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">Enabled</th>
+					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">Is admin</th>
+				</tr>
+			</thead>
+			<tbody
+				hx-confirm="Are you sure?"
+				hx-swap="outerHTML swap:0.5s"
+				hx-target="closest tr"
+				class="divide-y divide-gray-200 dark:divide-gray-700"
+			>
+				for _, user := range users {
+					@User(user)
+				}
+			</tbody>
+		</table>
+	</div>
+}
+
+templ UserListPage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, modelUser model.User, users []model.User) {
+	@components.Layout("List users", errors, userGoth, user, navItems) {
+		<div class="container mx-auto">
+			<h1>List users</h1>
+			@UserTable(users)
+		</div>
+	}
+}

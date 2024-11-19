@@ -1,6 +1,9 @@
 package components
 
-import "github.com/markbates/goth"
+import (
+	"github.com/markbates/goth"
+	"github.com/rousseau-romain/round-timing/model"
+)
 
 var isDebug = false
 
@@ -9,7 +12,7 @@ type Error struct {
 	Messages []string
 }
 
-templ Layout(title string, errors Error, user goth.User, navItems []NavItem) {
+templ Layout(title string, errors Error, userGoth goth.User, user model.User, navItems []NavItem) {
 	<html>
 		<head>
 			<title>Round Timing - { title }</title>
@@ -24,7 +27,7 @@ templ Layout(title string, errors Error, user goth.User, navItems []NavItem) {
 			if isDebug {
 				<button class="border border-red-600 bg-red-300 text-red-600 top-0 right-0 absolute">Debug MOD</button>
 			}
-			@Nav(user, navItems)
+			@Nav(userGoth, user, navItems)
 			<div id="content">
 				@ErrorMessages(errors)
 				{ children... }
@@ -37,7 +40,7 @@ type NavItem struct {
 	Name, Url string
 }
 
-templ Nav(user goth.User, navItems []NavItem) {
+templ Nav(userGoth goth.User, user model.User, navItems []NavItem) {
 	<header class="bg-white dark:bg-gray-900">
 		<div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
 			<div class="flex h-16 items-center justify-between">
@@ -74,8 +77,8 @@ templ Nav(user goth.User, navItems []NavItem) {
 				</div>
 				<div class="flex items-center gap-4">
 					<div class="sm:flex sm:gap-4">
-						if user.Name != "" {
-							<a href="/profile"><img class="w-10 h-10 p-1 rounded-full" src={ user.AvatarURL } alt="Bordered avatar"/></a>
+						if userGoth.Name != "" {
+							<a href="/profile"><img class="w-10 h-10 p-1 rounded-full" src={ userGoth.AvatarURL } alt="Bordered avatar"/></a>
 						} else {
 							<a
 								class="rounded-md bg-sky-600 px-5 py-2.5 text-sm font-medium text-white shadow dark:hover:bg-sky-500"
@@ -118,7 +121,7 @@ templ Nav(user goth.User, navItems []NavItem) {
 		</div>
 	</header>
 	<div class="absolute right-0 w-fit bg-white border">
-		@MobileMenu(user, navItems)
+		@MobileMenu(userGoth, user, navItems)
 	</div>
 	<script>
 		document.querySelector("#button-burger-menu").addEventListener("click", () => {
@@ -127,7 +130,7 @@ templ Nav(user goth.User, navItems []NavItem) {
 	</script>
 }
 
-templ MobileMenu(user goth.User, navItems []NavItem) {
+templ MobileMenu(userGoth goth.User, user model.User, navItems []NavItem) {
 	<ul id="menu-mobile" class=" hidden space-y-1 border">
 		for _, nav := range navItems {
 			<li class="block">

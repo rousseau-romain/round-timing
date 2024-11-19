@@ -56,6 +56,8 @@ func run() error {
 	r.HandleFunc("/auth/{provider}/callback", handler.HandleAuthCallbackFunction).Methods("GET")
 	r.HandleFunc("/auth/logout/{provider}", handler.HandleLogout).Methods("GET")
 
+	r.Handle("/admin/user", auth.RequireAuthAndAdmin(handler.HandlersListUser, authService)).Methods("GET")
+
 	r.NotFoundHandler = http.HandlerFunc(handler.HandlersNotFound)
 	return http.ListenAndServe(":2468", r)
 }

@@ -1,19 +1,20 @@
 package page
 
-import "github.com/rousseau-romain/round-timing/shared/components"
-import "github.com/markbates/goth"
+import (
+	"github.com/markbates/goth"
+	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/shared/components"
+)
 
-templ ProfilePage( user goth.User, errors components.Error, navItems []components.NavItem) {
-	@components.Layout("Profile", errors, user, navItems) {
+templ ProfilePage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem) {
+	@components.Layout("Profile", errors, userGoth, user, navItems) {
 		<div class="container mx-auto">
 			<h1 class="text-2xl font-semibold">Profile</h1>
-			<p class="text-gray-500">Welcome { user.Name }</p>
-			if user.Email != "" {
-				<p class="text-gray-500">Email: { user.Email }</p>
-			}
-			<p class="text-gray-500">Provider: { user.Provider }</p>
-			<p class="text-gray-500">UserID: { user.UserID }</p>
-			<a class="inline-block rounded-md bg-sky-600 px-5 py-2.5 text-sm font-medium text-white shadow dark:hover:bg-sky-500" href={ templ.SafeURL("/auth/logout/" + user.Provider) }>Logout</a>
+			<p class="text-gray-500">Welcome { userGoth.Name }</p>
+			<p class="text-gray-500">Email: { userGoth.Email }</p>
+			<p class="text-gray-500">Provider: { userGoth.Provider }</p>
+			<p class="text-gray-500">UserID: { userGoth.UserID }</p>
+			<a class="inline-block rounded-md bg-sky-600 px-5 py-2.5 text-sm font-medium text-white shadow dark:hover:bg-sky-500" href={ templ.SafeURL("/auth/logout/" + userGoth.Provider) }>Logout</a>
 		</div>
 	}
 }
