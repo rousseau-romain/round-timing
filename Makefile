@@ -2,8 +2,11 @@ include .env
 
 DATABASE_URL=${DB_DRIVER}://${DB_USER}:${DB_PASSWORD}@tcp(${DB_HOST}:${DB_PORT})/${DB_NAME}
 
-db:
-	echo ${DATABASE_URL}
+Arguments := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+Command := $(firstword $(MAKECMDGOALS))
+
+%::
+	@true
 
 db/combine/script:
 	cd database/migration/ && cat $$(ls | grep .up.sql) > output.sql
@@ -42,11 +45,14 @@ db_init:
 
 db_start:
 	docker-compose start
-	
+
 db_stop:
 	docker-compose down
 
 # Migration commands
+migration_create: 
+	@migrate create -ext sql -dir database/migration/ -seq $(Arguments)
+
 migration_up: 
 	migrate -path database/migration/ -database "${DATABASE_URL}" -verbose up
 
