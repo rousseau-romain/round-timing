@@ -8,17 +8,22 @@ Command := $(firstword $(MAKECMDGOALS))
 %::
 	@true
 
-db/combine/script:
-	cd database/migration/ && cat $$(ls | grep .up.sql) > output.sql
+live/go:
+	@go run github.com/air-verse/air@v1.52.3 \
+		--build.cmd "go build -o tmp/main" --build.bin "tmp/main" --build.delay "1000" \
+		--build.exclude_dir "node_modules,tmp,vendor" \
+		--build.include_ext "go" \
+		--build.stop_on_error "false" \
+		--misc.clean_on_exit true
 
 live/templ:
-	templ generate --watch --proxy="http://127.0.0.1:2468" --cmd="go run ."
+	@templ generate -watch -proxy="http://127.0.0.1:2468" --open-browser=false
 
 live/tailwind:
 	@npx tailwindcss -i input.css -o public/tailwind.css --watch
 
 live: 
-	make -j2 live/templ live/tailwind
+	make -j3 live/templ live/tailwind live/go
 
 build/tailwind:
 	npx tailwindcss -i input.css -o public/tailwind.css --minify
@@ -28,6 +33,7 @@ build/templ:
 
 install:
 	brew install golang-migrate
+	go install github.com/air-verse/air@v1.52.3
 	go install github.com/a-h/templ/cmd/templ@v0.2.793
 	npm install
 
@@ -37,6 +43,9 @@ install:
 
 
 # DB commands
+db/combine/script:
+	cd database/migration/ && cat $$(ls | grep .up.sql) > output.sql
+
 db_init:
 	docker-compose up -d
 	echo "Wait 2s"
