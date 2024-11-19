@@ -6,7 +6,7 @@ db:
 	echo ${DATABASE_URL}
 
 db/combine/script:
-	cd database/migration/ && cat $(ls | grep .up.sql) > output.sql
+	cd database/migration/ && cat $$(ls | grep .up.sql) > output.sql
 
 live/templ:
 	templ generate --watch --proxy="http://127.0.0.1:2468" --cmd="go run ."
