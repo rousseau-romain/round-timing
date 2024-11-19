@@ -24,7 +24,7 @@ make live
 Create migration file
 
 ```bash
-migrate create -ext sql -dir database/migration/ -seq {init_message}
+make migration_create {init_message}
 ```
 
 Run migration up
