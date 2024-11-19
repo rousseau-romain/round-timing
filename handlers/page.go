@@ -40,6 +40,12 @@ func getPageNavCustom(user model.User, match model.Match) []components.NavItem {
 			}
 		}
 	}
+	if user.IsAdmin {
+		pageNav = append(pageNav, components.NavItem{
+			Name: "Admin list users",
+			Url:  "admin/user",
+		})
+	}
 	return pageNav
 }
 
@@ -60,10 +66,10 @@ func (h *Handler) HandlersHome(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		pageNav = getPageNavCustom(user, model.Match{})
-		page.HomePage(userOauth2, h.error, pageNav).Render(r.Context(), w)
+		page.HomePage(userOauth2, user, h.error, pageNav).Render(r.Context(), w)
 		return
 	}
-	page.HomePage(goth.User{}, h.error, pageNav).Render(r.Context(), w)
+	page.HomePage(goth.User{}, model.User{}, h.error, pageNav).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersProfile(w http.ResponseWriter, r *http.Request) {
@@ -74,7 +80,7 @@ func (h *Handler) HandlersProfile(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	page.ProfilePage(userOauth2, h.error, getPageNavCustom(user, model.Match{})).Render(r.Context(), w)
+	page.ProfilePage(userOauth2, user, h.error, getPageNavCustom(user, model.Match{})).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) {
@@ -179,7 +185,7 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 
 	getPageNavCustom(user, model.Match{})
 
-	page.StartMatchPage(userOauth2, h.error, getPageNavCustom(user, match), match, players, spellsPlayer).Render(r.Context(), w)
+	page.StartMatchPage(userOauth2, user, h.error, getPageNavCustom(user, match), match, players, spellsPlayer).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerResetMatchPage(w http.ResponseWriter, r *http.Request) {
@@ -229,7 +235,7 @@ func (h *Handler) HandlerToggleMatchMastery(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	page.MatchPageTable(userOauth2, h.error, getPageNavCustom(user, match), match, players, spellsPlayers).Render(r.Context(), w)
+	page.MatchPageTable(userOauth2, user, h.error, getPageNavCustom(user, match), match, players, spellsPlayers).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerMatchNextRound(w http.ResponseWriter, r *http.Request) {

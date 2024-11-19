@@ -2,6 +2,7 @@ package page
 
 import (
 	"github.com/markbates/goth"
+	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/shared/components"
 )
 
@@ -9,8 +10,8 @@ type Pages struct {
 	Name, Slug string
 }
 
-templ HomePage(user goth.User, errors components.Error, navItems []components.NavItem) {
-	@components.Layout("Home", errors, user, navItems) {
+templ HomePage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem) {
+	@components.Layout("Home", errors, userGoth, user, navItems) {
 		<div class="container mx-auto p-4">
 			<div class="bg-white rounded-lg p-6">
 				<h1 class="text-3xl font-bold mb-4">Round Timing</h1>

@@ -8,13 +8,13 @@ import (
 	"strconv"
 )
 
-templ StartMatchPage(user goth.User, errors components.Error, navItems []components.NavItem, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell) {
-	@components.Layout("Start match", errors, user, navItems) {
-		@MatchPageTable(user, errors, navItems, match, players, playersSpells)
+templ StartMatchPage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell) {
+	@components.Layout("Start match", errors, userGoth, user, navItems) {
+		@MatchPageTable(userGoth, user, errors, navItems, match, players, playersSpells)
 	}
 }
 
-templ MatchPageTable(user goth.User, errors components.Error, navItems []components.NavItem, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell) {
+templ MatchPageTable(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell) {
 	<div class="flex justify-center gap-2 testt">
 		<button
 			type="submit"

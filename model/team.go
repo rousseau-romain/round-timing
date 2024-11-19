@@ -76,6 +76,7 @@ func CreateTeam(m TeamCreate) (int, error) {
 	response, err := db.Exec(sql, m.IdMatch, m.IdColorTeam, m.Name)
 
 	if err != nil {
+		log.Println(err)
 		return 0, err
 	}
 

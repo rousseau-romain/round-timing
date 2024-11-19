@@ -63,8 +63,8 @@ templ MatchTable(matchs []model.Match) {
 	</div>
 }
 
-templ MatchListPage(user goth.User, errors components.Error, navItems []components.NavItem, modelUser model.User, matchs []model.Match) {
-	@components.Layout("Create match", errors, user, navItems) {
+templ MatchListPage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, modelUser model.User, matchs []model.Match) {
+	@components.Layout("Create match", errors, userGoth, user, navItems) {
 		<div class="container mx-auto">
 			<h1>Create match</h1>
 			<form
