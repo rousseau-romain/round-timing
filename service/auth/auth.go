@@ -128,8 +128,6 @@ func RequireAuth(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFu
 
 		enabledUserIfWhiteListed(w, r, user)
 
-		log.Printf("user is authenticated! user: %v!", session.FirstName)
-
 		handlerFunc(w, r)
 	}
 }
@@ -158,21 +156,18 @@ func RequireAuthAndAdmin(handlerFunc http.HandlerFunc, auth *AuthService) http.H
 			return
 		}
 
-		log.Printf("user is authenticated! user: %v!", session.FirstName)
-
 		handlerFunc(w, r)
 	}
 }
 
 func RequireNotAuth(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		session, err := auth.GetSessionUser(r)
+		_, err := auth.GetSessionUser(r)
 		if err != nil {
 			handlerFunc(w, r)
 			return
 		}
 
-		log.Printf("user is authenticated! user: %v!", session.FirstName)
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 	}
 }
