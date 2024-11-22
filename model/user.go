@@ -61,6 +61,36 @@ func GetUsers() ([]User, error) {
 	return users, err
 }
 
+func GetUserById(idUser int) (User, error) {
+	user := User{}
+
+	sql := `
+			SELECT
+				id,
+				oauth2_id,
+				enabled,
+				email,
+				is_admin
+			FROM user
+			WHERE id = ?
+		`
+
+	err := db.QueryRow(sql, idUser).Scan(
+		&user.Id,
+		&user.Oauth2Id,
+		&user.Enabled,
+		&user.Email,
+		&user.IsAdmin,
+	)
+
+	if err != nil {
+		log.Println(err)
+		return user, err
+	}
+
+	return user, err
+}
+
 func GetUserIdByMatch(idmatch int) (User, error) {
 	user := User{}
 

@@ -57,6 +57,7 @@ func run() error {
 	r.HandleFunc("/auth/logout/{provider}", handler.HandleLogout).Methods("GET")
 
 	r.Handle("/admin/user", auth.RequireAuthAndAdmin(handler.HandlersListUser, authService)).Methods("GET")
+	r.Handle("/admin/user/{idUser:[0-9]+}/toggle-enabled/{toggleEnabled:(?:true|false)}", auth.RequireAuthAndAdmin(handler.HandlersUserEnabled, authService)).Methods("GET")
 
 	r.NotFoundHandler = http.HandlerFunc(handler.HandlersNotFound)
 	return http.ListenAndServe(":2468", r)
