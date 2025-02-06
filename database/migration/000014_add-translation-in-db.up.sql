@@ -4,9 +4,7 @@ CREATE TABLE class_translation (
     id_class INT NOT NULL,
     name VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_language) REFERENCES language(id),
-    FOREIGN KEY (id_class) REFERENCES class(id)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 ALTER TABLE class_translation ADD CONSTRAINT fk_class_translation_language FOREIGN KEY (id_language) REFERENCES language(id);
