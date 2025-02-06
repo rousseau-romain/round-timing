@@ -22,7 +22,7 @@ func (h *Handler) HandlersListMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page.MatchListPage(userOauth2, user, h.error, PagesNav, user, matchs).Render(r.Context(), w)
+	page.MatchListPage(userOauth2, user, h.error, PagesNav, h.languages, user, matchs).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
@@ -130,7 +130,7 @@ func (h *Handler) HandlersMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	players, err := model.GetPlayersByIdMatch(matchId)
+	players, err := model.GetPlayersByIdMatch(user.IdLanguage, matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -142,11 +142,11 @@ func (h *Handler) HandlersMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	classes, err := model.GetClasses()
+	classes, err := model.GetClasses(user.IdLanguage)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	page.TeamPlayerListPage(userOauth2, user, h.error, getPageNavCustom(user, model.Match{}), user, match, teams, classes, players).Render(r.Context(), w)
+	page.TeamPlayerListPage(userOauth2, user, h.error, getPageNavCustom(user, model.Match{}), h.languages, user, match, teams, classes, players).Render(r.Context(), w)
 }

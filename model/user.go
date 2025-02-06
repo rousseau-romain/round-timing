@@ -9,19 +9,22 @@ import (
 )
 
 type User struct {
-	Id       int    `json:"id"`
-	Oauth2Id string `json:"oauth2_id"`
-	Enabled  bool   `json:"enabled"`
-	Email    string `json:"email"`
-	IsAdmin  bool   `json:"is_admin"`
+	Id         int    `json:"id"`
+	Oauth2Id   string `json:"oauth2_id"`
+	Enabled    bool   `json:"enabled"`
+	Email      string `json:"email"`
+	IdLanguage int    `json:"id_language"`
+	IsAdmin    bool   `json:"is_admin"`
 }
 type UserUpdate struct {
-	Enabled *bool
+	Enabled    *bool
+	IdLanguage *int
 }
 
 type UserCreate struct {
-	Oauth2Id string
-	Email    string
+	Oauth2Id   string
+	Email      string
+	IdLanguage int
 }
 
 func GetUsers() ([]User, error) {
@@ -29,6 +32,7 @@ func GetUsers() ([]User, error) {
 		SELECT 
 			id,
 			email,
+			id_language,
 			enabled,
 			is_admin
 		FROM user
@@ -48,6 +52,7 @@ func GetUsers() ([]User, error) {
 		err := rows.Scan(
 			&user.Id,
 			&user.Email,
+			&user.IdLanguage,
 			&user.Enabled,
 			&user.IsAdmin,
 		)
@@ -70,6 +75,7 @@ func GetUserById(idUser int) (User, error) {
 				oauth2_id,
 				enabled,
 				email,
+				id_language,
 				is_admin
 			FROM user
 			WHERE id = ?
@@ -80,6 +86,7 @@ func GetUserById(idUser int) (User, error) {
 		&user.Oauth2Id,
 		&user.Enabled,
 		&user.Email,
+		&user.IdLanguage,
 		&user.IsAdmin,
 	)
 
@@ -100,13 +107,14 @@ func GetUserIdByMatch(idmatch int) (User, error) {
 			u.oauth2_id,
 			u.enabled,
 			u.email,
+			u.id_language,
 			u.is_admin
 		FROM %s AS m
 		JOIN user AS u ON m.id_user = u.id
 		WHERE m.id = ?
 	`, "`match`")
 
-	err := db.QueryRow(sql, idmatch).Scan(&user.Id, &user.Oauth2Id, &user.Enabled, &user.Email, &user.IsAdmin)
+	err := db.QueryRow(sql, idmatch).Scan(&user.Id, &user.Oauth2Id, &user.Enabled, &user.Email, &user.IdLanguage, &user.IsAdmin)
 	if err != nil && err.Error() == "sql: no rows in result set" {
 		return user, nil
 	}
@@ -121,10 +129,10 @@ func GetUserByOauth2Id(oauth2Id string) (User, error) {
 	user := User{}
 
 	sb := sqlbuilder.NewSelectBuilder()
-	sb.Select("id", "oauth2_id", "enabled", "email", "is_admin").From("user").Where(sb.Equal("oauth2_id", oauth2Id))
+	sb.Select("id", "oauth2_id", "enabled", "email", "id_language", "is_admin").From("user").Where(sb.Equal("oauth2_id", oauth2Id))
 	sql, args := sb.Build()
 
-	err := db.QueryRow(sql, args...).Scan(&user.Id, &user.Oauth2Id, &user.Enabled, &user.Email, &user.IsAdmin)
+	err := db.QueryRow(sql, args...).Scan(&user.Id, &user.Oauth2Id, &user.Enabled, &user.Email, &user.IdLanguage, &user.IsAdmin)
 	if err != nil && err.Error() == "sql: no rows in result set" {
 		return user, nil
 	}
@@ -167,11 +175,11 @@ func IsAdminUser(userId int) (bool, error) {
 func CreateUser(user UserCreate) (int64, error) {
 
 	sql := `
-		INSERT INTO user (oauth2_id, email)
-		VALUES ("?", "?")
+		INSERT INTO user (oauth2_id, email, id_language)
+		VALUES (?, ?, ?)
 	`
 
-	response, err := db.Exec(sql, user.Oauth2Id, user.Email)
+	response, err := db.Exec(sql, user.Oauth2Id, user.Email, user.IdLanguage)
 
 	if err != nil {
 		log.Println(err)
@@ -190,6 +198,11 @@ func UpdateUser(idUser int, user UserUpdate) error {
 
 	if user.Enabled != nil {
 		sb.Set(sb.Assign("enabled", *user.Enabled))
+		canUpdate = true
+	}
+
+	if user.IdLanguage != nil {
+		sb.Set(sb.Assign("id_language", *user.IdLanguage))
 		canUpdate = true
 	}
 

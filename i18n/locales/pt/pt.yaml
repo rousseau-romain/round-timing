@@ -1,0 +1,72 @@
+pt:
+  global:
+    header:
+      signin: "Entrar"
+      select-language: "Selecionar idioma"
+    table:
+      id: "Id"
+      email: "Email"
+      enabled: "Ativo"
+      disabled: "Inativo"
+      role: "Função"
+      role-admin: "Administrador"
+      role-user: "Usuário"
+      name: "Nome"
+      class: "Classe"
+      team: "Equipe"
+      created-at: "Criado em"
+      updated-at: "Atualizado em"
+    buttons:
+      go-back: "Voltar"
+      see: "Ver"
+      delete: "Excluir"
+    match: "Partida"
+    round: "Rodada"
+  page:
+    404:
+      title: "404 Não encontrado"
+      p: "Não conseguimos encontrar esta página."
+    home:
+      title: "Início"
+      discover: "Descubra %{name}, o aplicativo indispensável para todos os jogadores de Dofus que desejam otimizar o uso de seus feitiços em combate!"
+      h2: "Principais funcionalidades:"
+      list-title: "Gerenciamento do tempo das rodadas:"
+      list-features:
+        f1: "Planeje suas ações com antecedência com ferramentas de gerenciamento do tempo das rodadas."
+        f2: "Visualize a sequência ideal de turnos para maximizar o impacto de seus feitiços e minimizar o tempo de inatividade."
+        f3: "Analise seus feitiços e inimigos para escolher melhor suas ações."
+    match-list:
+      title: "Lista de partidas"
+      h1: "Criar uma partida"
+      button-create-match: "Criar uma partida"
+    match:
+      title: "Partida %{name}"
+      h1: "Adicionar jogadores"
+      button:
+        add-player: "Adicionar um jogador"
+        reset-match: "Reiniciar a partida para adicionar jogadores"
+        start-match: "Começar a partida"
+        go-to-match: "Ver partida"
+      input-placeholder-player-name: "Nome do jogador"
+    profile:
+      title: "Perfil"
+      h1: "Olá, %{name}!"
+      p: "Aqui está o seu perfil."
+      p-email: "Email: %{email}"
+      logout: "Sair"
+    signin:
+      title: "Entrar"
+      h1: "Comece hoje"
+      p: "Faça login na sua conta"
+      signin-button: "Entrar com %{provider}"
+    start-match:
+      title: "Partida em andamento"
+      h1: "Partida em andamento"
+      p: "Clique no botão abaixo para começar sua partida."
+      button:
+        reset-match: "Reiniciar partida"
+        next-round: "Próxima rodada"
+        toggle-multiple-mastery: "Ativar/Desativar multi-maestria"
+    admin:
+      title: "Admin"
+      h1: "Lista de usuários"

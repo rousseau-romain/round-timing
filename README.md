@@ -20,6 +20,7 @@ cp .env.template .env
 Run these commands first
 
 ```bash
+make db_init
 make db_start
 make install
 make live

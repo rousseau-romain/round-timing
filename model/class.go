@@ -12,17 +12,18 @@ type Class struct {
 	UrlImage string `json:"url_image"`
 }
 
-func GetClasses() ([]Class, error) {
+func GetClasses(idLanguage int) ([]Class, error) {
 	sql := `
 		SELECT
-			id,
-			name,
-			` + helper.GetUrlImageClassClause("id") + ` AS url_image
-		FROM class
-		WHERE id != 13
+			c.id,
+			cn.name,
+			? AS url_image
+		FROM class c
+		JOIN class_translation cn ON cn.id_class = c.id AND cn.id_language = ?
+		WHERE c.id != 13
 	`
 
-	rows, err := db.Query(sql)
+	rows, err := db.Query(sql, helper.GetUrlImageClassClause("c.id"), idLanguage)
 
 	if err != nil {
 		log.Println(err)
