@@ -63,6 +63,7 @@ es:
       title: "Partida en curso"
       h1: "Partida en curso"
       p: "Haz clic en el botón de abajo para comenzar tu partida."
+      delay-between-use: "Atraso entre uso"
       button:
         reset-match: "Reiniciar partida"
         next-round: "Siguiente ronda"

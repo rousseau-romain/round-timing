@@ -16,7 +16,7 @@ templ StartMatchPage(userGoth goth.User, user model.User, errors components.Erro
 }
 
 templ MatchPageTable(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell) {
-	<div class="flex justify-center gap-2 testt">
+	<div class="flex justify-center gap-2">
 		<button
 			type="submit"
 			class="inline-block w-full rounded-lg bg-red-600 px-5 py-3 font-medium text-white sm:w-auto"
@@ -80,7 +80,7 @@ templ Spell(mps model.MatchPlayerSpell) {
 		<span class="tooltip rounded shadow-lg p-1 bg-gray-100 text-black -top-3/4 -left-full">
 			<ul>
 				<li class="font-bold">{ mps.Spell.Name }</li>
-				<li>Delay between use : <span class="font-bold">{ strconv.Itoa(mps.Spell.Delay) }</span></li>
+				<li>{ i18n.T(ctx, "page.start-match.delay-between-use") } : <span class="font-bold">{ strconv.Itoa(mps.Spell.Delay) }</span></li>
 			</ul>
 		</span>
 		<img
