@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/rousseau-romain/round-timing/helper"
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/shared/components"
 	"github.com/rousseau-romain/round-timing/views/page"
@@ -51,7 +52,7 @@ func getPageNavCustom(user model.User, match model.Match) []components.NavItem {
 
 func (h *Handler) HandlersNotFound(w http.ResponseWriter, r *http.Request) {
 	userOauth2, _ := h.auth.GetSessionUser(r)
-	page.NotFoundPage(userOauth2, h.error, PagesNav).Render(r.Context(), w)
+	page.NotFoundPage(userOauth2, h.error, PagesNav, h.languages).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersHome(w http.ResponseWriter, r *http.Request) {
@@ -66,10 +67,10 @@ func (h *Handler) HandlersHome(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		pageNav = getPageNavCustom(user, model.Match{})
-		page.HomePage(userOauth2, user, h.error, pageNav).Render(r.Context(), w)
+		page.HomePage(userOauth2, user, h.error, pageNav, h.languages).Render(r.Context(), w)
 		return
 	}
-	page.HomePage(goth.User{}, model.User{}, h.error, pageNav).Render(r.Context(), w)
+	page.HomePage(goth.User{}, model.User{}, h.error, pageNav, h.languages).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersProfile(w http.ResponseWriter, r *http.Request) {
@@ -80,7 +81,7 @@ func (h *Handler) HandlersProfile(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	page.ProfilePage(userOauth2, user, h.error, getPageNavCustom(user, model.Match{})).Render(r.Context(), w)
+	page.ProfilePage(userOauth2, user, h.error, getPageNavCustom(user, model.Match{}), h.languages).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) {
@@ -97,14 +98,13 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 	vars := mux.Vars(r)
 
 	matchId, _ := strconv.Atoi(vars["idMatch"])
-	log.Println(matchId)
 	match, err := model.GetMatch(matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	players, err := model.GetPlayersByIdMatch(matchId)
+	players, err := model.GetPlayersByIdMatch(user.IdLanguage, matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -117,23 +117,21 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 
 	if match.Round == 0 {
 		classeIds := []int{idClassGlobal}
-		idSpellToExclude := []int{134, 135, 136, 137, 139, 140, 141, 142}
+		idSpellToExclude := helper.MasteryIdSpells
 		for _, player := range players {
 			classeIds = append(classeIds, player.Class.Id)
 		}
-
-		spells, err := model.GetSpellsByIdCLass(classeIds, idSpellToExclude)
+		spells, err := model.GetSpellsByIdClass(user.IdLanguage, classeIds, idSpellToExclude)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		// maitrise marteau id 138
 		if match.MultipleMasteryEnabled == 1 {
 			idSpellToExclude = []int{}
 		}
 
-		globalSpells, err := model.GetSpellsByIdCLass([]int{idClassGlobal}, idSpellToExclude)
+		globalSpells, err := model.GetSpellsByIdClass(user.IdLanguage, []int{idClassGlobal}, idSpellToExclude)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -176,7 +174,7 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	spellsPlayer, err := model.GetSpellsPlayersByIdMatch(matchId)
+	spellsPlayer, err := model.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -185,7 +183,7 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 
 	getPageNavCustom(user, model.Match{})
 
-	page.StartMatchPage(userOauth2, user, h.error, getPageNavCustom(user, match), match, players, spellsPlayer).Render(r.Context(), w)
+	page.StartMatchPage(userOauth2, user, h.error, getPageNavCustom(user, match), h.languages, match, players, spellsPlayer).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerResetMatchPage(w http.ResponseWriter, r *http.Request) {
@@ -203,12 +201,12 @@ func (h *Handler) HandlerResetMatchPage(w http.ResponseWriter, r *http.Request) 
 
 func (h *Handler) HandlerToggleMatchMastery(w http.ResponseWriter, r *http.Request) {
 	userOauth2, _ := h.auth.GetSessionUser(r)
-	user, err := model.GetUserByOauth2Id(userOauth2.UserID)
+	user, _ := model.GetUserByOauth2Id(userOauth2.UserID)
 	vars := mux.Vars(r)
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 	multipleMasteryEnabled, _ := strconv.Atoi(vars["toggleBool"])
 
-	err = model.UpdateMatch(matchId, model.MatchUpdate{
+	err := model.UpdateMatch(matchId, model.MatchUpdate{
 		MultipleMasteryEnabled: &multipleMasteryEnabled,
 	})
 
@@ -223,22 +221,24 @@ func (h *Handler) HandlerToggleMatchMastery(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	players, err := model.GetPlayersByIdMatch(matchId)
+	players, err := model.GetPlayersByIdMatch(user.IdLanguage, matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	spellsPlayers, err := model.GetSpellsPlayersByIdMatch(matchId)
+	spellsPlayers, err := model.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	page.MatchPageTable(userOauth2, user, h.error, getPageNavCustom(user, match), match, players, spellsPlayers).Render(r.Context(), w)
+	page.MatchPageTable(userOauth2, user, h.error, getPageNavCustom(user, match), h.languages, match, players, spellsPlayers).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerMatchNextRound(w http.ResponseWriter, r *http.Request) {
+	userOauth2, _ := h.auth.GetSessionUser(r)
+	user, _ := model.GetUserByOauth2Id(userOauth2.UserID)
 	vars := mux.Vars(r)
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 
@@ -259,13 +259,13 @@ func (h *Handler) HandlerMatchNextRound(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	players, err := model.GetPlayersByIdMatch(matchId)
+	players, err := model.GetPlayersByIdMatch(user.IdLanguage, matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	spellsPlayers, err := model.GetSpellsPlayersByIdMatch(matchId)
+	spellsPlayers, err := model.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -275,6 +275,8 @@ func (h *Handler) HandlerMatchNextRound(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *Handler) HandlerUsePlayerSpell(w http.ResponseWriter, r *http.Request) {
+	userOauth2, _ := h.auth.GetSessionUser(r)
+	user, _ := model.GetUserByOauth2Id(userOauth2.UserID)
 	vars := mux.Vars(r)
 	idPlayerSpell, _ := strconv.Atoi(vars["idPlayerSpell"])
 
@@ -284,7 +286,7 @@ func (h *Handler) HandlerUsePlayerSpell(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	spellPlayer, err := model.GetSpellPlayerByIdSpellsPlayers(idPlayerSpell)
+	spellPlayer, err := model.GetSpellPlayerByIdSpellsPlayers(user.IdLanguage, idPlayerSpell)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -295,6 +297,8 @@ func (h *Handler) HandlerUsePlayerSpell(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *Handler) HandlerRemoveRoundRecoveryPlayerSpell(w http.ResponseWriter, r *http.Request) {
+	userOauth2, _ := h.auth.GetSessionUser(r)
+	user, _ := model.GetUserByOauth2Id(userOauth2.UserID)
 	vars := mux.Vars(r)
 	idPlayerSpell, _ := strconv.Atoi(vars["idPlayerSpell"])
 
@@ -304,7 +308,7 @@ func (h *Handler) HandlerRemoveRoundRecoveryPlayerSpell(w http.ResponseWriter, r
 		return
 	}
 
-	spellPlayer, err := model.GetSpellPlayerByIdSpellsPlayers(idPlayerSpell)
+	spellPlayer, err := model.GetSpellPlayerByIdSpellsPlayers(user.IdLanguage, idPlayerSpell)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

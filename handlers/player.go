@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/rousseau-romain/round-timing/helper"
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/views/page"
 
@@ -12,6 +13,8 @@ import (
 )
 
 func (h *Handler) HandlersCreatePlayer(w http.ResponseWriter, r *http.Request) {
+	userOauth2, _ := h.auth.GetSessionUser(r)
+	user, _ := model.GetUserByOauth2Id(userOauth2.UserID)
 	vars := mux.Vars(r)
 
 	idMatch, _ := strconv.Atoi(vars["idMatch"])
@@ -57,7 +60,7 @@ func (h *Handler) HandlersCreatePlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	player, err := model.GetPlayer(idPlayer)
+	player, err := model.GetPlayer(user.IdLanguage, idPlayer)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -84,4 +87,28 @@ func (h *Handler) HandlersDeletePlayer(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 		return
 	}
+}
+
+func (h *Handler) HandlersPlayerLanguage(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	userOauth2, _ := h.auth.GetSessionUser(r)
+	user, _ := model.GetUserByOauth2Id(userOauth2.UserID)
+
+	code := vars["code"]
+	idLanguage := helper.SupportedLanguages[code]
+
+	userUpdate := model.UserUpdate{
+		IdLanguage: &idLanguage,
+	}
+
+	err := model.UpdateUser(user.Id, userUpdate)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("HX-Refresh", "true")
+
 }

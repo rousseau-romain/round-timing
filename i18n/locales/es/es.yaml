@@ -1,0 +1,72 @@
+es:
+  global:
+    header:
+      signin: "Iniciar sesión"
+      select-language: "Seleccionar idioma"
+    table:
+      id: "Id"
+      email: "Correo electrónico"
+      enabled: "Activo"
+      disabled: "Inactivo"
+      role: "Rol"
+      role-admin: "Administrador"
+      role-user: "Usuario"
+      name: "Nombre"
+      class: "Clase"
+      team: "Equipo"
+      created-at: "Creado el"
+      updated-at: "Actualizado el"
+    buttons:
+      go-back: "Volver"
+      see: "Ver"
+      delete: "Eliminar"
+    match: "Partida"
+    round: "Ronda"
+  page:
+    404:
+      title: "404 No encontrado"
+      p: "No podemos encontrar esta página."
+    home:
+      title: "Inicio"
+      discover: "Descubre %{name}, la aplicación imprescindible para todos los jugadores de Dofus que quieran optimizar el uso de sus hechizos en combate!"
+      h2: "Características principales:"
+      list-title: "Gestión del tiempo de las rondas:"
+      list-features:
+        f1: "Planifica tus acciones con antelación con herramientas de gestión del tiempo de las rondas."
+        f2: "Visualiza la secuencia óptima de turnos para maximizar el impacto de tus hechizos y minimizar el tiempo de inactividad."
+        f3: "Analiza tus hechizos y enemigos para elegir mejor tus acciones."
+    match-list:
+      title: "Lista de partidas"
+      h1: "Crear una partida"
+      button-create-match: "Crear una partida"
+    match:
+      title: "Partida %{name}"
+      h1: "Añadir jugadores"
+      button:
+        add-player: "Añadir un jugador"
+        reset-match: "Reiniciar la partida para añadir jugadores"
+        start-match: "Comenzar la partida"
+        go-to-match: "Ver partida"
+      input-placeholder-player-name: "Nombre del jugador"
+    profile:
+      title: "Perfil"
+      h1: "Hola, %{name}!"
+      p: "Aquí está tu perfil."
+      p-email: "Correo electrónico: %{email}"
+      logout: "Cerrar sesión"
+    signin:
+      title: "Iniciar sesión"
+      h1: "Empieza hoy"
+      p: "Inicia sesión en tu cuenta"
+      signin-button: "Iniciar sesión con %{provider}"
+    start-match:
+      title: "Partida en curso"
+      h1: "Partida en curso"
+      p: "Haz clic en el botón de abajo para comenzar tu partida."
+      button:
+        reset-match: "Reiniciar partida"
+        next-round: "Siguiente ronda"
+        toggle-multiple-mastery: "Activar/Desactivar multi-maestría"
+    admin:
+      title: "Admin"
+      h1: "Lista de usuarios"

@@ -2,6 +2,7 @@ package pageAdmin
 
 import (
 	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
 	"github.com/markbates/goth"
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/shared/components"
@@ -9,8 +10,8 @@ import (
 
 templ UserEnabled(u model.User) {
 	@components.ButtonEnableDisable(
-		"Actif",
-		"Non Actif",
+		i18n.T(ctx, "global.table.enabled"),
+		i18n.T(ctx, "global.table.disabled"),
 		fmt.Sprintf("/admin/user/%d/toggle-enabled/%t", u.Id, !u.Enabled),
 		u.Enabled,
 	)
@@ -32,9 +33,9 @@ templ User(u model.User) {
 				}
 			>
 				if u.IsAdmin {
-					{ "Admin" }
+					{ i18n.T(ctx, "global.table.role-admin") }
 				} else {
-					{ "User" }
+					{ i18n.T(ctx, "global.table.role-user") }
 				}
 			</span>
 		</td>
@@ -48,10 +49,10 @@ templ UserTable(users []model.User) {
 		>
 			<thead>
 				<tr>
-					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">Id</th>
-					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">Email</th>
-					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">Enabled</th>
-					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">Is admin</th>
+					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">{ i18n.T(ctx, "global.table.id") }</th>
+					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">{ i18n.T(ctx, "global.table.email") }</th>
+					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">{ i18n.T(ctx, "global.table.enabled") }</th>
+					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">{ i18n.T(ctx, "global.table.role") }</th>
 				</tr>
 			</thead>
 			<tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -63,10 +64,10 @@ templ UserTable(users []model.User) {
 	</div>
 }
 
-templ UserListPage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, modelUser model.User, users []model.User) {
-	@components.Layout("List users", errors, userGoth, user, navItems) {
+templ UserListPage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, modelUser model.User, users []model.User) {
+	@components.Layout(i18n.T(ctx, "page.admin.title"), errors, userGoth, user, navItems, languages) {
 		<div class="container mx-auto">
-			<h1>List users</h1>
+			<h1>{ i18n.T(ctx, "page.admin.h1") }</h1>
 			@UserTable(users)
 		</div>
 	}

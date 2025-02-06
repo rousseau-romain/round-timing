@@ -2,5 +2,9 @@
     "files.exclude": {
         "**/*_templ.txt": true,
         "**/*_templ.go": true
+    },
+    "emmet.includeLanguages": {
+        "html": "javascript",
+        "templ": "html"
     }
 }

@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/rousseau-romain/round-timing/helper"
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/views/page"
 
@@ -12,7 +13,7 @@ import (
 )
 
 func (h *Handler) HandleLogin(w http.ResponseWriter, r *http.Request) {
-	page.SigninPage(PagesNav, h.error).Render(r.Context(), w)
+	page.SigninPage(PagesNav, h.languages, h.error).Render(r.Context(), w)
 }
 
 func (h *Handler) HandleProviderLogin(w http.ResponseWriter, r *http.Request) {
@@ -20,7 +21,7 @@ func (h *Handler) HandleProviderLogin(w http.ResponseWriter, r *http.Request) {
 	if u, err := gothic.CompleteUserAuth(w, r); err == nil {
 		log.Printf("User already authenticated! %v", u)
 
-		page.SigninPage(PagesNav, h.error).Render(r.Context(), w)
+		page.SigninPage(PagesNav, h.languages, h.error).Render(r.Context(), w)
 	} else {
 		gothic.BeginAuthHandler(w, r)
 	}
@@ -42,9 +43,18 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 	}
 
 	if !userAlreadyExists {
+		lang := helper.GetPreferredLanguage(r)
+
+		id, err := model.GetLanguagesIdByCode(lang)
+		if err != nil {
+			fmt.Fprintln(w, err)
+			return
+		}
+
 		_, err = model.CreateUser(model.UserCreate{
-			Oauth2Id: user.UserID,
-			Email:    user.Email,
+			Oauth2Id:   user.UserID,
+			Email:      user.Email,
+			IdLanguage: id,
 		})
 		if err != nil {
 			fmt.Fprintln(w, err)

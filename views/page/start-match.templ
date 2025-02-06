@@ -2,26 +2,27 @@ package page
 
 import (
 	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
 	"github.com/markbates/goth"
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/shared/components"
 	"strconv"
 )
 
-templ StartMatchPage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell) {
-	@components.Layout("Start match", errors, userGoth, user, navItems) {
-		@MatchPageTable(userGoth, user, errors, navItems, match, players, playersSpells)
+templ StartMatchPage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell) {
+	@components.Layout("Start match", errors, userGoth, user, navItems, languages) {
+		@MatchPageTable(userGoth, user, errors, navItems, languages, match, players, playersSpells)
 	}
 }
 
-templ MatchPageTable(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell) {
+templ MatchPageTable(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell) {
 	<div class="flex justify-center gap-2 testt">
 		<button
 			type="submit"
 			class="inline-block w-full rounded-lg bg-red-600 px-5 py-3 font-medium text-white sm:w-auto"
 			hx-patch={ fmt.Sprintf("/match/%d/reset", match.Id) }
 		>
-			Reset match
+			{ i18n.T(ctx, "page.start-match.button.reset-match") }
 		</button>
 		<button
 			type="submit"
@@ -29,7 +30,7 @@ templ MatchPageTable(userGoth goth.User, user model.User, errors components.Erro
 			hx-get={ fmt.Sprintf("/match/%d/increase-round", match.Id) }
 			hx-target="next table"
 		>
-			Next Round
+			{ i18n.T(ctx, "page.start-match.button.next-round") }
 		</button>
 		<button
 			type="submit"
@@ -41,7 +42,7 @@ templ MatchPageTable(userGoth goth.User, user model.User, errors components.Erro
 			}
 			hx-target="#content"
 		>
-			Toggle multiple mastery
+			{ i18n.T(ctx, "page.start-match.button.toggle-multiple-mastery") }
 		</button>
 	</div>
 	<div class="overflow-x-auto">
@@ -135,7 +136,7 @@ templ PlayerTable(match model.Match, players []model.Player, spells []model.Matc
 	>
 		<thead class="ltr:text-left rtl:text-right">
 			<tr>
-				<th class="whitespace-nowrap  text-left px-4 py-2 font-medium text-gray-900 dark:text-white">Round n° { strconv.Itoa(match.Round) }</th>
+				<th class="whitespace-nowrap  text-left px-4 py-2 font-medium text-gray-900 dark:text-white">{ i18n.T(ctx, "global.round") } n° { strconv.Itoa(match.Round) }</th>
 				<th class="whitespace-nowrap px-4 py-2 font-medium"></th>
 				<th class="whitespace-nowrap px-4 py-2 font-medium"></th>
 			</tr>

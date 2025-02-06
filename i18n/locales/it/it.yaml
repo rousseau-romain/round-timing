@@ -1,0 +1,72 @@
+it:
+  global:
+    header:
+      signin: "Accedi"
+      select-language: "Seleziona lingua"
+    table:
+      id: "Id"
+      email: "Email"
+      enabled: "Attivo"
+      disabled: "Inattivo"
+      role: "Ruolo"
+      role-admin: "Amministratore"
+      role-user: "Utente"
+      name: "Nome"
+      class: "Classe"
+      team: "Squadra"
+      created-at: "Creato il"
+      updated-at: "Aggiornato il"
+    buttons:
+      go-back: "Indietro"
+      see: "Vedi"
+      delete: "Elimina"
+    match: "Partita"
+    round: "Turno"
+  page:
+    404:
+      title: "404 Non trovata"
+      p: "Non riusciamo a trovare questa pagina."
+    home:
+      title: "Home"
+      discover: "Scopri %{name}, l'app indispensabile per tutti i giocatori di Dofus che vogliono ottimizzare l'uso dei loro incantesimi in combattimento!"
+      h2: "Funzionalità principali:"
+      list-title: "Gestione del tempo dei turni:"
+      list-features:
+        f1: "Pianifica le tue azioni in anticipo con strumenti di gestione del tempo dei turni."
+        f2: "Visualizza la sequenza ottimale dei turni per massimizzare l'impatto dei tuoi incantesimi e ridurre al minimo i tempi morti."
+        f3: "Analizza i tuoi incantesimi e i tuoi nemici per scegliere meglio le tue azioni."
+    match-list:
+      title: "Elenco delle partite"
+      h1: "Crea una partita"
+      button-create-match: "Crea una partita"
+    match:
+      title: "Partita %{name}"
+      h1: "Aggiungi giocatori"
+      button:
+        add-player: "Aggiungi un giocatore"
+        reset-match: "Reimposta la partita per aggiungere giocatori"
+        start-match: "Inizia la partita"
+        go-to-match: "Vedi la partita"
+      input-placeholder-player-name: "Nome del giocatore"
+    profile:
+      title: "Profilo"
+      h1: "Ciao, %{name}!"
+      p: "Ecco il tuo profilo."
+      p-email: "Email: %{email}"
+      logout: "Disconnetti"
+    signin:
+      title: "Accedi"
+      h1: "Inizia oggi"
+      p: "Accedi al tuo account"
+      signin-button: "Accedi con %{provider}"
+    start-match:
+      title: "Partita in corso"
+      h1: "Partita in corso"
+      p: "Clicca sul pulsante qui sotto per iniziare la tua partita."
+      button:
+        reset-match: "Reimposta la partita"
+        next-round: "Passa al turno successivo"
+        toggle-multiple-mastery: "Attiva/Disattiva multi-maestria"
+    admin:
+      title: "Admin"
+      h1: "Elenco degli utenti"

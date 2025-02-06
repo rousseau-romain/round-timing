@@ -12,7 +12,7 @@ live/go:
 	@go run github.com/air-verse/air@v1.52.3 \
 		--build.cmd "go build -o tmp/main" --build.bin "tmp/main" --build.delay "1000" \
 		--build.exclude_dir "node_modules,tmp,vendor" \
-		--build.include_ext "go" \
+		--build.include_ext "go,yaml" \
 		--build.stop_on_error "false" \
 		--misc.clean_on_exit true
 
@@ -38,7 +38,7 @@ install:
 	npm install
 
 	@echo 'add "go.goroot:"$$GOROOT" to settings.json VsCode'
-	@echo 'after run "make live' 
+	@echo 'after run "make db_init' 
 
 
 

@@ -21,7 +21,7 @@ type Spell struct {
 	IsEndingCaster bool   `json:"is_ending_caster"`
 }
 
-func GetSpellsByIdCLass(idClass []int, idsToExclude []int) ([]Spell, error) {
+func GetSpellsByIdClass(idLanguage int, idClass []int, idsToExclude []int) ([]Spell, error) {
 	var strIdClass []string
 	for _, id := range idClass {
 		strIdClass = append(strIdClass, strconv.Itoa(id))
@@ -29,28 +29,28 @@ func GetSpellsByIdCLass(idClass []int, idsToExclude []int) ([]Spell, error) {
 
 	sql := `
 		SELECT
-			id,
-			` + helper.GetUrlImageSpellClause("id") + ` AS url_image,
-			id_class,
-			name,
-			delay,
-			is_global,
-			is_team,
-			is_self,
-			is_ending_caster
-		FROM spell
+			s.id,
+			` + helper.GetUrlImageSpellClause("s.id") + ` AS url_image,
+			s.id_class,
+			st.name,
+			s.delay,
+			s.is_global,
+			s.is_team,
+			s.is_self,
+			s.is_ending_caster
+		FROM spell s
+		JOIN spell_translation st ON st.id_spell = s.id AND st.id_language = ?
 		WHERE id_class IN (` + strings.Join(strIdClass, ",") + `)
 	`
 
 	if len(idsToExclude) > 0 {
 		var strIdsToExclude []string
 		for _, id := range idsToExclude {
-			strIdsToExclude = append(strIdClass, strconv.Itoa(id))
+			strIdsToExclude = append(strIdsToExclude, strconv.Itoa(id))
 		}
-		sql = sql + fmt.Sprintf("AND id NOT IN (%s)", strings.Join(strIdsToExclude, ","))
+		sql = sql + fmt.Sprintf("AND s.id NOT IN (%s)", strings.Join(strIdsToExclude, ","))
 	}
-
-	rows, err := db.Query(sql)
+	rows, err := db.Query(sql, idLanguage)
 
 	if err != nil {
 		log.Println(err)
