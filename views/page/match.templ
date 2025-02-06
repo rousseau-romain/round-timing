@@ -2,6 +2,7 @@ package page
 
 import (
 	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
 	"github.com/markbates/goth"
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/shared/components"
@@ -23,7 +24,7 @@ templ TeamPlayer(p model.Player, m model.Match) {
 				href={ templ.SafeURL(fmt.Sprintf("/player/%d", p.Id)) }
 				class="inline-block rounded bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700"
 			>
-				View
+				{ i18n.T(ctx, "global.buttons.see") }
 			</a>
 		</td>
 		<td class="whitespace-nowrap px-4 py-2">
@@ -32,13 +33,11 @@ templ TeamPlayer(p model.Player, m model.Match) {
 				hx-on::after-request="setTimeout(performAnimation, 750)"
 				class="inline-block rounded bg-red-600 px-4 py-2 text-xs font-medium text-white hover:bg-red-700"
 			>
-				Delete
+				{ i18n.T(ctx, "global.buttons.delete") }
 			</button>
 		</td>
 	</tr>
 }
-
-var thList = []string{"Name", "Class", "Team", "", ""}
 
 templ TeamPlayerTable(players []model.Player, match model.Match) {
 	<div class="bg-red-200"></div>
@@ -59,7 +58,7 @@ templ TeamPlayerTable(players []model.Player, match model.Match) {
 		>
 			<thead class="ltr:text-left rtl:text-right">
 				<tr>
-					for _, th := range thList {
+					for _, th := range []string{i18n.T(ctx, "global.table.name"), i18n.T(ctx, "global.table.class"), i18n.T(ctx, "global.table.team"), "", ""} {
 						<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">
 							{ th }
 						</th>
@@ -80,17 +79,17 @@ templ TeamPlayerTable(players []model.Player, match model.Match) {
 	</div>
 }
 
-templ TeamPlayerListPage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, modelUser model.User, match model.Match, teams []model.Team, classes []model.Class, players []model.Player) {
-	@components.Layout("Create match", errors, userGoth, user, navItems) {
+templ TeamPlayerListPage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, modelUser model.User, match model.Match, teams []model.Team, classes []model.Class, players []model.Player) {
+	@components.Layout("Create match", errors, userGoth, user, navItems, languages) {
 		<div class="container mx-auto">
-			<h1>Add classes</h1>
+			<h1>{ i18n.T(ctx, "page.match.h1") }</h1>
 			if match.Round > 0 {
 				<button
 					type="submit"
 					class="inline-block w-full rounded-lg bg-red-600 px-5 py-3 font-medium text-white sm:w-auto"
 					hx-patch={ fmt.Sprintf("/match/%d/reset", match.Id) }
 				>
-					Reset match to add players
+					{ i18n.T(ctx, "page.match.button.reset-match") }
 				</button>
 			} else {
 				<form
@@ -107,6 +106,7 @@ templ TeamPlayerListPage(userGoth goth.User, user model.User, errors components.
 							required
 							name="idTeam"
 							id="team"
+							onchange="updateInput(this)"
 						>
 							for _, team := range teams {
 								<option
@@ -118,12 +118,12 @@ templ TeamPlayerListPage(userGoth goth.User, user model.User, errors components.
 						</select>
 					</div>
 					<div>
-						<label class="sr-only" for="idClass">Class Team</label>
+						<label class="sr-only" for="class">Class Team</label>
 						<select
 							class="w-full rounded-lg border-gray-200 p-3 text-sm"
 							required
 							name="idClass"
-							id="idClass"
+							id="class"
 							onchange="updateInput(this)"
 						>
 							for _, class := range classes {
@@ -135,7 +135,7 @@ templ TeamPlayerListPage(userGoth goth.User, user model.User, errors components.
 						<label class="sr-only" for="name">Name</label>
 						<input
 							class="w-full rounded-lg border-gray-200 p-3 text-sm"
-							placeholder="Player Name"
+							placeholder={ i18n.T(ctx, "page.match.input-placeholder-player-name") }
 							required
 							type="text"
 							name="name"
@@ -145,12 +145,12 @@ templ TeamPlayerListPage(userGoth goth.User, user model.User, errors components.
 					<script>
 						function updateInput(option){
 							const inputElement = document.getElementById("name")
-							const selectorColor = document.getElementById("team")
-							const textOption = option.options[option.selectedIndex].text
-							const colorTeam = selectorColor.options[selectorColor.selectedIndex].text
-
+							const selectorClass = document.getElementById("class")
+							const selectorTeam = document.getElementById("team")
+							const nameClass = selectorClass.options[selectorClass.selectedIndex].text
+							const colorTeam = selectorTeam.options[selectorTeam.selectedIndex].text
 							// if (inputElement.value.trim() === "") {
-								inputElement.value = `${textOption} - ${colorTeam}`
+								inputElement.value = `${nameClass} - ${colorTeam}`
 							// }
 
 						}
@@ -159,7 +159,7 @@ templ TeamPlayerListPage(userGoth goth.User, user model.User, errors components.
 						type="submit"
 						class="inline-block w-full rounded-lg bg-black px-5 py-3 font-medium text-white sm:w-auto"
 					>
-						Add classes
+						{ i18n.T(ctx, "page.match.button.add-player") }
 					</button>
 				</form>
 			}
@@ -169,7 +169,11 @@ templ TeamPlayerListPage(userGoth goth.User, user model.User, errors components.
 				href={ templ.SafeURL(fmt.Sprintf("/match/%d/start", match.Id)) }
 				class="w-full rounded-lg bg-black px-5 py-3 font-medium text-white sm:w-auto hidden"
 			>
-				Start match
+				if match.Round > 0 {
+					{ i18n.T(ctx, "page.match.button.go-to-match") }
+				} else {
+					{ i18n.T(ctx, "page.match.button.start-match") }
+				}
 			</a>
 			<script>
 				function performAnimation() {

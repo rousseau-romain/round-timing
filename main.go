@@ -1,14 +1,20 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/rousseau-romain/round-timing/config"
 	"github.com/rousseau-romain/round-timing/handlers"
+	"github.com/rousseau-romain/round-timing/helper"
+	"github.com/rousseau-romain/round-timing/i18n/locales"
+	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/service/auth"
 
 	"github.com/gorilla/mux"
+	"github.com/invopop/ctxi18n"
 )
 
 func main() {
@@ -17,7 +23,39 @@ func main() {
 	}
 }
 
+func languageMiddleware(handler http.Handler, auth *auth.AuthService) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		session, err := auth.GetSessionUser(r)
+		var lang string
+		if err != nil {
+			lang = helper.GetPreferredLanguage(r)
+		} else {
+			user, err := model.GetUserByOauth2Id(session.UserID)
+			if user.Id != 0 {
+				lang, err = model.GetLanguageLocaleById(user.IdLanguage)
+				if err != nil {
+					log.Println(err)
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+			}
+		}
+
+		ctx, err := ctxi18n.WithLocale(r.Context(), lang)
+		if err != nil {
+			log.Printf("error setting locale: %v", err)
+			http.Error(w, "error setting locale", http.StatusBadRequest)
+			return
+		}
+		handler.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
 func run() error {
+	if err := ctxi18n.Load(locales.Content); err != nil {
+		log.Printf("error loading locales: %v", err)
+	}
+
 	sessionStore := auth.NewCookieStore(auth.SessionOptions{
 		CookiesKey: config.COOKIES_AUTH_SECRET,
 		MaxAge:     config.COOKIES_AUTH_AGE_IN_SECONDS,
@@ -29,6 +67,12 @@ func run() error {
 	r := mux.NewRouter()
 
 	handler := handlers.New(authService)
+
+	keys := make([]string, 0, len(helper.SupportedLanguages))
+	for k := range helper.SupportedLanguages {
+		keys = append(keys, k)
+	}
+	regexCode := strings.Join(keys, "|")
 
 	// PUBLIC ROUTE
 	r.PathPrefix("/public/").Handler(http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
@@ -50,6 +94,7 @@ func run() error {
 	r.Handle("/match/{idMatch:[0-9]+}/player/{idPlayer:[0-9]+}", auth.RequireAuthAndHisMatch(handler.HandlersDeletePlayer, authService)).Methods("DELETE")
 
 	r.Handle("/profile", auth.RequireAuth(handler.HandlersProfile, authService)).Methods("GET")
+	r.Handle(fmt.Sprintf("/user/{idUser:[0-9]+}/locale/{code:(?:%s)}", regexCode), auth.RequireAuthAndHisAccount(handler.HandlersPlayerLanguage, authService)).Methods("PATCH")
 
 	r.Handle("/signin", auth.RequireNotAuth(handler.HandleLogin, authService)).Methods("GET")
 	r.HandleFunc("/auth/{provider}", handler.HandleProviderLogin).Methods("GET")
@@ -60,5 +105,6 @@ func run() error {
 	r.Handle("/admin/user/{idUser:[0-9]+}/toggle-enabled/{toggleEnabled:(?:true|false)}", auth.RequireAuthAndAdmin(handler.HandlersUserEnabled, authService)).Methods("GET")
 
 	r.NotFoundHandler = http.HandlerFunc(handler.HandlersNotFound)
-	return http.ListenAndServe(":2468", r)
+
+	return http.ListenAndServe(":2468", languageMiddleware(r, authService))
 }

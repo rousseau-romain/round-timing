@@ -1,3 +1,3 @@
-DROP TABLE team;
-DROP TABLE color_team;
-DROP TABLE player;
+DROP TABLE IF EXISTS team;
+DROP TABLE IF EXISTS color_team;
+DROP TABLE IF EXISTS player;

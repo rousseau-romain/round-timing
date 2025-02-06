@@ -1,6 +1,8 @@
 {
     "recommendations": [
         "golang.go",
-        "a-h.templ"
+        "a-h.templ",
+        "redhat.vscode-yaml",
+        "jtcontreras90.yaml-path-extractor"
     ]
 }

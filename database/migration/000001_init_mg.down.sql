@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS mydatabase.user;
+DROP TABLE IF EXISTS user;

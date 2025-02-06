@@ -1,1 +1,1 @@
-DROP TABLE class;
+DROP TABLE IF EXISTS class;

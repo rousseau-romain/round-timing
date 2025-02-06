@@ -1,8 +1,11 @@
 package components
 
 import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
 	"github.com/markbates/goth"
 	"github.com/rousseau-romain/round-timing/model"
+	"strconv"
 )
 
 var isDebug = false
@@ -12,7 +15,7 @@ type Error struct {
 	Messages []string
 }
 
-templ Layout(title string, errors Error, userGoth goth.User, user model.User, navItems []NavItem) {
+templ Layout(title string, errors Error, userGoth goth.User, user model.User, navItems []NavItem, languages []model.Language) {
 	<html>
 		<head>
 			<title>Round Timing - { title }</title>
@@ -20,14 +23,14 @@ templ Layout(title string, errors Error, userGoth goth.User, user model.User, na
 			<link rel="stylesheet" type="text/css" href="/public/tailwind.css"/>
 			<script src="/public/script/htmx1.9.11.js"></script>
 			if isDebug {
-				<script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/debug.js"></script>
+				<script src="/public/script/htmx1.9.11-debug.js"></script>
 			}
 		</head>
 		<body>
 			if isDebug {
 				<button class="border border-red-600 bg-red-300 text-red-600 top-0 right-0 absolute">Debug MOD</button>
 			}
-			@Nav(userGoth, user, navItems)
+			@Nav(userGoth, user, navItems, languages)
 			<div id="content">
 				@ErrorMessages(errors)
 				{ children... }
@@ -40,7 +43,7 @@ type NavItem struct {
 	Name, Url string
 }
 
-templ Nav(userGoth goth.User, user model.User, navItems []NavItem) {
+templ Nav(userGoth goth.User, user model.User, navItems []NavItem, languages []model.Language) {
 	<header class="bg-white dark:bg-gray-900">
 		<div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
 			<div class="flex h-16 items-center justify-between">
@@ -79,12 +82,24 @@ templ Nav(userGoth goth.User, user model.User, navItems []NavItem) {
 					<div class="sm:flex sm:gap-4">
 						if userGoth.Name != "" {
 							<a href="/profile"><img class="w-10 h-10 p-1 rounded-full" src={ userGoth.AvatarURL } alt="Bordered avatar"/></a>
+							<img alt="flag" id="header-select-language" class="cursor-pointer w-10 h-8" src={ "/public/img/flag/" + strconv.Itoa(user.IdLanguage) + ".svg" }/>
+							@PopinSelectLanguage(user, languages)
+							<script>
+								document.querySelector("#header-select-language").addEventListener("click", () => {
+									document.querySelector("#popin-language").classList.toggle("hidden");
+								});
+								document.querySelector("#popin-language").addEventListener("click", () => {
+									document.querySelector("#popin-language").classList.toggle("hidden");
+									e.stopPropagation();
+								});
+								document.querySelector("#popin-language div").addEventListener("click", (e) => e.stopPropagation());
+							</script>
 						} else {
 							<a
 								class="rounded-md bg-sky-600 px-5 py-2.5 text-sm font-medium text-white shadow dark:hover:bg-sky-500"
 								href="/signin"
 							>
-								Signin
+								{ i18n.T(ctx, "global.header.signin") }
 							</a>
 							<div class="relative w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
 								<svg class="absolute w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
@@ -163,4 +178,27 @@ templ ErrorMessages(errors Error) {
 			}
 		</div>
 	}
+}
+
+templ PopinSelectLanguage(user model.User, languages []model.Language) {
+	<div id="popin-language" class="h-screen w-screen absolute top-0 right-0 bg-gray-800 bg-opacity-40 cursor-pointer place-items-center justify-center flex hidden">
+		<section class="w-max h-max rounded-3xl shadow-2xl bg-slate-50">
+			<div class="p-8 text-center">
+				<h2 class="mt-6 text-3xl font-bold">{ i18n.T(ctx, "global.header.select-language") }</h2>
+				<ul>
+					for _, l := range languages {
+						<li>
+							<button
+								type="submit"
+								class="inline-block w-full rounded-lg bg-transparent sm:w-auto border"
+								hx-patch={ fmt.Sprintf("/user/%d/locale/%s", user.Id, l.Locale) }
+							>
+								<img alt="flag" id="header-select-language" class="cursor-pointer w-20" src={ fmt.Sprintf("/public/img/flag/%d.svg", l.Id) }/>
+							</button>
+						</li>
+					}
+				</ul>
+			</div>
+		</section>
+	</div>
 }

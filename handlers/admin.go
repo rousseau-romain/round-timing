@@ -21,7 +21,7 @@ func (h *Handler) HandlersListUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pageAdmin.UserListPage(userOauth2, user, h.error, PagesNav, user, users).Render(r.Context(), w)
+	pageAdmin.UserListPage(userOauth2, user, h.error, PagesNav, h.languages, user, users).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersUserEnabled(w http.ResponseWriter, r *http.Request) {

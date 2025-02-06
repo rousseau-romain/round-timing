@@ -31,6 +31,7 @@ INSERT INTO spell (id_class, name, delay) VALUES
 
 INSERT INTO spell (id_class, name, delay) VALUES 
 (2, "Cri de l'Ours", 2),
+(2, "Deplacement Felin", 5),
 (2, "Bénédiction Animale ", 6),
 (2, "Piqûre Motivante", 3),
 (2, "Crapaud", 3),

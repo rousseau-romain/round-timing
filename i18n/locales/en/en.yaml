@@ -1,0 +1,72 @@
+en:
+  global:
+    header:
+      signin: "Sign in"
+      select-language: "Select language"
+    table:
+      id: "Id"
+      email: "Email"
+      enabled: "Active"
+      disabled: "Inactive"
+      role: "Role"
+      role-admin: "Admin"
+      role-user: "User"
+      name: "Name"
+      class: "Class"
+      team: "Team"
+      created-at: "Created at"
+      updated-at: "Updated at"
+    buttons:
+      go-back: "Back"
+      see: "View"
+      delete: "Delete"
+    match: "Match"
+    round: "Round"
+  page:
+    404:
+      title: "404 Not Found"
+      p: "We can't find this page."
+    home:
+      title: "Home"
+      discover: "Discover %{name}, the must-have app for all Dofus players looking to optimize their spell usage in combat!"
+      h2: "Main features:"
+      list-title: "Round timing management:"
+      list-features:
+        f1: "Plan your actions in advance with round timing management tools."
+        f2: "Visualize the optimal turn sequence to maximize the impact of your spells and minimize downtime."
+        f3: "Analyze your spells and enemies to make better action choices."
+    match-list:
+      title: "Match list"
+      h1: "Create a match"
+      button-create-match: "Create a match"
+    match:
+      title: "Match %{name}"
+      h1: "Add players"
+      button:
+        add-player: "Add a player"
+        reset-match: "Reset the match to add players"
+        start-match: "Start match"
+        go-to-match: "View match"
+      input-placeholder-player-name: "Player name"
+    profile:
+      title: "Profile"
+      h1: "Hello, %{name}!"
+      p: "Here is your profile."
+      p-email: "Email: %{email}"
+      logout: "Log out"
+    signin:
+      title: "Sign in"
+      h1: "Start today"
+      p: "Sign in to your account"
+      signin-button: "Sign in with %{provider}"
+    start-match:
+      title: "Ongoing match"
+      h1: "Ongoing match"
+      p: "Click the button below to start your match."
+      button:
+        reset-match: "Reset match"
+        next-round: "Next round"
+        toggle-multiple-mastery: "Enable/Disable multi-mastery"
+    admin:
+      title: "Admin"
+      h1: "User list"

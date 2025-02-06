@@ -29,28 +29,28 @@ type PlayerUpdate struct {
 	Name    *string
 }
 
-func GetPlayersByIdMatch(idMatch int) ([]Player, error) {
+func GetPlayersByIdMatch(idTranslation int, idMatch int) ([]Player, error) {
 	sql := `
 		SELECT
 			p.id,
 			p.id_team,
 			p.name,
 			p.id_class,
-			c.name AS class_name,
+			cn.name AS class_name,
 			` + helper.GetUrlImageClassClause("c.id") + ` AS url_image,
 			t.id AS id_team,
 			t.name AS team_name,
 			ct.name AS color_team
 		FROM player AS p
 		JOIN class AS c ON c.id = p.id_class
+		JOIN class_translation AS cn ON cn.id_class = c.id AND cn.id_language = ?
 		JOIN team AS t ON t.id = p.id_team
 		JOIN color_team AS ct ON ct.id = t.id_color_team
 		JOIN ` + "`match`" + ` AS m ON m.id = t.id_match
 		WHERE m.id = ? 
 	`
 
-	rows, err := db.Query(sql, idMatch)
-
+	rows, err := db.Query(sql, idTranslation, idMatch)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -81,14 +81,14 @@ func GetPlayersByIdMatch(idMatch int) ([]Player, error) {
 	return players, err
 }
 
-func GetPlayer(idPlayer int) (Player, error) {
+func GetPlayer(idLanguage int, idPlayer int) (Player, error) {
 	sql := `
 		SELECT 
 			p.id,
 			p.id_team,
 			p.name,
 			p.id_class,
-			c.name AS class_name,
+			cn.name AS class_name,
 			` + helper.GetUrlImageClassClause("c.id") + ` AS url_image,
 			t.id AS id_team,
 			t.name AS team_name,
@@ -97,11 +97,12 @@ func GetPlayer(idPlayer int) (Player, error) {
 		JOIN team AS t ON t.id = p.id_team
 		JOIN color_team AS ct ON ct.id = t.id_color_team
 		JOIN class AS c ON c.id = p.id_class
+		JOIN class_translation AS cn ON cn.id_class = c.id AND cn.id_language = ?
 		WHERE p.id = ?
 	`
 
 	var player Player
-	err := db.QueryRow(sql, idPlayer).Scan(
+	err := db.QueryRow(sql, idLanguage, idPlayer).Scan(
 		&player.Id,
 		&player.Idteam,
 		&player.Name,

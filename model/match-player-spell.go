@@ -1,8 +1,8 @@
 package model
 
 import (
+	"fmt"
 	"log"
-	"strings"
 
 	"github.com/rousseau-romain/round-timing/helper"
 )
@@ -28,7 +28,7 @@ type MatchPlayerSpellUpdate struct {
 	RoundBeforeRecovery *string
 }
 
-func GetSpellPlayerByIdSpellsPlayers(idSpellPlayer int) (MatchPlayerSpell, error) {
+func GetSpellPlayerByIdSpellsPlayers(idLanguage int, idSpellPlayer int) (MatchPlayerSpell, error) {
 	matchSpell := MatchPlayerSpell{}
 
 	sql := `
@@ -37,7 +37,7 @@ func GetSpellPlayerByIdSpellsPlayers(idSpellPlayer int) (MatchPlayerSpell, error
 			mps.match_id,
 			mps.player_id,
 			s.id,
-			s.name,
+			st.name,
 			s.delay,
 			` + helper.GetUrlImageSpellClause("s.id") + ` AS url_image,
 			mps.round_before_recovery,
@@ -45,10 +45,11 @@ func GetSpellPlayerByIdSpellsPlayers(idSpellPlayer int) (MatchPlayerSpell, error
 			mps.updated_at
 		FROM match_player_spell AS mps
 		JOIN spell AS s ON s.id = mps.spell_id
+		JOIN spell_translation AS st ON st.id_spell = s.id	 AND st.id_language = ?
 		WHERE mps.id = ?
 	`
 
-	rows := db.QueryRow(sql, idSpellPlayer)
+	rows := db.QueryRow(sql, idLanguage, idSpellPlayer)
 
 	if rows.Err() != nil {
 		return matchSpell, rows.Err()
@@ -69,10 +70,14 @@ func GetSpellPlayerByIdSpellsPlayers(idSpellPlayer int) (MatchPlayerSpell, error
 	return matchSpell, err
 }
 
-func GetSpellsPlayersByIdMatch(idMatch int) ([]MatchPlayerSpell, error) {
-	// maitrise marteau id 138
-	masteryIdSpells := []string{"134", "135", "136", "137", "139", "140", "141", "142"}
+func GetSpellsPlayersByIdMatch(idLanguage, idMatch int) ([]MatchPlayerSpell, error) {
 	matchSpells := []MatchPlayerSpell{}
+	masteryClause := "(m.multiple_mastery_enabled = 0 AND (s.id NOT IN ("
+	for _, id := range helper.MasteryIdSpells {
+		masteryClause += fmt.Sprintf("%d, ", id)
+	}
+	masteryClause = masteryClause[:len(masteryClause)-2]
+	masteryClause += ")))"
 
 	sql := `
 		SELECT
@@ -80,7 +85,7 @@ func GetSpellsPlayersByIdMatch(idMatch int) ([]MatchPlayerSpell, error) {
 			mps.match_id,
 			mps.player_id,
 			s.id,
-			s.name,
+			st.name,
 			s.delay,
 			` + helper.GetUrlImageSpellClause("s.id") + ` AS url_image,
 			mps.round_before_recovery,
@@ -88,13 +93,14 @@ func GetSpellsPlayersByIdMatch(idMatch int) ([]MatchPlayerSpell, error) {
 			mps.updated_at
 		FROM match_player_spell AS mps
 		JOIN spell AS s ON s.id = mps.spell_id
+		JOIN spell_translation AS st ON st.id_spell = s.id AND st.id_language = ?
 		JOIN ` + "`match`" + ` AS m ON m.id = mps.match_id 
 		WHERE match_id = ?
-		AND (m.multiple_mastery_enabled = 0 AND (s.id NOT IN (` + strings.Join(masteryIdSpells, ",") + `)))
+		AND ` + masteryClause + `
 		OR (m.multiple_mastery_enabled = 1)
 	`
 	// why can't use ?
-	rows, err := db.Query(sql, idMatch)
+	rows, err := db.Query(sql, idLanguage, idMatch)
 
 	if err != nil {
 		log.Println(err)
