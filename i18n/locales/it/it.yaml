@@ -63,6 +63,7 @@ it:
       title: "Partita in corso"
       h1: "Partita in corso"
       p: "Clicca sul pulsante qui sotto per iniziare la tua partita."
+      delay-between-use: "Ritardo tra l'uso"
       button:
         reset-match: "Reimposta la partita"
         next-round: "Passa al turno successivo"

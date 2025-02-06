@@ -63,6 +63,7 @@ en:
       title: "Ongoing match"
       h1: "Ongoing match"
       p: "Click the button below to start your match."
+      delay-between-use: "Delay between use"
       button:
         reset-match: "Reset match"
         next-round: "Next round"
