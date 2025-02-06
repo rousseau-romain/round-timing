@@ -65,7 +65,7 @@ fr:
       p: "Cliquez sur le bouton ci-dessous pour commencer votre match."
       button:
         reset-match: "Reinitialiser le match"
-        next-round: "Passer au round suivant"
+        next-round: "Passer au tour suivant"
         toggle-multiple-mastery: "Activer/Desactiver le multi-maitrise"
     admin:
       title: "Admin"
