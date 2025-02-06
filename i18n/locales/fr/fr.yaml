@@ -63,6 +63,7 @@ fr:
       title: "Match en cours"
       h1: "Match en cours"
       p: "Cliquez sur le bouton ci-dessous pour commencer votre match."
+      delay-between-use: "Delai entre utilisation"
       button:
         reset-match: "Reinitialiser le match"
         next-round: "Passer au tour suivant"

@@ -63,6 +63,7 @@ pt:
       title: "Partida em andamento"
       h1: "Partida em andamento"
       p: "Clique no botão abaixo para começar sua partida."
+      delay-between-use: "Atraso entre uso"
       button:
         reset-match: "Reiniciar partida"
         next-round: "Próxima rodada"
