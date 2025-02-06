@@ -6,6 +6,7 @@ import (
 	"github.com/markbates/goth"
 	"github.com/rousseau-romain/round-timing/model"
 	"strconv"
+	"time"
 )
 
 var isDebug = false
@@ -20,7 +21,7 @@ templ Layout(title string, errors Error, userGoth goth.User, user model.User, na
 		<head>
 			<title>Round Timing - { title }</title>
 			<link rel="icon" type="image/svg+xml" href="/public/img/favicon.svg"/>
-			<link rel="stylesheet" type="text/css" href="/public/tailwind.css"/>
+			<link rel="stylesheet" type="text/css" href={ fmt.Sprintf("/public/tailwind.css?build=%s", strconv.FormatInt(time.Now().Unix(), 10)) }/>
 			<script src="/public/script/htmx1.9.11.js"></script>
 			if isDebug {
 				<script src="/public/script/htmx1.9.11-debug.js"></script>
