@@ -182,7 +182,7 @@ templ ErrorMessages(errors Error) {
 
 templ PopinSelectLanguage(user model.User, languages []model.Language) {
 	<div id="popin-language" class="h-screen w-screen absolute top-0 right-0 bg-gray-800 bg-opacity-40 cursor-pointer place-items-center justify-center flex hidden">
-		<section class="w-max h-max rounded-3xl shadow-2xl bg-slate-50">
+		<section class="w-max h-max rounded-3xl shadow-2xl bg-slate-50 z-20">
 			<div class="p-8 text-center">
 				<h2 class="mt-6 text-3xl font-bold">{ i18n.T(ctx, "global.header.select-language") }</h2>
 				<ul>
