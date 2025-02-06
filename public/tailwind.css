@@ -998,6 +998,10 @@ footer a:hover {
   top: 0px;
 }
 
+.z-20 {
+  z-index: 20;
+}
+
 .m-auto {
   margin: auto;
 }
