@@ -6,5 +6,11 @@
     "emmet.includeLanguages": {
         "html": "javascript",
         "templ": "html"
+    },
+    "tailwindCSS.includeLanguages": {
+        "templ": "html",
+    },
+    "editor.quickSuggestions": {
+        "strings": true
     }
 }

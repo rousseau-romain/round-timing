@@ -10,23 +10,23 @@ import (
 
 templ TeamPlayer(p model.Player, m model.Match) {
 	<tr class={ "bg-" + p.Team.Color + "-200" }>
-		<td class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">
+		<td class="text-center whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">
 			{ p.Name }
 		</td>
 		<td class="whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">
 			<img onclick="handleClickImage(this)" alt={ p.Class.Name } src={ p.Class.UrlImage + "F.svg" } class="h-8 m-auto img-class"/>
 		</td>
-		<td class={ "whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200" }>
+		<td class="text-center whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">
 			{ p.Team.Name }
 		</td>
-		<td class="whitespace-nowrap px-4 py-2">
-			<a
-				href={ templ.SafeURL(fmt.Sprintf("/player/%d", p.Id)) }
-				class="inline-block rounded bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700"
-			>
-				{ i18n.T(ctx, "global.buttons.see") }
-			</a>
-		</td>
+		// <td class="whitespace-nowrap px-4 py-2">
+		// 	<a
+		// 		href={ templ.SafeURL(fmt.Sprintf("/player/%d", p.Id)) }
+		// 		class="inline-block rounded bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700"
+		// 	>
+		// 		{ i18n.T(ctx, "global.buttons.see") }
+		// 	</a>
+		// </td>
 		<td class="whitespace-nowrap px-4 py-2">
 			<button
 				hx-delete={ fmt.Sprintf("/match/%d/player/%d", m.Id, p.Id) }
@@ -58,7 +58,7 @@ templ TeamPlayerTable(players []model.Player, match model.Match) {
 		>
 			<thead class="ltr:text-left rtl:text-right">
 				<tr>
-					for _, th := range []string{i18n.T(ctx, "global.table.name"), i18n.T(ctx, "global.table.class"), i18n.T(ctx, "global.table.team"), "", ""} {
+					for _, th := range []string{i18n.T(ctx, "global.table.name"), i18n.T(ctx, "global.table.class"), i18n.T(ctx, "global.table.team"), ""} {
 						<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">
 							{ th }
 						</th>
