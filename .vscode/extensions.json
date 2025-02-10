@@ -3,6 +3,7 @@
         "golang.go",
         "a-h.templ",
         "redhat.vscode-yaml",
-        "jtcontreras90.yaml-path-extractor"
+        "jtcontreras90.yaml-path-extractor",
+        "bradlc.vscode-tailwindcss"
     ]
 }
