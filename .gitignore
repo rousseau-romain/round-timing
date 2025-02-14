@@ -1,6 +1,8 @@
+database/migration/output.sql
 *_templ.txt
 *_templ.go
 tmp
 .env
+.env.prod
 vendor
 node_modules

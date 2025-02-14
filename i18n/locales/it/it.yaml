@@ -39,6 +39,7 @@ it:
       title: "Elenco delle partite"
       h1: "Crea una partita"
       button-create-match: "Crea una partita"
+      max-match: "Hai raggiunto il numero massimo di partite, elimina una per crearne una nuova."
     match:
       title: "Partita %{name}"
       h1: "Aggiungi giocatori"
