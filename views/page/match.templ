@@ -80,7 +80,7 @@ templ TeamPlayerTable(players []model.Player, match model.Match) {
 }
 
 templ TeamPlayerListPage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, modelUser model.User, match model.Match, teams []model.Team, classes []model.Class, players []model.Player) {
-	@components.Layout("Create match", errors, userGoth, user, navItems, languages) {
+	@components.Layout(i18n.T(ctx, "page.match.title", i18n.M{"name": match.Name}), errors, userGoth, user, navItems, languages) {
 		<div class="container mx-auto">
 			<h1>{ i18n.T(ctx, "page.match.h1") }</h1>
 			if match.Round > 0 {

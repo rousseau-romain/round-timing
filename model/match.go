@@ -98,6 +98,27 @@ func GetLastMatchByUserId(idUser int) (Match, error) {
 	return match, err
 }
 
+func GetNumberOfMatchByUserId(idUser int) (int, error) {
+	var numberOfMatch = 0
+
+	sql := `
+		SELECT
+			COUNT(*) AS number
+		FROM ` + "`match`" + `
+		WHERE id_user = ?
+	`
+	rows := db.QueryRow(sql, idUser)
+	if rows.Err() != nil {
+		return numberOfMatch, rows.Err()
+	}
+	err := rows.Scan(&numberOfMatch)
+	if err != nil && err.Error() == "sql: no rows in result set" {
+		return numberOfMatch, nil
+	}
+
+	return numberOfMatch, err
+}
+
 func CreateMatch(m MatchCreate) (int, error) {
 	sb := sqlbuilder.NewInsertBuilder()
 	sb.InsertInto("`match`").Cols("id_user", "name").Values(m.IdUser, m.Name)

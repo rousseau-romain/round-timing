@@ -52,7 +52,6 @@ templ MatchTable(matchs []model.Match) {
 				</tr>
 			</thead>
 			<tbody
-				hx-confirm="Are you sure?"
 				hx-swap="outerHTML swap:0.5s"
 				hx-target="closest tr"
 				class="divide-y divide-gray-200 dark:divide-gray-700"
@@ -74,6 +73,7 @@ templ MatchListPage(userGoth goth.User, user model.User, errors components.Error
 				hx-post="/match"
 				hx-swap="beforebegin"
 				hx-target="next tbody"
+				hx-target-error="#content"
 			>
 				<div>
 					<label class="sr-only" for="name">{ i18n.T(ctx, "global.table.name") }</label>

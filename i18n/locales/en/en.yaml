@@ -39,6 +39,7 @@ en:
       title: "Match list"
       h1: "Create a match"
       button-create-match: "Create a match"
+      max-match: "You have reached the maximum number of matches, delete one to create a new one."
     match:
       title: "Match %{name}"
       h1: "Add players"

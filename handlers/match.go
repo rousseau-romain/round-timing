@@ -4,12 +4,17 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
+	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/shared/components"
 	"github.com/rousseau-romain/round-timing/views/page"
 
 	"github.com/gorilla/mux"
 )
+
+var NumberOfMatchMax = 50
 
 func (h *Handler) HandlersListMatch(w http.ResponseWriter, r *http.Request) {
 	userOauth2, _ := h.auth.GetSessionUser(r)
@@ -35,9 +40,25 @@ func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if r.FormValue("name") == "" {
+	numberOfMatch, err := model.GetNumberOfMatchByUserId(user.Id)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if strings.TrimSpace(r.FormValue("name")) == "" {
 		log.Println(err)
 		http.Error(w, "Match need a name", http.StatusBadRequest)
+		return
+	}
+
+	if numberOfMatch >= NumberOfMatchMax {
+		w.WriteHeader(http.StatusBadRequest)
+		components.ErrorMessages(components.Error{
+			Title:    i18n.T(r.Context(), "global.error") + " " + r.FormValue("name"),
+			Messages: []string{i18n.T(r.Context(), "page.match-list.max-match")},
+		}).Render(r.Context(), w)
 		return
 	}
 
