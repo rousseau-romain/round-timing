@@ -22,19 +22,21 @@ templ Layout(title string, errors Error, userGoth goth.User, user model.User, na
 			<title>Round Timing - { title }</title>
 			<link rel="icon" type="image/svg+xml" href="/public/img/favicon.svg"/>
 			<link rel="stylesheet" type="text/css" href={ fmt.Sprintf("/public/tailwind.css?build=%s", strconv.FormatInt(time.Now().Unix(), 10)) }/>
-			<script src="/public/script/htmx1.9.11.js"></script>
+		</head>
+		<body>
+			<script src="/public/script/htmx2.0.4.js"></script>
+			<script src="/public/script/htmx2.0.0-response-targets.js"></script>
 			if isDebug {
 				<script src="/public/script/htmx1.9.11-debug.js"></script>
 			}
-		</head>
-		<body>
+
 			if isDebug {
 				<button class="border border-red-600 bg-red-300 text-red-600 top-0 right-0 absolute">Debug MOD</button>
 			}
 			@Nav(userGoth, user, navItems, languages)
-			<div id="content">
-				@ErrorMessages(errors)
-				{ children... }
+			<div id="content" hx-ext="response-targets">
+					@ErrorMessages(errors)
+					{ children... }
 			</div>
 		</body>
 	</html>
@@ -158,10 +160,18 @@ templ MobileMenu(userGoth goth.User, user model.User, navItems []NavItem) {
 
 templ ErrorMessages(errors Error) {
 	if len(errors.Messages) > 0 {
+	<div id="errors" class="w-screen h-screen absolute top-0 right-0 bg-gray-800 bg-opacity-40 cursor-pointer place-items-center justify-center flex">
 		<div
 			role="alert"
-			class="w-fit rounded border-s-4 border-red-500 bg-red-50 p-4 dark:border-red-600 dark:bg-red-900"
+			class="relative mr-4 ml-4 w-fit rounded border-s-4 border-red-500 bg-red-50 p-4 dark:border-red-600 dark:bg-red-900"
 		>
+			<div class="close absolute right-2 top-2">
+				<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+					<line x1="5" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+					<line x1="19" y1="5" x2="5" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+				</svg>
+			</div>
+
 			if errors.Title != "" {
 				<div class="flex items-center gap-2 text-red-800 dark:text-red-100">
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
@@ -178,6 +188,12 @@ templ ErrorMessages(errors Error) {
 				<p class="mt-2 text-sm text-red-700 dark:text-red-200">{ e }</p>
 			}
 		</div>
+		<script>
+			document.querySelector("#errors").addEventListener("click", () => document.querySelector("#errors").remove())
+			document.querySelector("#errors .close").addEventListener("click", () => document.querySelector("#errors").remove())
+			document.querySelector("#errors div").addEventListener("click", (e) => e.stopPropagation())
+		</script>
+	</div>
 	}
 }
 

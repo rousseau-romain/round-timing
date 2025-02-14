@@ -3,6 +3,7 @@ fr:
     header:
       signin: "Connexion"
       select-language: "Selectionner la langue"
+    error: "Erreur"
     table:
       id: "Id"
       email: "Email"
@@ -39,6 +40,7 @@ fr:
       title: "Liste des matches"
       h1: "Créé un match"
       button-create-match: "Créé un match"
+      max-match: "Vous avez atteint le nombre maximum de matchs, veuillez en supprimer un pour en créer un nouveau."
     match:
       title: "Match %{name}"
       h1: "Ajouter des joueurs"
