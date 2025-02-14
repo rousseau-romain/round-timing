@@ -71,9 +71,9 @@ templ MatchListPage(userGoth goth.User, user model.User, errors components.Error
 			<form
 				class="space-y-4"
 				hx-post="/match"
-				hx-swap="beforebegin"
-				hx-target="next tbody"
-				hx-target-error="#content"
+				hx-swap="afterbegin"
+				hx-target="tbody"
+				hx-target-error="#errors"
 			>
 				<div>
 					<label class="sr-only" for="name">{ i18n.T(ctx, "global.table.name") }</label>

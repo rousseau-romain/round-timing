@@ -35,7 +35,9 @@ templ Layout(title string, errors Error, userGoth goth.User, user model.User, na
 			}
 			@Nav(userGoth, user, navItems, languages)
 			<div id="content" hx-ext="response-targets">
+				<div id="errors">
 					@ErrorMessages(errors)
+				</div>
 					{ children... }
 			</div>
 		</body>
@@ -160,7 +162,7 @@ templ MobileMenu(userGoth goth.User, user model.User, navItems []NavItem) {
 
 templ ErrorMessages(errors Error) {
 	if len(errors.Messages) > 0 {
-	<div id="errors" class="w-screen h-screen absolute top-0 right-0 bg-gray-800 bg-opacity-40 cursor-pointer place-items-center justify-center flex">
+	<div class="error w-screen h-screen absolute top-0 right-0 bg-gray-800 bg-opacity-40 cursor-pointer place-items-center justify-center flex">
 		<div
 			role="alert"
 			class="relative mr-4 ml-4 w-fit rounded border-s-4 border-red-500 bg-red-50 p-4 dark:border-red-600 dark:bg-red-900"
@@ -189,9 +191,9 @@ templ ErrorMessages(errors Error) {
 			}
 		</div>
 		<script>
-			document.querySelector("#errors").addEventListener("click", () => document.querySelector("#errors").remove())
-			document.querySelector("#errors .close").addEventListener("click", () => document.querySelector("#errors").remove())
-			document.querySelector("#errors div").addEventListener("click", (e) => e.stopPropagation())
+			document.querySelector(".error").addEventListener("click", () => document.querySelector(".error").remove())
+			document.querySelector(".error .close").addEventListener("click", () => document.querySelector(".error").remove())
+			document.querySelector(".error div").addEventListener("click", (e) => e.stopPropagation())
 		</script>
 	</div>
 	}
