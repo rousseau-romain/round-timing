@@ -65,6 +65,22 @@ func GetTeamsByIdMatch(idMatch int) ([]Team, error) {
 
 	return teams, err
 }
+func NumberPlayerInTeamByTeamId(idTeam int) (int, error) {
+	sql := `
+		SELECT COUNT(*) AS number
+		FROM player AS p
+		WHERE p.id_team = ?
+	`
+
+	rows := db.QueryRow(sql, idTeam)
+
+	var number int
+
+	err := rows.Scan(&number)
+
+	return number, err
+
+}
 
 func CreateTeam(m TeamCreate) (int, error) {
 

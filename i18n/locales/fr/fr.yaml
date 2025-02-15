@@ -3,6 +3,7 @@ fr:
     header:
       signin: "Connexion"
       select-language: "Selectionner la langue"
+      last-match: "Dernier match %{name} (%{id})"
     error: "Erreur"
     table:
       id: "Id"
@@ -44,6 +45,7 @@ fr:
     match:
       title: "Match %{name}"
       h1: "Ajouter des joueurs"
+      max-player-by-team: "Vous avez atteint le nombre maximum de joueurs pas equipe."
       button:
         add-player: "Ajouter un joueur"
         reset-match: "Reinitialiser le match pour ajouter des joueurs"

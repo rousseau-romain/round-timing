@@ -3,6 +3,7 @@ it:
     header:
       signin: "Accedi"
       select-language: "Seleziona lingua"
+      last-match: "Ultima partita %{name} (%{id})"
     table:
       id: "Id"
       email: "Email"
@@ -43,6 +44,7 @@ it:
     match:
       title: "Partita %{name}"
       h1: "Aggiungi giocatori"
+      max-player-by-team: "Hai raggiunto il numero massimo di giocatori per squadra."
       button:
         add-player: "Aggiungi un giocatore"
         reset-match: "Reimposta la partita per aggiungere giocatori"
