@@ -5,12 +5,16 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/helper"
 	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/shared/components"
 	"github.com/rousseau-romain/round-timing/views/page"
 
 	"github.com/gorilla/mux"
 )
+
+var MaxPlayerByTeam = 8
 
 func (h *Handler) HandlersCreatePlayer(w http.ResponseWriter, r *http.Request) {
 	userOauth2, _ := h.auth.GetSessionUser(r)
@@ -18,19 +22,35 @@ func (h *Handler) HandlersCreatePlayer(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	idMatch, _ := strconv.Atoi(vars["idMatch"])
+	idTeam, _ := strconv.Atoi(r.FormValue("idTeam"))
 
 	if r.FormValue("name") == "" {
-		http.Error(w, "Team need a name", http.StatusBadRequest)
+		http.Error(w, "Player need a name", http.StatusBadRequest)
 		return
 	}
 
 	if _, err := strconv.ParseInt(r.FormValue("idTeam"), 10, 64); err != nil {
-		http.Error(w, "Team need a color", http.StatusBadRequest)
+		http.Error(w, "Player need a color", http.StatusBadRequest)
+		return
+	}
+
+	canCreatePlayerInTeam, err := model.NumberPlayerInTeamByTeamId(idTeam)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	if canCreatePlayerInTeam == MaxPlayerByTeam {
+		w.WriteHeader(http.StatusBadRequest)
+		components.ErrorMessages(components.Error{
+			Title:    i18n.T(r.Context(), "global.error") + " " + r.FormValue("name"),
+			Messages: []string{i18n.T(r.Context(), "page.match.max-player-by-team")},
+		}).Render(r.Context(), w)
 		return
 	}
 
 	if _, err := strconv.ParseInt(r.FormValue("idClass"), 10, 64); err != nil {
-		http.Error(w, "Team need a class", http.StatusBadRequest)
+		http.Error(w, "Player need a class", http.StatusBadRequest)
 		return
 	}
 
@@ -46,7 +66,6 @@ func (h *Handler) HandlersCreatePlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	idTeam, _ := strconv.Atoi(r.FormValue("idTeam"))
 	idClass, _ := strconv.Atoi(r.FormValue("idClass"))
 	idPlayer, err := model.CreatePlayer(model.PlayerCreate{
 		Name:    r.FormValue("name"),

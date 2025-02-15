@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/helper"
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/shared/components"
@@ -15,12 +16,17 @@ import (
 	"github.com/markbates/goth"
 )
 
-var PagesNav = []components.NavItem{
-	{Name: "Match list", Url: "match"},
+func GetPageNavDefault(r *http.Request) []components.NavItem {
+	return []components.NavItem{
+		{
+			Name: i18n.T(r.Context(), "page.match-list.title"),
+			Url:  "match",
+		},
+	}
 }
 
-func getPageNavCustom(user model.User, match model.Match) []components.NavItem {
-	var pageNav = PagesNav
+func getPageNavCustom(r *http.Request, user model.User, match model.Match) []components.NavItem {
+	var pageNav = GetPageNavDefault(r)
 	if user.Id != 0 {
 		if match.Id != 0 {
 			pageNav = append(pageNav, components.NavItem{
@@ -35,7 +41,7 @@ func getPageNavCustom(user model.User, match model.Match) []components.NavItem {
 			}
 			if lastMatch.Id != 0 {
 				pageNav = append(pageNav, components.NavItem{
-					Name: fmt.Sprintf("Last match %s (%d)", lastMatch.Name, lastMatch.Id),
+					Name: i18n.T(r.Context(), "global.header.last-match", i18n.M{"name": lastMatch.Name, "id": lastMatch.Id}),
 					Url:  fmt.Sprintf("match/%d", lastMatch.Id),
 				})
 			}
@@ -52,12 +58,12 @@ func getPageNavCustom(user model.User, match model.Match) []components.NavItem {
 
 func (h *Handler) HandlersNotFound(w http.ResponseWriter, r *http.Request) {
 	userOauth2, _ := h.auth.GetSessionUser(r)
-	page.NotFoundPage(userOauth2, h.error, PagesNav, h.languages).Render(r.Context(), w)
+	page.NotFoundPage(userOauth2, h.error, GetPageNavDefault(r), h.languages).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersHome(w http.ResponseWriter, r *http.Request) {
 	userOauth2, _ := h.auth.GetSessionUser(r)
-	pageNav := PagesNav
+	pageNav := GetPageNavDefault(r)
 
 	if userOauth2.Name != "" {
 		user, err := model.GetUserByOauth2Id(userOauth2.UserID)
@@ -66,7 +72,7 @@ func (h *Handler) HandlersHome(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		pageNav = getPageNavCustom(user, model.Match{})
+		pageNav = getPageNavCustom(r, user, model.Match{})
 		page.HomePage(userOauth2, user, h.error, pageNav, h.languages).Render(r.Context(), w)
 		return
 	}
@@ -81,7 +87,7 @@ func (h *Handler) HandlersProfile(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	page.ProfilePage(userOauth2, user, h.error, getPageNavCustom(user, model.Match{}), h.languages).Render(r.Context(), w)
+	page.ProfilePage(userOauth2, user, h.error, getPageNavCustom(r, user, model.Match{}), h.languages).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) {
@@ -181,9 +187,7 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	getPageNavCustom(user, model.Match{})
-
-	page.StartMatchPage(userOauth2, user, h.error, getPageNavCustom(user, match), h.languages, match, players, spellsPlayer).Render(r.Context(), w)
+	page.StartMatchPage(userOauth2, user, h.error, getPageNavCustom(r, user, match), h.languages, match, players, spellsPlayer).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerResetMatchPage(w http.ResponseWriter, r *http.Request) {
@@ -233,7 +237,7 @@ func (h *Handler) HandlerToggleMatchMastery(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	page.MatchPageTable(userOauth2, user, h.error, getPageNavCustom(user, match), h.languages, match, players, spellsPlayers).Render(r.Context(), w)
+	page.MatchPageTable(userOauth2, user, h.error, getPageNavCustom(r, user, match), h.languages, match, players, spellsPlayers).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerMatchNextRound(w http.ResponseWriter, r *http.Request) {
