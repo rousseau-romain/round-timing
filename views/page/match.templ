@@ -66,7 +66,6 @@ templ TeamPlayerTable(players []model.Player, match model.Match) {
 				</tr>
 			</thead>
 			<tbody
-				hx-confirm="Are you sure?"
 				hx-swap="outerHTML swap:0.5s"
 				hx-target="closest tr"
 				class="divide-y divide-gray-200 dark:divide-gray-700"
@@ -98,6 +97,7 @@ templ TeamPlayerListPage(userGoth goth.User, user model.User, errors components.
 					hx-swap="afterbegin"
 					hx-target="next tbody"
 					hx-on::after-request="performAnimation()"
+					hx-target-error="#errors"
 				>
 					<div>
 						<label class="sr-only" for="idColorTeam">Color Team</label>
@@ -149,9 +149,7 @@ templ TeamPlayerListPage(userGoth goth.User, user model.User, errors components.
 							const selectorTeam = document.getElementById("team")
 							const nameClass = selectorClass.options[selectorClass.selectedIndex].text
 							const colorTeam = selectorTeam.options[selectorTeam.selectedIndex].text
-							// if (inputElement.value.trim() === "") {
-								inputElement.value = `${nameClass} - ${colorTeam}`
-							// }
+							inputElement.value = `${nameClass} - ${colorTeam}`
 
 						}
 					</script>
