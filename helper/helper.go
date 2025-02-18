@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-var MailContact = "rousseau.romain82@gmail.com"
+var MailContact = "roundtiming@gmail.com"
 
 // Id in database
 var SupportedLanguages = map[string]int{
