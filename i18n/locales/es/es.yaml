@@ -27,6 +27,9 @@ es:
     404:
       title: "404 No encontrado"
       p: "No podemos encontrar esta página."
+    cgu:
+      title: "CGU"
+      h1: "Condiciones generales de uso de Round Timing"
     home:
       title: "Inicio"
       discover: "Descubre %{name}, la aplicación imprescindible para todos los jugadores de Dofus que quieran optimizar el uso de sus hechizos en combate!"
