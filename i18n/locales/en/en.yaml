@@ -4,6 +4,19 @@ en:
       signin: "Sign in"
       select-language: "Select language"
       last-match: "Last match %{name} (%{id})"
+    footer:
+      p-contact: "You can contact us by email."
+      about-us:
+        title: "Round timing"
+        l-match: "Match"
+        l-profil: "Profile"
+      other-link:
+        title: "Other links"
+        l-cgu: "CGU"
+        l-privacy: "Privacy policy"
+        l-bug: "Report a bug"
+        rights: "All rights reserved"
+    error: "Error"
     table:
       id: "Id"
       email: "Email"
@@ -30,6 +43,9 @@ en:
     cgu:
       title: "CGU"
       h1: "General terms of use of Round Timing"
+    privacy:
+      title: "Privacy policy"
+      h1: "Privacy policy of Round Timing"
     home:
       title: "Home"
       discover: "Discover %{name}, the must-have app for all Dofus players looking to optimize their spell usage in combat!"

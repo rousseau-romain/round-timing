@@ -4,6 +4,18 @@ fr:
       signin: "Connexion"
       select-language: "Selectionner la langue"
       last-match: "Dernier match %{name} (%{id})"
+    footer:
+      p-contact: "Vous pouver me contacter par email"
+      about-us:
+        title: "Round timing"
+        l-match: "Match"
+        l-profil: "Profile"
+      other-link:
+        title: "Autres liens"
+        l-cgu: "CGU"
+        l-privacy: "Politique de confidentialité"
+        l-bug: "Signaler un bug"
+        rights: "Tous droits réservés"
     error: "Erreur"
     table:
       id: "Id"
@@ -31,6 +43,9 @@ fr:
     cgu:
       title: "CGU"
       h1: "Condition générale d'utilisation de Round Timing"
+    privacy:
+      title: "Politique de confidentialité"
+      h1: "Politique de confidentialité de Round Timing"
     home:
       title: "Accueil"
       discover: "Découvrez %{name}, l'application indispensable pour tous les joueurs de Dofus souhaitant optimiser l'utilisation de leurs sorts en combat !"
