@@ -14,7 +14,7 @@ import (
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/discord"
-	"github.com/markbates/goth/providers/github"
+	"github.com/markbates/goth/providers/google"
 )
 
 type AuthService struct{}
@@ -23,10 +23,10 @@ func NewAuthService(store sessions.Store) *AuthService {
 	gothic.Store = store
 
 	goth.UseProviders(
-		github.New(
-			config.GITHUB_CLIENT_ID,
-			config.GITHUB_CLIENT_SECRET,
-			buildCallbackURL("github"),
+		google.New(
+			config.GOOGLE_CLIENT_ID,
+			config.GOOGLE_CLIENT_SECRET,
+			buildCallbackURL("google"),
 			"email",
 		),
 		discord.New(

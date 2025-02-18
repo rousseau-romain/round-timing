@@ -81,6 +81,7 @@ pt:
       h1: "Comece hoje"
       p: "Faça login na sua conta"
       signin-button: "Entrar com %{provider}"
+      already-exists-with-provider: "Uma conta já foi criada com o e-mail %{email} e o provedor %{provider}."
     start-match:
       title: "Partida em andamento"
       h1: "Partida em andamento"

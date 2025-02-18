@@ -7,6 +7,8 @@ toolchain go1.22.9
 require github.com/a-h/templ v0.2.793
 
 require (
+	cloud.google.com/go/compute v1.20.1 // indirect
+	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/huandu/xstrings v1.3.2 // indirect
@@ -24,5 +26,5 @@ require (
 	github.com/huandu/go-sqlbuilder v1.25.0
 	github.com/invopop/ctxi18n v0.9.0
 	github.com/joho/godotenv v1.5.1
-	github.com/markbates/goth v1.79.0
+	github.com/markbates/goth v1.80.0
 )

@@ -81,6 +81,7 @@ it:
       h1: "Inizia oggi"
       p: "Accedi al tuo account"
       signin-button: "Accedi con %{provider}"
+      already-exists-with-provider: "Un account è già stato creato con l'email %{email} e il provider %{provider}."
     start-match:
       title: "Partita in corso"
       h1: "Partita in corso"
