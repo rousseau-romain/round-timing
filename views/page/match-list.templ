@@ -14,8 +14,8 @@ templ Match(m model.Match) {
 		<td class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">
 			{ m.Name }
 		</td>
-		<td class="whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">{ m.CreatedAt }</td>
-		<td class="whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">{ m.UpdatedAt }</td>
+		// <td class="whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">{ m.CreatedAt }</td>
+		// <td class="whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">{ m.UpdatedAt }</td>
 		<td class="whitespace-nowrap px-4 py-2">
 			<a
 				href={ templ.SafeURL("/match/" + fmt.Sprintf("%d", m.Id)) }
@@ -43,10 +43,10 @@ templ MatchTable(matchs []model.Match) {
 			<thead class="ltr:text-left rtl:text-right">
 				<tr>
 					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">{ i18n.T(ctx, "global.table.name") }</th>
-					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">
-						{ i18n.T(ctx, "global.table.created-at") }
-					</th>
-					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">{ i18n.T(ctx, "global.table.updated-at") }</th>
+					// <th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">
+					// 	{ i18n.T(ctx, "global.table.created-at") }
+					// </th>
+					// <th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">{ i18n.T(ctx, "global.table.updated-at") }</th>
 					<th class="px-4 py-2"></th>
 					<th class="px-4 py-2"></th>
 				</tr>
