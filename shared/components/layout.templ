@@ -16,8 +16,7 @@ type Error struct {
 	Messages []string
 }
 
-
-templ Layout(title string, errors Error, userGoth goth.User, user model.User, navItems []NavItem, languages []model.Language) {
+templ Layout(title string, errors Error, userGoth goth.User, user model.User, navItems []NavItem, languages []model.Language, pageSlug string) {
 	<html>
 		<head>
 			<title>Round Timing - { title }</title>
@@ -30,16 +29,17 @@ templ Layout(title string, errors Error, userGoth goth.User, user model.User, na
 			if isDebug {
 				<script src="/public/script/htmx1.9.11-debug.js"></script>
 			}
-
 			if isDebug {
 				<button class="border border-red-600 bg-red-300 text-red-600 top-0 right-0 absolute">Debug MOD</button>
 			}
-			@Nav(userGoth, user, navItems, languages)
-			<div  class="min-h-screen" id="content" hx-ext="response-targets">
+			@Nav(userGoth, user, navItems, languages, pageSlug)
+			<div class="min-h-screen" id="content" hx-ext="response-targets">
 				<div id="errors">
-					@ErrorMessages(errors)
+					if errors.Title != "" {
+						@ErrorMessages(errors)
+					}
 				</div>
-					{ children... }
+				{ children... }
 			</div>
 			@Footer()
 		</body>
@@ -50,7 +50,7 @@ type NavItem struct {
 	Name, Url string
 }
 
-templ Nav(userGoth goth.User, user model.User, navItems []NavItem, languages []model.Language) {
+templ Nav(userGoth goth.User, user model.User, navItems []NavItem, languages []model.Language, pageSlug string) {
 	<header class="bg-white dark:bg-gray-900">
 		<div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
 			<div class="flex h-16 items-center justify-between">
@@ -65,10 +65,10 @@ templ Nav(userGoth goth.User, user model.User, navItems []NavItem, languages []m
 						>
 							<path
 								d="M523.859,232.329h-41.701c-5.07,0-9.715-4.073-10.59-9.067c-19.57-111.442-117-196.409-233.962-196.409
-			C106.589,26.853,0,133.441,0,264.458c0,131.018,106.589,237.605,237.606,237.605c12.675,0,22.95-10.275,22.95-22.949
-			s-10.275-22.949-22.95-22.949c-105.708,0-191.706-85.998-191.706-191.707c0-105.707,85.995-191.706,191.703-191.706
-			c91.583,0,168.325,64.569,187.208,150.564c1.086,4.951-2.359,9.012-7.426,9.012H380.66c-5.07,0-6.578,3.182-3.371,7.108
-			l69.162,84.621c3.209,3.926,8.408,3.926,11.619,0l69.162-84.621C530.439,235.511,528.928,232.329,523.859,232.329z"
+								C106.589,26.853,0,133.441,0,264.458c0,131.018,106.589,237.605,237.606,237.605c12.675,0,22.95-10.275,22.95-22.949
+								s-10.275-22.949-22.95-22.949c-105.708,0-191.706-85.998-191.706-191.707c0-105.707,85.995-191.706,191.703-191.706
+								c91.583,0,168.325,64.569,187.208,150.564c1.086,4.951-2.359,9.012-7.426,9.012H380.66c-5.07,0-6.578,3.182-3.371,7.108
+								l69.162,84.621c3.209,3.926,8.408,3.926,11.619,0l69.162-84.621C530.439,235.511,528.928,232.329,523.859,232.329z"
 								stroke-linejoin="round"
 							></path>
 						</svg>
@@ -87,7 +87,7 @@ templ Nav(userGoth goth.User, user model.User, navItems []NavItem, languages []m
 				</div>
 				<div class="flex items-center gap-4">
 					<div class="sm:flex sm:gap-4">
-						if userGoth.Name != "" {
+						if userGoth.Email != "" {
 							<a href="/profile"><img class="w-10 h-10 p-1 rounded-full" src={ userGoth.AvatarURL } alt="Bordered avatar"/></a>
 							<img alt="flag" id="header-select-language" class="cursor-pointer w-10 h-8" src={ "/public/img/flag/" + strconv.Itoa(user.IdLanguage) + ".svg" }/>
 							@PopinSelectLanguage(user, languages)
@@ -102,15 +102,17 @@ templ Nav(userGoth goth.User, user model.User, navItems []NavItem, languages []m
 								document.querySelector("#popin-language div").addEventListener("click", (e) => e.stopPropagation());
 							</script>
 						} else {
-							<a
-								class="rounded-md bg-sky-600 px-5 py-2.5 text-sm font-medium text-white shadow dark:hover:bg-sky-500"
-								href="/signin"
-							>
-								{ i18n.T(ctx, "global.header.signin") }
-							</a>
-							<div class="relative w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
-								<svg class="absolute w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-							</div>
+							if pageSlug != "/signin" {
+								<a
+									class="rounded-md bg-sky-600 px-5 py-2.5 text-sm font-medium text-white shadow dark:hover:bg-sky-500"
+									href="/signin"
+								>
+									{ i18n.T(ctx, "global.header.signin") }
+								</a>
+								<div class="relative w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
+									<svg class="absolute w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+								</div>
+							}
 						}
 						// <div class="hidden sm:flex">
 						// 	<a
@@ -164,40 +166,47 @@ templ MobileMenu(userGoth goth.User, user model.User, navItems []NavItem) {
 
 templ ErrorMessages(errors Error) {
 	if len(errors.Messages) > 0 {
-	<div class="error w-screen h-screen absolute top-0 right-0 bg-gray-800 bg-opacity-40 cursor-pointer place-items-center justify-center flex">
-		<div
-			role="alert"
-			class="relative mr-4 ml-4 w-fit rounded border-s-4 border-red-500 bg-red-50 p-4 dark:border-red-600 dark:bg-red-900"
-		>
-			<div class="close absolute right-2 top-2">
-				<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-					<line x1="5" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-					<line x1="19" y1="5" x2="5" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-				</svg>
-			</div>
-
-			if errors.Title != "" {
-				<div class="flex items-center gap-2 text-red-800 dark:text-red-100">
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
-						<path
-							fill-rule="evenodd"
-							d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z"
-							clip-rule="evenodd"
-						></path>
+		<div class="error w-screen h-screen absolute top-0 right-0 bg-gray-800 bg-opacity-40 cursor-pointer place-items-center justify-center flex">
+			<div
+				role="alert"
+				class="relative mr-4 ml-4 w-fit rounded border-s-4 border-red-500 bg-red-50 p-4 dark:border-red-600 dark:bg-red-900"
+			>
+				<div class="close absolute right-2 top-2">
+					<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+						<line x1="5" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
+						<line x1="19" y1="5" x2="5" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
 					</svg>
-					<strong class="block font-medium">{ errors.Title }</strong>
 				</div>
+				if errors.Title != "" {
+					<div class="flex items-center gap-2 text-red-800 dark:text-red-100">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+							<path
+								fill-rule="evenodd"
+								d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z"
+								clip-rule="evenodd"
+							></path>
+						</svg>
+						<strong class="block font-medium">{ errors.Title }</strong>
+					</div>
+				}
+				for _, e := range errors.Messages {
+					<p class="mt-2 text-sm text-red-700 dark:text-red-200">{ e }</p>
+				}
+			</div>
+			<script>
+			function closeError() {
+				document.querySelector(".error").remove()
+				const url = new URL(window.location);
+				url.searchParams.delete('errorTitle');
+				url.searchParams.delete('errorMessages');
+				window.history.replaceState({}, document.title, url);
+				location.reload();
 			}
-			for _, e := range errors.Messages {
-				<p class="mt-2 text-sm text-red-700 dark:text-red-200">{ e }</p>
-			}
-		</div>
-		<script>
-			document.querySelector(".error").addEventListener("click", () => document.querySelector(".error").remove())
-			document.querySelector(".error .close").addEventListener("click", () => document.querySelector(".error").remove())
+			document.querySelector(".error").addEventListener("click", closeError)
+			document.querySelector(".error .close").addEventListener("click", closeError)
 			document.querySelector(".error div").addEventListener("click", (e) => e.stopPropagation())
 		</script>
-	</div>
+		</div>
 	}
 }
 

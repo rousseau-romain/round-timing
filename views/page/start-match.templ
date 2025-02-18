@@ -9,13 +9,13 @@ import (
 	"strconv"
 )
 
-templ StartMatchPage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell) {
-	@components.Layout("Start match", errors, userGoth, user, navItems, languages) {
-		@MatchPageTable(userGoth, user, errors, navItems, languages, match, players, playersSpells)
+templ StartMatchPage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, pageSlug string, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell) {
+	@components.Layout("Start match", errors, userGoth, user, navItems, languages, pageSlug) {
+		@MatchPageTable(userGoth, user, errors, navItems, languages, pageSlug, match, players, playersSpells)
 	}
 }
 
-templ MatchPageTable(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell) {
+templ MatchPageTable(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, pageSlug string, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell) {
 	<div class="flex justify-center gap-2">
 		<button
 			type="submit"

@@ -27,7 +27,7 @@ func (h *Handler) HandlersListMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page.MatchListPage(userOauth2, user, h.error, GetPageNavDefault(r), h.languages, user, matchs).Render(r.Context(), w)
+	page.MatchListPage(userOauth2, user, h.error, GetPageNavDefault(r), h.languages, r.URL.Path, user, matchs).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
@@ -169,5 +169,5 @@ func (h *Handler) HandlersMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page.TeamPlayerListPage(userOauth2, user, h.error, getPageNavCustom(r, user, model.Match{}), h.languages, user, match, teams, classes, players).Render(r.Context(), w)
+	page.TeamPlayerListPage(userOauth2, user, h.error, getPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, user, match, teams, classes, players).Render(r.Context(), w)
 }

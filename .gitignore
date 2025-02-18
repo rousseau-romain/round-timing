@@ -1,4 +1,4 @@
-database/migration/output.sql
+output.sql
 *_templ.txt
 *_templ.go
 tmp

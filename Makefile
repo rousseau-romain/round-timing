@@ -44,7 +44,7 @@ install:
 
 # DB commands
 db/combine/script:
-	cd database/migration/ && cat $$(ls | grep .up.sql)| grep -v '^--' > output.sql
+	cd database/migration/ && cat $$(ls | grep .up.sql)| grep -v '^--' > ../../output.sql
 
 db_init:
 	docker-compose up -d

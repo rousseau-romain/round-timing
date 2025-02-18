@@ -56,7 +56,7 @@ fr:
         f2: "Visualisez le déroulement optimal des tours pour maximiser l'impact de vos sorts et minimiser les temps morts."
         f3: "Analysez vos sorts et vos ennemis pour mieux choisir vos actions."
     match-list:
-      title: "Liste des matches"
+      title: "Liste des matchs"
       h1: "Créé un match"
       button-create-match: "Créé un match"
       max-match: "Vous avez atteint le nombre maximum de matchs, veuillez en supprimer un pour en créer un nouveau."
@@ -81,6 +81,7 @@ fr:
       h1: "Commencez aujourd'hui"
       p: "Connectez-vous à votre compte"
       signin-button: "Se connecter avec %{provider}"
+      already-exists-with-provider: "Un compte est déja crée avec l'email %{email} et le provider %{provider}."
     start-match:
       title: "Match en cours"
       h1: "Match en cours"
