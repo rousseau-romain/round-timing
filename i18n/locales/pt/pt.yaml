@@ -4,6 +4,19 @@ pt:
       signin: "Entrar"
       select-language: "Selecionar idioma"
       last-match: "Última partida %{name} (%{id})"
+    footer:
+      p-contact: "Você pode entrar em contato conosco por e-mail."
+      about-us:
+        title: "Round Timing"
+        l-match: "Partida"
+        l-profil: "Perfil"
+      other-link:
+        title: "Outros links"
+        l-cgu: "CGU"
+        l-privacy: "Política de privacidade"
+        l-bug: "Relatar um bug"
+        rights: "Todos os direitos reservados"
+    error: "Erro"
     table:
       id: "Id"
       email: "Email"
@@ -30,6 +43,9 @@ pt:
     cgu:
       title: "CGU"
       h1: "Condições gerais de uso de Round Timing"
+    privacy:
+      title: "Política de privacidade"
+      h1: "Política de privacidade de Round Timing"
     home:
       title: "Início"
       discover: "Descubra %{name}, o aplicativo indispensável para todos os jogadores de Dofus que desejam otimizar o uso de seus feitiços em combate!"
