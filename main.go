@@ -80,6 +80,7 @@ func run() error {
 	// PAGES ROUTE
 	r.Handle("/", auth.AllowToBeAuth(handler.HandlersHome, authService)).Methods("GET")
 
+	r.Handle("/cgu", auth.AllowToBeAuth(handler.HandlerCGU, authService)).Methods("GET")
 	r.Handle("/match", auth.RequireAuth(handler.HandlersListMatch, authService)).Methods("GET")
 	r.Handle("/match", auth.RequireAuth(handler.HandlersCreateMatch, authService)).Methods("POST")
 	r.Handle("/match/{idMatch:[0-9]+}", auth.RequireAuthAndHisMatch(handler.HandlersDeleteMatch, authService)).Methods("DELETE")

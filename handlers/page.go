@@ -321,3 +321,14 @@ func (h *Handler) HandlerRemoveRoundRecoveryPlayerSpell(w http.ResponseWriter, r
 
 	page.Spell(spellPlayer).Render(r.Context(), w)
 }
+
+func (h *Handler) HandlerCGU(w http.ResponseWriter, r *http.Request) {
+	userOauth2, _ := h.auth.GetSessionUser(r)
+	user, err := model.GetUserByOauth2Id(userOauth2.UserID)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	page.CGU(userOauth2, h.error, getPageNavCustom(r, user, model.Match{}), h.languages).Render(r.Context(), w)
+}
