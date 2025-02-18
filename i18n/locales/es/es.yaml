@@ -4,6 +4,19 @@ es:
       signin: "Iniciar sesión"
       select-language: "Seleccionar idioma"
       last-match: "Última partida %{name} (%{id})"
+    footer:
+      p-contact: "Puedes contactarnos por correo electrónico."
+      about-us:
+        title: "Round timing"
+        l-match: "Partida"
+        l-profil: "Perfil"
+      other-link:
+        title: "Otros enlaces"
+        l-cgu: "CGU"
+        l-privacy: "Política de privacidad"
+        l-bug: "Reportar un error"
+        rights: "Todos los derechos reservados"
+    error: "Error"
     table:
       id: "Id"
       email: "Correo electrónico"
@@ -30,6 +43,9 @@ es:
     cgu:
       title: "CGU"
       h1: "Condiciones generales de uso de Round Timing"
+    privacy:
+      title: "Política de privacidad"
+      h1: "Política de privacidad de Round Timing"
     home:
       title: "Inicio"
       discover: "Descubre %{name}, la aplicación imprescindible para todos los jugadores de Dofus que quieran optimizar el uso de sus hechizos en combate!"

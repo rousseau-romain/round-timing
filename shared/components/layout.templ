@@ -16,6 +16,7 @@ type Error struct {
 	Messages []string
 }
 
+
 templ Layout(title string, errors Error, userGoth goth.User, user model.User, navItems []NavItem, languages []model.Language) {
 	<html>
 		<head>
@@ -34,12 +35,13 @@ templ Layout(title string, errors Error, userGoth goth.User, user model.User, na
 				<button class="border border-red-600 bg-red-300 text-red-600 top-0 right-0 absolute">Debug MOD</button>
 			}
 			@Nav(userGoth, user, navItems, languages)
-			<div id="content" hx-ext="response-targets">
+			<div  class="min-h-screen" id="content" hx-ext="response-targets">
 				<div id="errors">
 					@ErrorMessages(errors)
 				</div>
 					{ children... }
 			</div>
+			@Footer()
 		</body>
 	</html>
 }
