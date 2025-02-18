@@ -9,12 +9,13 @@ import (
 )
 
 type User struct {
-	Id         int    `json:"id"`
-	Oauth2Id   string `json:"oauth2_id"`
-	Enabled    bool   `json:"enabled"`
-	Email      string `json:"email"`
-	IdLanguage int    `json:"id_language"`
-	IsAdmin    bool   `json:"is_admin"`
+	Id            int    `json:"id"`
+	ProviderLogin string `json:"provider_login"`
+	Oauth2Id      string `json:"oauth2_id"`
+	Enabled       bool   `json:"enabled"`
+	Email         string `json:"email"`
+	IdLanguage    int    `json:"id_language"`
+	IsAdmin       bool   `json:"is_admin"`
 }
 type UserUpdate struct {
 	Enabled    *bool
@@ -22,9 +23,10 @@ type UserUpdate struct {
 }
 
 type UserCreate struct {
-	Oauth2Id   string
-	Email      string
-	IdLanguage int
+	ProviderLogin string
+	Oauth2Id      string
+	Email         string
+	IdLanguage    int
 }
 
 func GetUsers() ([]User, error) {
@@ -139,7 +141,7 @@ func GetUserByOauth2Id(oauth2Id string) (User, error) {
 	return user, err
 }
 
-func UserExists(oauth2Id string) (bool, error) {
+func UserExistsByOauth2Id(oauth2Id string) (bool, error) {
 	userId := 0
 
 	sb := sqlbuilder.NewSelectBuilder()
@@ -153,6 +155,22 @@ func UserExists(oauth2Id string) (bool, error) {
 	}
 
 	return userId != 0, err
+}
+
+func UserExistsByEmail(email string) (string, error) {
+	var providerLoginName string
+
+	sb := sqlbuilder.NewSelectBuilder()
+	sb.Select("provider_login").From("user").Where(sb.Equal("email", email))
+	sql, args := sb.Build()
+
+	err := db.QueryRow(sql, args...).Scan(&providerLoginName)
+
+	if err != nil {
+		return "", nil
+	}
+
+	return providerLoginName, err
 }
 
 func IsAdminUser(userId int) (bool, error) {
@@ -175,11 +193,11 @@ func IsAdminUser(userId int) (bool, error) {
 func CreateUser(user UserCreate) (int64, error) {
 
 	sql := `
-		INSERT INTO user (oauth2_id, email, id_language)
-		VALUES (?, ?, ?)
+		INSERT INTO user (provider_login, oauth2_id, email, id_language)
+		VALUES (?, ?, ?, ?)
 	`
 
-	response, err := db.Exec(sql, user.Oauth2Id, user.Email, user.IdLanguage)
+	response, err := db.Exec(sql, user.ProviderLogin, user.Oauth2Id, user.Email, user.IdLanguage)
 
 	if err != nil {
 		log.Println(err)

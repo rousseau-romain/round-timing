@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/helper"
@@ -58,14 +59,19 @@ func getPageNavCustom(r *http.Request, user model.User, match model.Match) []com
 
 func (h *Handler) HandlersNotFound(w http.ResponseWriter, r *http.Request) {
 	userOauth2, _ := h.auth.GetSessionUser(r)
-	page.NotFoundPage(userOauth2, h.error, GetPageNavDefault(r), h.languages).Render(r.Context(), w)
+	page.NotFoundPage(userOauth2, h.error, GetPageNavDefault(r), h.languages, r.URL.Path).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersHome(w http.ResponseWriter, r *http.Request) {
 	userOauth2, _ := h.auth.GetSessionUser(r)
 	pageNav := GetPageNavDefault(r)
 
-	if userOauth2.Name != "" {
+	h.error = components.Error{
+		Title:    r.URL.Query().Get("errorTitle"),
+		Messages: strings.Split(r.URL.Query().Get("errorMessages"), ","),
+	}
+
+	if userOauth2.Email != "" {
 		user, err := model.GetUserByOauth2Id(userOauth2.UserID)
 		if err != nil {
 			log.Println(err)
@@ -73,10 +79,10 @@ func (h *Handler) HandlersHome(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		pageNav = getPageNavCustom(r, user, model.Match{})
-		page.HomePage(userOauth2, user, h.error, pageNav, h.languages).Render(r.Context(), w)
+		page.HomePage(userOauth2, user, h.error, pageNav, h.languages, r.URL.Path).Render(r.Context(), w)
 		return
 	}
-	page.HomePage(goth.User{}, model.User{}, h.error, pageNav, h.languages).Render(r.Context(), w)
+	page.HomePage(goth.User{}, model.User{}, h.error, pageNav, h.languages, r.URL.Path).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersProfile(w http.ResponseWriter, r *http.Request) {
@@ -87,7 +93,7 @@ func (h *Handler) HandlersProfile(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	page.ProfilePage(userOauth2, user, h.error, getPageNavCustom(r, user, model.Match{}), h.languages).Render(r.Context(), w)
+	page.ProfilePage(userOauth2, user, h.error, getPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) {
@@ -187,7 +193,7 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	page.StartMatchPage(userOauth2, user, h.error, getPageNavCustom(r, user, match), h.languages, match, players, spellsPlayer).Render(r.Context(), w)
+	page.StartMatchPage(userOauth2, user, h.error, getPageNavCustom(r, user, match), h.languages, r.URL.Path, match, players, spellsPlayer).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerResetMatchPage(w http.ResponseWriter, r *http.Request) {
@@ -237,7 +243,7 @@ func (h *Handler) HandlerToggleMatchMastery(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	page.MatchPageTable(userOauth2, user, h.error, getPageNavCustom(r, user, match), h.languages, match, players, spellsPlayers).Render(r.Context(), w)
+	page.MatchPageTable(userOauth2, user, h.error, getPageNavCustom(r, user, match), h.languages, r.URL.Path, match, players, spellsPlayers).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerMatchNextRound(w http.ResponseWriter, r *http.Request) {
@@ -330,7 +336,7 @@ func (h *Handler) HandlerCGU(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	page.CGU(userOauth2, h.error, getPageNavCustom(r, user, model.Match{}), h.languages).Render(r.Context(), w)
+	page.CGU(userOauth2, h.error, getPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerPrivacy(w http.ResponseWriter, r *http.Request) {
@@ -341,5 +347,5 @@ func (h *Handler) HandlerPrivacy(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	page.Privacy(userOauth2, h.error, getPageNavCustom(r, user, model.Match{}), h.languages).Render(r.Context(), w)
+	page.Privacy(userOauth2, h.error, getPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path).Render(r.Context(), w)
 }

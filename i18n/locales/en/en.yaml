@@ -59,7 +59,7 @@ en:
       title: "Match list"
       h1: "Create a match"
       button-create-match: "Create a match"
-      max-match: "You have reached the maximum number of matches, delete one to create a new one."
+      max-match: "You have reached the maximum number of matchs, delete one to create a new one."
     match:
       title: "Match %{name}"
       h1: "Add players"
@@ -81,6 +81,7 @@ en:
       h1: "Start today"
       p: "Sign in to your account"
       signin-button: "Sign in with %{provider}"
+      already-exists-with-provider: "An account has already been created with the email %{email} and the provider %{provider}."
     start-match:
       title: "Ongoing match"
       h1: "Ongoing match"

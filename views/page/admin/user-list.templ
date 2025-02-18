@@ -64,8 +64,8 @@ templ UserTable(users []model.User) {
 	</div>
 }
 
-templ UserListPage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, modelUser model.User, users []model.User) {
-	@components.Layout(i18n.T(ctx, "page.admin.title"), errors, userGoth, user, navItems, languages) {
+templ UserListPage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, pageSlug string, modelUser model.User, users []model.User) {
+	@components.Layout(i18n.T(ctx, "page.admin.title"), errors, userGoth, user, navItems, languages, pageSlug) {
 		<div class="container mx-auto">
 			<h1>{ i18n.T(ctx, "page.admin.h1") }</h1>
 			@UserTable(users)

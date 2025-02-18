@@ -7,8 +7,8 @@ import (
 	"github.com/rousseau-romain/round-timing/shared/components"
 )
 
-templ SigninPage(navItems []components.NavItem, languages []model.Language, errors components.Error) {
-	@components.Layout(i18n.T(ctx, "page.signin.title"), errors, goth.User{}, model.User{}, navItems, languages) {
+templ SigninPage(navItems []components.NavItem, languages []model.Language, pageSlug string, errors components.Error) {
+	@components.Layout(i18n.T(ctx, "page.signin.title"), errors, goth.User{}, model.User{}, navItems, languages, pageSlug) {
 		<div class="mx-auto max-w-screen-xl px-4 py-16 sm:px-6 lg:px-8">
 			<div class="mx-auto max-w-lg">
 				<h1 class="text-center text-2xl font-bold text-indigo-600 sm:text-3xl">{ i18n.T(ctx, "page.signin.h1") }</h1>
@@ -18,6 +18,12 @@ templ SigninPage(navItems []components.NavItem, languages []model.Language, erro
 					class="block w-full rounded-lg bg-indigo-600 px-5 py-3 text-sm font-medium text-white text-center"
 				>
 					{ i18n.T(ctx, "page.signin.signin-button", i18n.M{"provider": "Discord"}) }
+				</a>
+				<a
+					href="/auth/google"
+					class="block w-full rounded-lg bg-indigo-600 px-5 py-3 text-sm font-medium text-white text-center"
+				>
+					{ i18n.T(ctx, "page.signin.signin-button", i18n.M{"provider": "Google"}) }
 				</a>
 			</div>
 		</div>

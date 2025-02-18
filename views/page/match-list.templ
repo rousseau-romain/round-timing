@@ -64,8 +64,8 @@ templ MatchTable(matchs []model.Match) {
 	</div>
 }
 
-templ MatchListPage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, modelUser model.User, matchs []model.Match) {
-	@components.Layout(i18n.T(ctx, "page.match-list.title"), errors, userGoth, user, navItems, languages) {
+templ MatchListPage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, pageSlug string, modelUser model.User, matchs []model.Match) {
+	@components.Layout(i18n.T(ctx, "page.match-list.title"), errors, userGoth, user, navItems, languages, pageSlug) {
 		<div class="container mx-auto">
 			<h1>{ i18n.T(ctx, "page.match-list.h1") }</h1>
 			<form
