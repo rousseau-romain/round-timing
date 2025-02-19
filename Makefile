@@ -36,7 +36,7 @@ build/commit-id-to-git:
 	git add config/commit-id.json
 
 install:
-	brew install golang-migrate
+	brew install golang-migrate gnupg
 	go install github.com/air-verse/air@v1.52.3
 	go install github.com/a-h/templ/cmd/templ@v0.2.793
 	npm install
@@ -48,6 +48,17 @@ install:
 
 
 # DB commands
+db/encode:
+	tar -czvf database/migration/database.tar.gz database/migration
+	gpg -c database/migration/database.tar.gz
+	shred -u database/migration/*.sql database/migration/database.tar.gz
+
+db/decode:
+	gpg database/migration/database.tar.gz.gpg
+	tar -xzvf database/migration/database.tar.gz
+	shred -u database/migration/database.tar.gz.gpg database/migration/database.tar.gz
+
+
 db/combine/script:
 	cd database/migration/ && cat $$(ls | grep .up.sql)| grep -v '^--' > ../../output.sql
 
