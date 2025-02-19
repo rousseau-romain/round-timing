@@ -23,13 +23,16 @@ live/tailwind:
 	@npx tailwindcss -i input.css -o public/tailwind.css --watch
 
 live: 
-	make -j3 live/templ live/tailwind live/go
+	make -j4 live/templ live/tailwind live/go build/commit-id
 
 build/tailwind:
 	npx tailwindcss -i input.css -o public/tailwind.css --minify
 
 build/templ:
 	templ generate
+
+build/commit-id:
+	git rev-parse HEAD | jq -R '{commit_id: .}' > config/commit-id.json
 
 install:
 	brew install golang-migrate
