@@ -1,9 +1,12 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
+
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
@@ -12,6 +15,8 @@ import (
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/shared/components"
 	"github.com/rousseau-romain/round-timing/views/page"
+
+	"io"
 
 	"github.com/gorilla/mux"
 	"github.com/markbates/goth"
@@ -55,6 +60,26 @@ func getPageNavCustom(r *http.Request, user model.User, match model.Match) []com
 		})
 	}
 	return pageNav
+}
+func (h *Handler) HandlerCommitId(w http.ResponseWriter, r *http.Request) {
+	jsonFile, err := os.Open("config/commit-id.json")
+	if err != nil {
+		log.Println(err)
+		fmt.Println(err)
+	}
+
+	defer jsonFile.Close()
+
+	byteValue, _ := io.ReadAll(jsonFile)
+
+	var commit struct {
+		CommitId string `json:"commit_id"`
+	}
+
+	json.Unmarshal(byteValue, &commit)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(byteValue)
 }
 
 func (h *Handler) HandlersNotFound(w http.ResponseWriter, r *http.Request) {

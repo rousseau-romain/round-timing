@@ -16,6 +16,8 @@ RUN npm install
 
 RUN go mod download
 
+RUN make build/commit-id
+
 RUN make build/tailwind
 
 RUN make build/templ
