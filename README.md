@@ -53,3 +53,7 @@ Run migration fix
 ```bash
 make migration_fix VERSION={VERSION_NUMBER}
 ```
+
+## Deploy
+
+Push to branch staging to deploy on this url https://round-timing-staging.web-rows.ovh/

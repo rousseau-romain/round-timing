@@ -23,7 +23,7 @@ live/tailwind:
 	@npx tailwindcss -i input.css -o public/tailwind.css --watch
 
 live: 
-	make -j3 live/templ live/tailwind live/go
+	make -j4 live/templ live/tailwind live/go build/commit-id
 
 build/tailwind:
 	npx tailwindcss -i input.css -o public/tailwind.css --minify
@@ -31,11 +31,16 @@ build/tailwind:
 build/templ:
 	templ generate
 
+build/commit-id-to-git:
+	git rev-parse HEAD | jq -R '{commit_id: .}' > config/commit-id.json
+	git add config/commit-id.json
+
 install:
-	brew install golang-migrate
+	brew install golang-migrate gnupg
 	go install github.com/air-verse/air@v1.52.3
 	go install github.com/a-h/templ/cmd/templ@v0.2.793
 	npm install
+	npx husky init
 
 	@echo 'add "go.goroot:"$$GOROOT" to settings.json VsCode'
 	@echo 'after run "make db_init' 
@@ -43,6 +48,17 @@ install:
 
 
 # DB commands
+db/encode:
+	tar -czvf database/migration/database.tar.gz database/migration
+	gpg -c database/migration/database.tar.gz
+	shred -u database/migration/*.sql database/migration/database.tar.gz
+
+db/decode:
+	gpg database/migration/database.tar.gz.gpg
+	tar -xzvf database/migration/database.tar.gz
+	shred -u database/migration/database.tar.gz.gpg database/migration/database.tar.gz
+
+
 db/combine/script:
 	cd database/migration/ && cat $$(ls | grep .up.sql)| grep -v '^--' > ../../output.sql
 

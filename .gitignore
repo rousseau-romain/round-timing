@@ -4,5 +4,8 @@ output.sql
 tmp
 .env
 .env.prod
+.env.staging
+database/migration/*.sql
 vendor
 node_modules
+**/*.DS_Store

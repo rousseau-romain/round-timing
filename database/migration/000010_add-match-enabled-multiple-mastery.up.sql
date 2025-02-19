@@ -1,1 +1,0 @@
-ALTER table `match` ADD COLUMN multiple_mastery_enabled BOOLEAN NOT NULL DEFAULT TRUE;
