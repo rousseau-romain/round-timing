@@ -11,7 +11,6 @@ RUN apt update && apt-get install -y nodejs \
 && go install github.com/a-h/templ/cmd/templ@v0.2.793 \
 && npm install \
 && go mod download \
-&& make build/commit-id \
 && make build/tailwind \
 && make build/templ \
 && go build -o /main .

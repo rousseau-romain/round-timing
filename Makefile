@@ -31,14 +31,16 @@ build/tailwind:
 build/templ:
 	templ generate
 
-build/commit-id:
+build/commit-id-to-git:
 	git rev-parse HEAD | jq -R '{commit_id: .}' > config/commit-id.json
+	git add config/commit-id.json
 
 install:
 	brew install golang-migrate
 	go install github.com/air-verse/air@v1.52.3
 	go install github.com/a-h/templ/cmd/templ@v0.2.793
 	npm install
+	npx husky init
 
 	@echo 'add "go.goroot:"$$GOROOT" to settings.json VsCode'
 	@echo 'after run "make db_init' 

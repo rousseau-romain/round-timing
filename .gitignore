@@ -5,7 +5,6 @@ tmp
 .env
 .env.prod
 .env.staging
-config/commit-id.json
 vendor
 node_modules
 **/*.DS_Store
