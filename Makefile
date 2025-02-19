@@ -31,9 +31,8 @@ build/tailwind:
 build/templ:
 	templ generate
 
-build/commit-id-to-git:
-	git rev-parse HEAD | jq -R '{commit_id: .}' > config/commit-id.json
-	git add config/commit-id.json
+build/commit-id:
+	echo "{\"commit_id\": \"$(Arguments)\"}" > config/commit-id.json
 
 install:
 	brew install golang-migrate gnupg

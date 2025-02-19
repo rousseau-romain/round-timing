@@ -5,6 +5,7 @@ tmp
 .env
 .env.prod
 .env.staging
+config/commit-id.json
 database/migration/*.sql
 vendor
 node_modules
