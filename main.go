@@ -79,6 +79,7 @@ func run() error {
 
 	// PAGES ROUTE
 	r.Handle("/", auth.AllowToBeAuth(handler.HandlersHome, authService)).Methods("GET")
+	r.Handle("/commit-id", auth.AllowToBeAuth(handler.HandlerCommitId, authService)).Methods("GET")
 
 	r.Handle("/privacy", auth.AllowToBeAuth(handler.HandlerPrivacy, authService)).Methods("GET")
 	r.Handle("/cgu", auth.AllowToBeAuth(handler.HandlerCGU, authService)).Methods("GET")
