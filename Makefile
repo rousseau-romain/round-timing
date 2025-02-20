@@ -1,6 +1,7 @@
 include .env
 
 DATABASE_URL=${DB_DRIVER}://${DB_USER}:${DB_PASSWORD}@tcp(${DB_HOST}:${DB_PORT})/${DB_NAME}
+COMMIT_ID := $(shell git rev-parse HEAD)
 
 Arguments := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 Command := $(firstword $(MAKECMDGOALS))
@@ -23,7 +24,8 @@ live/tailwind:
 	@npx tailwindcss -i input.css -o public/tailwind.css --watch
 
 live: 
-	make -j4 live/templ live/tailwind live/go build/commit-id
+	make build/commit-id ${COMMIT_ID}
+	make -j4 live/templ live/tailwind live/go 
 
 build/tailwind:
 	npx tailwindcss -i input.css -o public/tailwind.css --minify
@@ -39,7 +41,6 @@ install:
 	go install github.com/air-verse/air@v1.52.3
 	go install github.com/a-h/templ/cmd/templ@v0.2.793
 	npm install
-	npx husky init
 
 	@echo 'add "go.goroot:"$$GOROOT" to settings.json VsCode'
 	@echo 'after run "make db_init' 
