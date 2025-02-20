@@ -30,7 +30,7 @@ templ TeamPlayer(p model.Player, m model.Match) {
 		<td class="whitespace-nowrap px-4 py-2">
 			<button
 				hx-delete={ fmt.Sprintf("/match/%d/player/%d", m.Id, p.Id) }
-				hx-on::after-request="setTimeout(performAnimation, 750)"
+				hx-on::after-request="setTimeout(performAnimation, 250)"
 				class="inline-block rounded bg-red-600 px-4 py-2 text-xs font-medium text-white hover:bg-red-700"
 			>
 				{ i18n.T(ctx, "global.buttons.delete") }
@@ -40,8 +40,8 @@ templ TeamPlayer(p model.Player, m model.Match) {
 }
 
 templ TeamPlayerTable(players []model.Player, match model.Match) {
-	<div class="bg-red-200"></div>
-	<div class="bg-indigo-200"></div>
+	<div class="bg-red-200 border-red-200"></div>
+	<div class="bg-indigo-200 border-indigo-200"></div>
 	// SHITY WORKAROUND
 	<script>
 		function handleClickImage(img) {
@@ -52,9 +52,9 @@ templ TeamPlayerTable(players []model.Player, match model.Match) {
 			}
 		}
 	</script>
-	<div class="overflow-x-auto mb-5">
+	<div id="div-table-button" class="overflow-x-auto mb-5 flex-col items-center hidden">
 		<table
-			class="min-w-full divide-y-2 divide-gray-200 bg-white text-sm dark:divide-gray-700 dark:bg-gray-900"
+			class="mb-2 min-w-full divide-y-2 divide-gray-200 bg-white text-sm dark:divide-gray-700 dark:bg-gray-900"
 		>
 			<thead class="ltr:text-left rtl:text-right">
 				<tr>
@@ -66,7 +66,7 @@ templ TeamPlayerTable(players []model.Player, match model.Match) {
 				</tr>
 			</thead>
 			<tbody
-				hx-swap="outerHTML swap:0.5s"
+				hx-swap="outerHTML swap:0.1s"
 				hx-target="closest tr"
 				class="divide-y divide-gray-200 dark:divide-gray-700"
 			>
@@ -75,13 +75,24 @@ templ TeamPlayerTable(players []model.Player, match model.Match) {
 				}
 			</tbody>
 		</table>
+		<a
+			id="link-start-match-body"
+			href={ templ.SafeURL(fmt.Sprintf("/match/%d/start", match.Id)) }
+			class="max-w-max rounded-lg bg-black px-5 py-3 font-medium text-white sm:w-auto"
+		>
+			if match.Round > 0 {
+				{ i18n.T(ctx, "page.match.button.go-to-match") }
+			} else {
+				{ i18n.T(ctx, "page.match.button.start-match") }
+			}
+		</a>
 	</div>
 }
 
 templ TeamPlayerListPage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, pageSlug string, modelUser model.User, match model.Match, teams []model.Team, classes []model.Class, players []model.Player) {
 	@components.Layout(i18n.T(ctx, "page.match.title", i18n.M{"name": match.Name}), errors, userGoth, user, navItems, languages, pageSlug) {
 		<div class="container mx-auto">
-			<h1>{ i18n.T(ctx, "page.match.h1") }</h1>
+			<h1 class="mb-2">{ i18n.T(ctx, "page.match.h1") }</h1>
 			if match.Round > 0 {
 				<button
 					type="submit"
@@ -91,100 +102,44 @@ templ TeamPlayerListPage(userGoth goth.User, user model.User, errors components.
 					{ i18n.T(ctx, "page.match.button.reset-match") }
 				</button>
 			} else {
-				<form
-					class="space-y-4"
-					hx-post={ fmt.Sprintf("/match/%d/player", match.Id) }
-					hx-swap="afterbegin"
-					hx-target="next tbody"
-					hx-on::after-request="performAnimation()"
-					hx-target-error="#errors"
-				>
-					<div>
-						<label class="sr-only" for="idColorTeam">Color Team</label>
-						<select
-							class="w-full rounded-lg border-gray-200 p-3 text-sm"
-							required
-							name="idTeam"
-							id="team"
-							onchange="updateInput(this)"
-						>
-							for _, team := range teams {
-								<option
-									value={ fmt.Sprintf("%d", team.Id) }
-								>
-									{ team.Color }
-								</option>
-							}
-						</select>
-					</div>
-					<div>
-						<label class="sr-only" for="class">Class Team</label>
-						<select
-							class="w-full rounded-lg border-gray-200 p-3 text-sm"
-							required
-							name="idClass"
-							id="class"
-							onchange="updateInput(this)"
-						>
-							for _, class := range classes {
-								<option value={ fmt.Sprintf("%d", class.Id) }>{ class.Name }</option>
-							}
-						</select>
-					</div>
-					<div>
-						<label class="sr-only" for="name">Name</label>
-						<input
-							class="w-full rounded-lg border-gray-200 p-3 text-sm"
-							placeholder={ i18n.T(ctx, "page.match.input-placeholder-player-name") }
-							required
-							type="text"
-							name="name"
-							id="name"
-						/>
-					</div>
-					<script>
-						function updateInput(option){
-							const inputElement = document.getElementById("name")
-							const selectorClass = document.getElementById("class")
-							const selectorTeam = document.getElementById("team")
-							const nameClass = selectorClass.options[selectorClass.selectedIndex].text
-							const colorTeam = selectorTeam.options[selectorTeam.selectedIndex].text
-							inputElement.value = `${nameClass} - ${colorTeam}`
-
-						}
-					</script>
-					<button
-						type="submit"
-						class="inline-block w-full rounded-lg bg-black px-5 py-3 font-medium text-white sm:w-auto"
+				for _, team := range teams {
+					<div
+						class={ "flex items-center justify-between",
+								"border-2 rounded-md p-2 mb-2",
+								"border-" + team.Color + "-200" }
 					>
-						{ i18n.T(ctx, "page.match.button.add-player") }
-					</button>
-				</form>
+						for _, class := range classes {
+							<button
+								class={
+									"rounded-md lg:w-16 lg:h-16 md:w-12 md:h-12 w-8 h-8",
+									"bg-" + team.Color + "-200",
+								}
+								hx-post={ fmt.Sprintf("/match/%d/player", match.Id) }
+								hx-vals={ fmt.Sprintf(`{"idTeam": "%d", "idClass": "%d", "name": "%s"}`, team.Id, class.Id, class.Name+" - "+team.Color) }
+								hx-swap="afterbegin"
+								hx-target="next tbody"
+								hx-on::after-request="performAnimation()"
+								hx-target-error="#errors"
+							>
+								<img class="img-class lg:h-12 md:h-9 h-6 w-max mx-auto" alt={ class.Name } src={ class.UrlImage + "F.svg" }/>
+							</button>
+						}
+					</div>
+				}
 			}
 			@TeamPlayerTable(players, match)
-			<a
-				id="link-start-match-body"
-				href={ templ.SafeURL(fmt.Sprintf("/match/%d/start", match.Id)) }
-				class="w-full rounded-lg bg-black px-5 py-3 font-medium text-white sm:w-auto hidden"
-			>
-				if match.Round > 0 {
-					{ i18n.T(ctx, "page.match.button.go-to-match") }
-				} else {
-					{ i18n.T(ctx, "page.match.button.start-match") }
-				}
-			</a>
 			<script>
 				function performAnimation() {
 					const tbody = document.querySelector("tbody");
-					const a = document.getElementById("link-start-match-body");
+					const divTableButton = document.getElementById("div-table-button");
 
 					if (tbody.children.length > 0) {
-						a.classList.add("inline-block");
-						a.classList.remove("hidden");
+						divTableButton.classList.add("flex");
+						divTableButton.classList.remove("hidden");
 					}
 					else {
-						a.classList.remove("inline-block");
-						a.classList.add("hidden");
+						divTableButton.classList.remove("flex");
+						divTableButton.classList.add("hidden");
 					}
 				}
 				performAnimation()

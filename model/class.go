@@ -17,13 +17,13 @@ func GetClasses(idLanguage int) ([]Class, error) {
 		SELECT
 			c.id,
 			cn.name,
-			? AS url_image
+			` + helper.GetUrlImageClassClause("c.id") + ` AS url_image
 		FROM class c
 		JOIN class_translation cn ON cn.id_class = c.id AND cn.id_language = ?
 		WHERE c.id != 13
 	`
 
-	rows, err := db.Query(sql, helper.GetUrlImageClassClause("c.id"), idLanguage)
+	rows, err := db.Query(sql, idLanguage)
 
 	if err != nil {
 		log.Println(err)
