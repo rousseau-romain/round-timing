@@ -11,6 +11,7 @@ require (
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
+	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/invopop/yaml v0.2.0 // indirect
 	golang.org/x/oauth2 v0.17.0 // indirect
@@ -21,6 +22,7 @@ require (
 
 require (
 	github.com/go-sql-driver/mysql v1.7.1
+	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/gorilla/sessions v1.2.2
 	github.com/huandu/go-sqlbuilder v1.25.0
