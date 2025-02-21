@@ -1,5 +1,8 @@
 en:
   global:
+    team:
+      red: "Red"
+      indigo: "Blue"
     header:
       signin: "Sign in"
       select-language: "Select language"

@@ -1,5 +1,8 @@
 pt:
   global:
+    team:
+      red: "Vermelho"
+      indigo: "Azul"
     header:
       signin: "Entrar"
       select-language: "Selecionar idioma"

@@ -1,5 +1,8 @@
 fr:
   global:
+    team:
+      red: "Rouge"
+      indigo: "Bleu"
     header:
       signin: "Connexion"
       select-language: "Selectionner la langue"
