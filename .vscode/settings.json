@@ -3,6 +3,9 @@
         "**/*_templ.txt": true,
         "**/*_templ.go": true
     },
+    "[templ]": {
+        "editor.defaultFormatter": "a-h.templ",
+    },
     "emmet.includeLanguages": {
         "html": "javascript",
         "templ": "html"

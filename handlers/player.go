@@ -8,7 +8,6 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/helper"
 	"github.com/rousseau-romain/round-timing/model"
-	"github.com/rousseau-romain/round-timing/shared/components"
 	"github.com/rousseau-romain/round-timing/views/page"
 
 	"github.com/gorilla/mux"
@@ -42,10 +41,12 @@ func (h *Handler) HandlersCreatePlayer(w http.ResponseWriter, r *http.Request) {
 
 	if canCreatePlayerInTeam == MaxPlayerByTeam {
 		w.WriteHeader(http.StatusBadRequest)
-		components.ErrorMessages(components.Error{
-			Title:    i18n.T(r.Context(), "global.error") + " " + r.FormValue("name"),
-			Messages: []string{i18n.T(r.Context(), "page.match.max-player-by-team")},
-		}).Render(r.Context(), w)
+		RenderComponentError(
+			i18n.T(r.Context(), "global.error")+" "+r.FormValue("name"),
+			[]string{i18n.T(r.Context(), "page.match.max-player-by-team")},
+			w,
+			r,
+		)
 		return
 	}
 

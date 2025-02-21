@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/service/auth"
@@ -28,4 +29,11 @@ func New(auth *auth.AuthService) *Handler {
 		},
 		languages: languages,
 	}
+}
+
+func RenderComponentError(title string, message []string, w http.ResponseWriter, r *http.Request) {
+	components.ErrorMessages(components.Error{
+		Title:    title,
+		Messages: message,
+	}).Render(r.Context(), w)
 }
