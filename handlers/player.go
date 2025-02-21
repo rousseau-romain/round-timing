@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/helper"
@@ -19,7 +20,7 @@ var MaxPlayerByTeam = 8
 func (h *Handler) HandlersUpdatePlayer(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	name := r.FormValue("name")
+	name := strings.TrimSpace(r.FormValue("name"))
 	idPlayer, _ := strconv.Atoi(vars["idPlayer"])
 	if name == "" {
 		log.Printf("%s", fmt.Sprintf("Player (%d) need a name not (%s)", idPlayer, name))
