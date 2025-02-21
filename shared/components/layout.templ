@@ -170,7 +170,7 @@ templ ErrorMessages(errors Error) {
 		<div class="error w-screen h-screen absolute top-0 right-0 bg-gray-800 bg-opacity-40 cursor-pointer place-items-center justify-center flex">
 			<div
 				role="alert"
-				class="relative mr-4 ml-4 w-fit rounded border-s-4 border-red-500 bg-red-50 p-4 dark:border-red-600 dark:bg-red-900"
+				class="z-50 pr-10 relative mr-4 ml-4 w-fit rounded border-s-4 border-red-500 bg-red-50 p-4 dark:border-red-600 dark:bg-red-900"
 			>
 				<div class="close absolute right-2 top-2">
 					<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -191,7 +191,9 @@ templ ErrorMessages(errors Error) {
 					</div>
 				}
 				for _, e := range errors.Messages {
-					<p class="mt-2 text-sm text-red-700 dark:text-red-200">{ e }</p>
+					if e != "" {
+						<p class="mt-2 text-sm text-red-700 dark:text-red-200">{ e }</p>
+					}
 				}
 			</div>
 			<script>

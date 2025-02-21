@@ -87,9 +87,11 @@ func run() error {
 	r.Handle("/match", auth.RequireAuth(handler.HandlersCreateMatch, authService)).Methods("POST")
 	r.Handle("/match/{idMatch:[0-9]+}", auth.RequireAuthAndHisMatch(handler.HandlersDeleteMatch, authService)).Methods("DELETE")
 	r.Handle("/match/{idMatch:[0-9]+}", auth.RequireAuthAndHisMatch(handler.HandlersMatch, authService)).Methods("GET")
+	r.Handle("/match/{idMatch:[0-9]+}/spectate", auth.RequireAuthAndSpectateOfUserMatch(handler.HandlerSpectateMatch, authService)).Methods("GET")
 	r.Handle("/match/{idMatch:[0-9]+}/start", auth.RequireAuthAndHisMatch(handler.HandlerStartMatchPage, authService)).Methods("GET")
 	r.Handle("/match/{idMatch:[0-9]+}/reset", auth.RequireAuthAndHisMatch(handler.HandlerResetMatchPage, authService)).Methods("PATCH")
 	r.Handle("/match/{idMatch:[0-9]+}/increase-round", auth.RequireAuthAndHisMatch(handler.HandlerMatchNextRound, authService)).Methods("GET")
+	r.Handle("/match/{idMatch:[0-9]+}/table-live", auth.AllowToBeAuth(handler.HandlerMatchTableLive, authService)).Methods("GET")
 	r.Handle("/match/{idMatch:[0-9]+}/toggle-mastery/{toggleBool:[0-1]}", auth.RequireAuthAndHisMatch(handler.HandlerToggleMatchMastery, authService)).Methods("GET")
 	r.Handle("/match/{idMatch:[0-9]+}/player-spell/{idPlayerSpell:[0-9]+}/use", auth.RequireAuthAndHisMatch(handler.HandlerUsePlayerSpell, authService)).Methods("GET")
 	r.Handle("/match/{idMatch:[0-9]+}/player-spell/{idPlayerSpell:[0-9]+}/remove-round-recovery", auth.RequireAuthAndHisMatch(handler.HandlerRemoveRoundRecoveryPlayerSpell, authService)).Methods("GET")
@@ -97,6 +99,8 @@ func run() error {
 	r.Handle("/match/{idMatch:[0-9]+}/player/{idPlayer:[0-9]+}", auth.RequireAuthAndHisMatch(handler.HandlersDeletePlayer, authService)).Methods("DELETE")
 
 	r.Handle("/profile", auth.RequireAuth(handler.HandlersProfile, authService)).Methods("GET")
+	r.Handle("/profile/user-spectate", auth.RequireAuth(handler.HandlersProfileAddSpectate, authService)).Methods("POST")
+	r.Handle("/profile/user-spectate", auth.RequireAuth(handler.HandlersProfileDeleteSpectate, authService)).Methods("DELETE")
 	r.Handle(fmt.Sprintf("/user/{idUser:[0-9]+}/locale/{code:(?:%s)}", regexCode), auth.RequireAuthAndHisAccount(handler.HandlersPlayerLanguage, authService)).Methods("PATCH")
 
 	r.Handle("/signin", auth.RequireNotAuth(handler.HandleLogin, authService)).Methods("GET")
