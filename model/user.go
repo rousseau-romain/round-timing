@@ -16,6 +16,7 @@ type User struct {
 	Email         string `json:"email"`
 	IdLanguage    int    `json:"id_language"`
 	IsAdmin       bool   `json:"is_admin"`
+	IdShare       string `json:"id_share"`
 }
 type UserUpdate struct {
 	Enabled    *bool
@@ -36,7 +37,8 @@ func GetUsers() ([]User, error) {
 			email,
 			id_language,
 			enabled,
-			is_admin
+			is_admin,
+			id_share
 		FROM user
 	`
 
@@ -57,6 +59,7 @@ func GetUsers() ([]User, error) {
 			&user.IdLanguage,
 			&user.Enabled,
 			&user.IsAdmin,
+			&user.IdShare,
 		)
 		if err != nil {
 			log.Println(err)
@@ -78,7 +81,8 @@ func GetUserById(idUser int) (User, error) {
 				enabled,
 				email,
 				id_language,
-				is_admin
+				is_admin,
+				id_share
 			FROM user
 			WHERE id = ?
 		`
@@ -90,6 +94,7 @@ func GetUserById(idUser int) (User, error) {
 		&user.Email,
 		&user.IdLanguage,
 		&user.IsAdmin,
+		&user.IdShare,
 	)
 
 	if err != nil {
@@ -110,13 +115,14 @@ func GetUserIdByMatch(idmatch int) (User, error) {
 			u.enabled,
 			u.email,
 			u.id_language,
-			u.is_admin
+			u.is_admin,
+			u.id_share
 		FROM %s AS m
 		JOIN user AS u ON m.id_user = u.id
 		WHERE m.id = ?
 	`, "`match`")
 
-	err := db.QueryRow(sql, idmatch).Scan(&user.Id, &user.Oauth2Id, &user.Enabled, &user.Email, &user.IdLanguage, &user.IsAdmin)
+	err := db.QueryRow(sql, idmatch).Scan(&user.Id, &user.Oauth2Id, &user.Enabled, &user.Email, &user.IdLanguage, &user.IsAdmin, &user.IdShare)
 	if err != nil && err.Error() == "sql: no rows in result set" {
 		return user, nil
 	}
@@ -131,10 +137,10 @@ func GetUserByOauth2Id(oauth2Id string) (User, error) {
 	user := User{}
 
 	sb := sqlbuilder.NewSelectBuilder()
-	sb.Select("id", "oauth2_id", "enabled", "email", "id_language", "is_admin").From("user").Where(sb.Equal("oauth2_id", oauth2Id))
+	sb.Select("id", "oauth2_id", "enabled", "email", "id_language", "is_admin", "id_share").From("user").Where(sb.Equal("oauth2_id", oauth2Id))
 	sql, args := sb.Build()
 
-	err := db.QueryRow(sql, args...).Scan(&user.Id, &user.Oauth2Id, &user.Enabled, &user.Email, &user.IdLanguage, &user.IsAdmin)
+	err := db.QueryRow(sql, args...).Scan(&user.Id, &user.Oauth2Id, &user.Enabled, &user.Email, &user.IdLanguage, &user.IsAdmin, &user.IdShare)
 	if err != nil && err.Error() == "sql: no rows in result set" {
 		return user, nil
 	}
@@ -146,6 +152,22 @@ func UserExistsByOauth2Id(oauth2Id string) (bool, error) {
 
 	sb := sqlbuilder.NewSelectBuilder()
 	sb.Select("id").From("user").Where(sb.Equal("oauth2_id", oauth2Id))
+	sql, args := sb.Build()
+
+	err := db.QueryRow(sql, args...).Scan(&userId)
+
+	if err != nil {
+		return false, nil
+	}
+
+	return userId != 0, err
+}
+
+func UserExistsByIdShare(idShare string) (bool, error) {
+	userId := 0
+
+	sb := sqlbuilder.NewSelectBuilder()
+	sb.Select("id").From("user").Where(sb.Equal("id_share", idShare))
 	sql, args := sb.Build()
 
 	err := db.QueryRow(sql, args...).Scan(&userId)

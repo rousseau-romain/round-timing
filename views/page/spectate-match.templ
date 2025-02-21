@@ -1,0 +1,13 @@
+package page
+
+import (
+	"github.com/markbates/goth"
+	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/shared/components"
+)
+
+templ SpectateMatchPage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, pageSlug string, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell, isSpectator bool) {
+	@components.Layout("Start match", errors, userGoth, user, navItems, languages, pageSlug) {
+		@DivPlayerTable(match, players, playersSpells, isSpectator)
+	}
+}

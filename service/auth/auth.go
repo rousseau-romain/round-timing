@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/rousseau-romain/round-timing/config"
+	"github.com/rousseau-romain/round-timing/helper"
 	"github.com/rousseau-romain/round-timing/model"
 
 	"github.com/gorilla/mux"
@@ -40,7 +42,7 @@ func NewAuthService(store sessions.Store) *AuthService {
 	return &AuthService{}
 }
 
-func enabledUserIfWhiteListed(w http.ResponseWriter, r *http.Request, user model.User) {
+func enabledUserIfWhiteListed(w http.ResponseWriter, user model.User) {
 	if model.GetFeatureFlagIsEnabled("WHITE_LIST") && !user.Enabled {
 		isWhiteListed, err := model.IsEmailWhiteListed(user.Email)
 		if err != nil {
@@ -53,8 +55,11 @@ func enabledUserIfWhiteListed(w http.ResponseWriter, r *http.Request, user model
 			model.UpdateUser(user.Id, model.UserUpdate{Enabled: &t})
 			return
 		}
-		log.Printf("User %v is not white listed!", user.Email)
-		http.Redirect(w, r, "?require-user-enabled", http.StatusTemporaryRedirect)
+		errorTitle := "You can't acces here"
+		errorMessage := fmt.Sprintf("Ask to be add to whitelist at email %s", helper.MailContact)
+		log.Printf("User (%v) is not white listed!", user.Email)
+		w.Header().Set("Location", fmt.Sprintf("/?errorTitle=%s&errorMessage=%s", url.QueryEscape(errorTitle), errorMessage))
+		w.WriteHeader(http.StatusTemporaryRedirect)
 		return
 	}
 }
@@ -126,7 +131,7 @@ func RequireAuth(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFu
 			return
 		}
 
-		enabledUserIfWhiteListed(w, r, user)
+		enabledUserIfWhiteListed(w, user)
 
 		handlerFunc(w, r)
 	}
@@ -148,11 +153,13 @@ func RequireAuthAndAdmin(handlerFunc http.HandlerFunc, auth *AuthService) http.H
 			return
 		}
 
-		enabledUserIfWhiteListed(w, r, user)
+		enabledUserIfWhiteListed(w, user)
 
 		if !user.IsAdmin {
-			log.Printf("User %v is not admin!", user.Email)
-			http.Redirect(w, r, "?require-user-admin", http.StatusTemporaryRedirect)
+			errorTitle := "You can't acces here"
+			log.Printf("%s", fmt.Sprintf("User (%d) is not Admin", user.Id))
+			w.Header().Set("Location", fmt.Sprintf("/?errorTitle=%s", url.QueryEscape(errorTitle)))
+			w.WriteHeader(http.StatusTemporaryRedirect)
 			return
 		}
 
@@ -172,6 +179,58 @@ func RequireNotAuth(handlerFunc http.HandlerFunc, auth *AuthService) http.Handle
 	}
 }
 
+func RequireAuthAndSpectateOfUserMatch(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		session, err := auth.GetSessionUser(r)
+		if err != nil {
+			log.Println("User is not authenticated!")
+			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
+			return
+		}
+		user, err := model.GetUserByOauth2Id(session.UserID)
+
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		enabledUserIfWhiteListed(w, user)
+
+		vars := mux.Vars(r)
+
+		matchId, _ := strconv.Atoi(vars["idMatch"])
+
+		userMatch, err := model.GetUserIdByMatch(matchId)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		isUsersSpectateByIdUser, err := model.IsUsersSpectateByIdUser(userMatch.Id, user.IdShare)
+
+		log.Println(user.Id, userMatch.IdShare, isUsersSpectateByIdUser)
+
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if !isUsersSpectateByIdUser {
+			errorTitle := "You are not spectater"
+			errorMessage := "You are not spectator of this match ask user to add you in list spectater in this profile"
+			log.Printf("%s", fmt.Sprintf("User (%d) is not spectater for match (%d)", user.Id, matchId))
+			w.Header().Set("Location", fmt.Sprintf("/?errorTitle=%s&errorMessages=%s", url.QueryEscape(errorTitle), url.QueryEscape(errorMessage)))
+			w.WriteHeader(http.StatusTemporaryRedirect)
+			return
+		}
+
+		handlerFunc(w, r)
+	}
+}
+
 func RequireAuthAndHisMatch(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		session, err := auth.GetSessionUser(r)
@@ -188,7 +247,7 @@ func RequireAuthAndHisMatch(handlerFunc http.HandlerFunc, auth *AuthService) htt
 			return
 		}
 
-		enabledUserIfWhiteListed(w, r, user)
+		enabledUserIfWhiteListed(w, user)
 
 		vars := mux.Vars(r)
 
@@ -226,7 +285,7 @@ func RequireAuthAndHisAccount(handlerFunc http.HandlerFunc, auth *AuthService) h
 			return
 		}
 
-		enabledUserIfWhiteListed(w, r, user)
+		enabledUserIfWhiteListed(w, user)
 
 		vars := mux.Vars(r)
 

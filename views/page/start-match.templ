@@ -4,19 +4,20 @@ import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/markbates/goth"
+	"github.com/rousseau-romain/round-timing/config"
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/shared/components"
 	"strconv"
 )
 
-templ StartMatchPage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, pageSlug string, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell) {
+templ StartMatchPage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, pageSlug string, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell, isSpectator bool) {
 	@components.Layout("Start match", errors, userGoth, user, navItems, languages, pageSlug) {
-		@MatchPageTable(userGoth, user, errors, navItems, languages, pageSlug, match, players, playersSpells)
+		@MatchPageTable(userGoth, user, errors, navItems, languages, pageSlug, match, players, playersSpells, isSpectator)
 	}
 }
 
-templ MatchPageTable(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, pageSlug string, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell) {
-	<div class="flex justify-center gap-2">
+templ MatchPageTable(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, pageSlug string, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell, isSpectator bool) {
+	<div class="flex flex-wrap justify-center gap-2">
 		<button
 			type="submit"
 			class="inline-block w-full rounded-lg bg-red-600 px-5 py-3 font-medium text-white sm:w-auto"
@@ -44,6 +45,7 @@ templ MatchPageTable(userGoth goth.User, user model.User, errors components.Erro
 		>
 			{ i18n.T(ctx, "page.start-match.button.toggle-multiple-mastery") }
 		</button>
+		@components.ButtonCopy(fmt.Sprintf("%s/match/%d/spectate", config.PUBLIC_HOST_PORT, match.Id))
 	</div>
 	<div class="overflow-x-auto">
 		<script>
@@ -55,11 +57,11 @@ templ MatchPageTable(userGoth goth.User, user model.User, errors components.Erro
 				}
 			}
 		</script>
-		@PlayerTable(match, players, playersSpells)
+		@DivPlayerTable(match, players, playersSpells, isSpectator)
 	</div>
 }
 
-templ Spell(mps model.MatchPlayerSpell) {
+templ Spell(mps model.MatchPlayerSpell, isSpectator bool) {
 	<div
 		class={
 			"has-tooltip",
@@ -68,13 +70,15 @@ templ Spell(mps model.MatchPlayerSpell) {
 			templ.KV("border-yellow-500", mps.RoundBeforeRecovery == 2),
 			templ.KV("border-cyan-500", mps.RoundBeforeRecovery >= 3),
 		}
-		hx-target="this"
-		skipConfirmation
-		if mps.RoundBeforeRecovery == 0 {
-			hx-get={ fmt.Sprintf("/match/%d/player-spell/%d/use", mps.MatchId, mps.Id) }
-		} else {
-			hx-get={ fmt.Sprintf("/match/%d/player-spell/%d/remove-round-recovery", mps.MatchId, mps.Id) }
-			hx-trigger="dblclick"
+		if !isSpectator {
+			hx-target="this"
+			skipConfirmation
+			if mps.RoundBeforeRecovery == 0 {
+				hx-get={ fmt.Sprintf("/match/%d/player-spell/%d/use", mps.MatchId, mps.Id) }
+			} else {
+				hx-get={ fmt.Sprintf("/match/%d/player-spell/%d/remove-round-recovery", mps.MatchId, mps.Id) }
+				hx-trigger="dblclick"
+			}
 		}
 	>
 		<span class="tooltip rounded shadow-lg p-1 bg-gray-100 text-black -top-3/4 -left-full">
@@ -88,7 +92,7 @@ templ Spell(mps model.MatchPlayerSpell) {
 			src={ mps.Spell.UrlImage }
 			class={
 				"h-12 img-class",
-				templ.KV("cursor-pointer transition-all hover:scale-110", mps.RoundBeforeRecovery == 0),
+				templ.KV("cursor-pointer transition-all hover:scale-110", mps.RoundBeforeRecovery == 0 && !isSpectator),
 				templ.KV("grayscale", mps.RoundBeforeRecovery > 0),
 			}
 		/>
@@ -107,7 +111,7 @@ templ Spell(mps model.MatchPlayerSpell) {
 	</div>
 }
 
-templ Player(p model.Player, playersSpells []model.MatchPlayerSpell) {
+templ Player(p model.Player, playersSpells []model.MatchPlayerSpell, isSpectator bool) {
 	<tr
 		class={
 			templ.KV("bg-red-200", p.Team.Color == "red"),
@@ -122,7 +126,7 @@ templ Player(p model.Player, playersSpells []model.MatchPlayerSpell) {
 			<div class="flex gap-1 flex-wrap">
 				for _, ps := range playersSpells {
 					if ps.PlayerId == p.Id {
-						@Spell(ps)
+						@Spell(ps, isSpectator)
 					}
 				}
 			</div>
@@ -130,8 +134,22 @@ templ Player(p model.Player, playersSpells []model.MatchPlayerSpell) {
 	</tr>
 }
 
-templ PlayerTable(match model.Match, players []model.Player, spells []model.MatchPlayerSpell) {
+templ DivPlayerTable(match model.Match, players []model.Player, spells []model.MatchPlayerSpell, isSpectator bool) {
+	<div
+		if isSpectator {
+			hx-ws={ fmt.Sprintf("connect:/match/%d/table-live", match.Id) }
+			hx-ext="ws"
+			hx-trigger="ws"
+			hx-swap="innerHTML"
+		}
+	>
+		@PlayerTable(match, players, spells, isSpectator)
+	</div>
+}
+
+templ PlayerTable(match model.Match, players []model.Player, spells []model.MatchPlayerSpell, isSpectator bool) {
 	<table
+		id="ws-table-players"
 		class="min-w-full divide-y-2 divide-gray-200 bg-white text-sm dark:divide-gray-700 dark:bg-gray-900"
 	>
 		<thead class="ltr:text-left rtl:text-right">
@@ -142,12 +160,14 @@ templ PlayerTable(match model.Match, players []model.Player, spells []model.Matc
 			</tr>
 		</thead>
 		<tbody
-			hx-swap="outerHTML swap:0.5s"
-			hx-target="closest tr"
+			if !isSpectator {
+				hx-swap="outerHTML swap:0.5s"
+				hx-target="closest tr"
+			}
 			class="divide-y divide-gray-200 dark:divide-gray-700"
 		>
 			for _, player := range players {
-				@Player(player, spells)
+				@Player(player, spells, isSpectator)
 			}
 		</tbody>
 	</table>
