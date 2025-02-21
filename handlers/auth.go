@@ -57,9 +57,16 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 		if providerLoginName != "" {
 			errorTitle := i18n.T(r.Context(), "global.error") + " " + i18n.T(r.Context(), "page.signin.title")
 			errorMessage := i18n.T(r.Context(), "page.signin.already-exists-with-provider", i18n.M{"email": user.Email, "provider": providerLoginName})
+			err := gothic.Logout(w, r)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			h.auth.RemoveUserSession(w, r)
+
 			w.Header().Set("Location", fmt.Sprintf("/?errorTitle=%s&errorMessages=%s", url.QueryEscape(errorTitle), url.QueryEscape(errorMessage)))
 			w.WriteHeader(http.StatusTemporaryRedirect)
-			gothic.Logout(w, r)
 			return
 		}
 		lang := helper.GetPreferredLanguage(r)

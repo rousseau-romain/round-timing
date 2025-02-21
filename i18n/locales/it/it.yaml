@@ -72,10 +72,12 @@ it:
       input-placeholder-player-name: "Nome del giocatore"
     profile:
       title: "Profilo"
-      h1: "Ciao, %{name}!"
+      h1: "Profilo"
+      h2-hello: "Ciao, %{name}!"
       p: "Ecco il tuo profilo."
-      p-email: "Email: %{email}"
+      p-user-id: "Il tuo ID é:"
       logout: "Disconnetti"
+      no-spectate: "Non hai nessun osservatore, aggiungi uno tramite il form qui sotto."
     signin:
       title: "Accedi"
       h1: "Inizia oggi"
