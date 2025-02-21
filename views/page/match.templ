@@ -19,14 +19,6 @@ templ TeamPlayer(p model.Player, m model.Match) {
 		<td class="text-center whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">
 			{ p.Team.Name }
 		</td>
-		// <td class="whitespace-nowrap px-4 py-2">
-		// 	<a
-		// 		href={ templ.SafeURL(fmt.Sprintf("/player/%d", p.Id)) }
-		// 		class="inline-block rounded bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700"
-		// 	>
-		// 		{ i18n.T(ctx, "global.buttons.see") }
-		// 	</a>
-		// </td>
 		<td class="whitespace-nowrap px-4 py-2">
 			<button
 				hx-delete={ fmt.Sprintf("/match/%d/player/%d", m.Id, p.Id) }
@@ -102,7 +94,7 @@ templ TeamPlayerListPage(userGoth goth.User, user model.User, errors components.
 					{ i18n.T(ctx, "page.match.button.reset-match") }
 				</button>
 			} else {
-				for _, team := range teams {
+				for it, team := range teams {
 					<div
 						class={ "flex items-center justify-between",
 								"border-2 rounded-md p-2 mb-2",
@@ -116,7 +108,11 @@ templ TeamPlayerListPage(userGoth goth.User, user model.User, errors components.
 								}
 								hx-post={ fmt.Sprintf("/match/%d/player", match.Id) }
 								hx-vals={ fmt.Sprintf(`{"idTeam": "%d", "idClass": "%d", "name": "%s"}`, team.Id, class.Id, class.Name+" - "+team.Color) }
-								hx-swap="afterbegin"
+								if it == 0 {
+									hx-swap="afterbegin"
+								} else {
+									hx-swap="afterend"
+								}
 								hx-target="next tbody"
 								hx-on::after-request="performAnimation()"
 								hx-target-error="#errors"
