@@ -1067,24 +1067,12 @@ footer a:hover {
   margin-top: 2rem;
 }
 
-.box-border {
-  box-sizing: border-box;
-}
-
-.box-content {
-  box-sizing: content-box;
-}
-
 .block {
   display: block;
 }
 
 .inline-block {
   display: inline-block;
-}
-
-.inline {
-  display: inline;
 }
 
 .flex {
@@ -1141,24 +1129,10 @@ footer a:hover {
   height: 100vh;
 }
 
-.h-14 {
-  height: 3.5rem;
-}
-
-.h-6 {
-  height: 1.5rem;
-}
-
-.max-h-16 {
-  max-height: 4rem;
-}
-
 .min-h-screen {
   min-height: 100vh;
 }
 
-.min-h-8 {
-  min-height: 2rem;
 .w-1\/2 {
   width: 50%;
 }
@@ -1205,20 +1179,8 @@ footer a:hover {
   width: 100vw;
 }
 
-.w-16 {
-  width: 4rem;
-}
-
-.w-8 {
-  width: 2rem;
-}
-
 .min-w-full {
   min-width: 100%;
-}
-
-.min-w-8 {
-  min-width: 2rem;
 }
 
 .max-w-lg {
@@ -1238,13 +1200,6 @@ footer a:hover {
   max-width: 1280px;
 }
 
-.max-w-max {
-  max-width: -moz-max-content;
-  max-width: max-content;
-}
-
-.max-w-16 {
-  max-width: 4rem;
 .table-auto {
   table-layout: auto;
 }
@@ -1263,10 +1218,6 @@ footer a:hover {
 
 .grid-cols-1 {
   grid-template-columns: repeat(1, minmax(0, 1fr));
-}
-
-.flex-row {
-  flex-direction: row;
 }
 
 .flex-col {
@@ -1449,16 +1400,6 @@ footer a:hover {
 .border-yellow-500 {
   --tw-border-opacity: 1;
   border-color: rgb(234 179 8 / var(--tw-border-opacity, 1));
-}
-
-.border-indigo-200 {
-  --tw-border-opacity: 1;
-  border-color: rgb(199 210 254 / var(--tw-border-opacity, 1));
-}
-
-.border-red-200 {
-  --tw-border-opacity: 1;
-  border-color: rgb(254 202 202 / var(--tw-border-opacity, 1));
 }
 
 .bg-black {
@@ -1672,10 +1613,6 @@ footer a:hover {
 
 .text-center {
   text-align: center;
-}
-
-.align-middle {
-  vertical-align: middle;
 }
 
 .text-2xl {
@@ -2204,20 +2141,8 @@ tr.htmx-swapping td {
     display: flex;
   }
 
-  .sm\:h-6 {
-    height: 1.5rem;
-  }
-
-  .sm\:h-8 {
-    height: 2rem;
-  }
-
   .sm\:w-auto {
     width: auto;
-  }
-
-  .sm\:w-8 {
-    width: 2rem;
   }
 
   .sm\:max-w-xs {
@@ -2269,32 +2194,12 @@ tr.htmx-swapping td {
     display: none;
   }
 
-  .md\:h-8 {
-    height: 2rem;
-  }
-
-  .md\:h-6 {
-    height: 1.5rem;
-  }
-
   .md\:h-12 {
     height: 3rem;
   }
 
-  .md\:h-16 {
-    height: 4rem;
-  }
-
   .md\:h-9 {
     height: 2.25rem;
-  }
-
-  .md\:w-8 {
-    width: 2rem;
-  }
-
-  .md\:w-16 {
-    width: 4rem;
   }
 
   .md\:w-12 {
@@ -2342,20 +2247,6 @@ tr.htmx-swapping td {
 
   .lg\:pt-8 {
     padding-top: 2rem;
-  }
-}
-
-@media (min-width: 1280px) {
-  .xl\:h-12 {
-    height: 3rem;
-  }
-
-  .xl\:h-16 {
-    height: 4rem;
-  }
-
-  .xl\:w-16 {
-    width: 4rem;
   }
 }
 
