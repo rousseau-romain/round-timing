@@ -117,7 +117,7 @@ templ TeamPlayerListPage(userGoth goth.User, user model.User, errors components.
 									"bg-" + team.Color + "-200",
 								}
 								hx-post={ fmt.Sprintf("/match/%d/player", match.Id) }
-								hx-vals={ fmt.Sprintf(`{"idTeam": "%d", "idClass": "%d", "name": "%s"}`, team.Id, class.Id, class.Name+" - "+team.Color) }
+								hx-vals={ fmt.Sprintf(`{"idTeam": "%d", "idClass": "%d", "name": "%s"}`, team.Id, class.Id, class.Name+" - "+i18n.T(ctx, "global.team."+team.Color)) }
 								if it == 0 {
 									hx-swap="afterbegin"
 								} else {
