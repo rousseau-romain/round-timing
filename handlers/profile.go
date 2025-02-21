@@ -97,7 +97,7 @@ func (h *Handler) HandlersProfileDeleteSpectate(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	if err := uuid.Validate(r.FormValue("idUserShare")); err == nil {
+	if err := uuid.Validate(r.FormValue("idUserShare")); err != nil {
 		log.Println("User spectate need a id")
 		http.Error(w, "User spectate need a id", http.StatusBadRequest)
 		return

@@ -17,7 +17,7 @@ type UserSpectateCreate struct {
 
 func GetUsersSpectateByIdUser(idUser int) ([]string, error) {
 
-	sql := "SELECT id_user_share FROM user_spectate WHERE id_user = ?"
+	sql := "SELECT id_user_share FROM user_spectate WHERE id_user_share = ?"
 
 	rows, err := db.Query(sql, idUser)
 
@@ -26,25 +26,25 @@ func GetUsersSpectateByIdUser(idUser int) ([]string, error) {
 		return nil, err
 	}
 
-	userSpectateIds := []string{}
+	userShareIds := []string{}
 
 	if rows.Err() != nil {
-		return userSpectateIds, rows.Err()
+		return userShareIds, rows.Err()
 	}
 
 	for rows.Next() {
-		var userSpectateId string
+		var userShareId string
 		err := rows.Scan(
-			&userSpectateId,
+			&userShareId,
 		)
 		if err != nil {
 			log.Println(err)
 			return nil, err
 		}
-		userSpectateIds = append(userSpectateIds, userSpectateId)
+		userShareIds = append(userShareIds, userShareId)
 	}
 
-	return userSpectateIds, err
+	return userShareIds, err
 }
 
 func IsUsersSpectateByIdUser(idUser int, idUserShare string) (bool, error) {
