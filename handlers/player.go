@@ -15,6 +15,29 @@ import (
 
 var MaxPlayerByTeam = 8
 
+func (h *Handler) HandlersUpdatePlayer(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	name := r.FormValue("name")
+	log.Println("name", name)
+	idPlayer, _ := strconv.Atoi(vars["idPlayer"])
+	log.Println("idPlayer", idPlayer)
+	if name == "" {
+		http.Error(w, "Player need a name", http.StatusBadRequest)
+		return
+	}
+
+	err := model.UpdatePlayer(idPlayer, model.PlayerUpdate{
+		Name: &name,
+	})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err.Error())
+		return
+	}
+
+}
+
 func (h *Handler) HandlersCreatePlayer(w http.ResponseWriter, r *http.Request) {
 	userOauth2, _ := h.auth.GetSessionUser(r)
 	user, _ := model.GetUserByOauth2Id(userOauth2.UserID)
