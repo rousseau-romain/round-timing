@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -19,10 +20,9 @@ func (h *Handler) HandlersUpdatePlayer(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	name := r.FormValue("name")
-	log.Println("name", name)
 	idPlayer, _ := strconv.Atoi(vars["idPlayer"])
-	log.Println("idPlayer", idPlayer)
 	if name == "" {
+		log.Printf("%s", fmt.Sprintf("Player (%d) need a name not (%s)", idPlayer, name))
 		http.Error(w, "Player need a name", http.StatusBadRequest)
 		return
 	}
