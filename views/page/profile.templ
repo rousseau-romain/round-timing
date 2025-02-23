@@ -8,19 +8,17 @@ import (
 	"github.com/rousseau-romain/round-timing/shared/components"
 )
 
-templ ProfilePage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, pageSlug string, idUserShares []string) {
+templ ProfilePage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, pageSlug string, idUserShares []string, classes []model.Class, spells []model.SpellByClass) {
 	@components.Layout(i18n.T(ctx, "page.profile.title"), errors, userGoth, user, navItems, languages, pageSlug) {
 		<div class="container mx-auto">
 			<h1 class="text-2xl font-semibold">{ i18n.T(ctx, "page.profile.h1") }</h1>
 			<div class="mb-2">
-				<h2 class="font-semibold">{ i18n.T(ctx, "page.profile.h2-hello", i18n.M{"name": userGoth.Name}) }</h2>
-				<p class="text-gray-500">{ i18n.T(ctx, "page.profile.p") }</p>
 				<div class="flex gap-2">
 					<p class="text-gray-500">{ i18n.T(ctx, "page.profile.p-user-id") }</p>
 					@components.ButtonCopy(user.IdShare)
 				</div>
 			</div>
-			<h2>Utilisateurs spectateurs:</h2>
+			<h2 class="font-semibold">Utilisateurs spectateurs:</h2>
 			<div class="mb-2">
 				if len(idUserShares) == 0 {
 					<p class="text-gray-500">{ i18n.T(ctx, "page.profile.no-spectate") }</p>
@@ -47,8 +45,12 @@ templ ProfilePage(userGoth goth.User, user model.User, errors components.Error, 
 				</form>
 			</div>
 			@TableUserSpectate(idUserShares)
+			<h2 class="font-semibold mb-2">{ i18n.T(ctx, "page.profile.h2-spells-favorites") }</h2>
+			<div class="mb-2 p-2">
+				@ListSpellClass(classes, spells)
+			</div>
 			<a
-				class="inline-block rounded-md bg-sky-600 px-5 py-2.5 text-sm font-medium text-white shadow hover:bg-sky-500"
+				class="m-auto table rounded-md bg-red-600 px-6 py-3 text-md font-medium text-white shadow hover:bg-red-500"
 				href={ templ.SafeURL("/auth/logout/" + userGoth.Provider) }
 			>
 				{ i18n.T(ctx, "page.profile.logout") }
@@ -89,4 +91,43 @@ templ UserSpectate(idUserShare string) {
 			</button>
 		</td>
 	</tr>
+}
+
+templ ListSpellClass(classes []model.Class, spells []model.SpellByClass) {
+	<div class="mb-4 flex gap-4 flex-col">
+		for _, class := range(classes) {
+			<div class="border p-2 flex flex-row items-center gap-4">
+				<img
+					class="h-auto w-8 img-class"
+					alt={ class.Name }
+					title={ class.Name }
+					src={ class.UrlImage + "F.svg" }
+				/>
+				<div class="flex flex-row flex-wrap gap-2">
+					for _, spell := range(spells) {
+						if spell.IdClass == class.Id {
+							@SpellFavorite(spell)
+						}
+					}
+				</div>
+			</div>
+		}
+	</div>
+}
+
+templ SpellFavorite(s model.SpellByClass) {
+	<div
+		class="group relative cursor-pointer transition-all hover:scale-110"
+		hx-patch={ fmt.Sprintf("/profile/spell-favorite/%d/toggle-favorite", s.IdSpell) }
+		hx-swap="outerHTML"
+	>
+		<img
+			alt={ s.Name }
+			src={ s.UrlImage }
+			class="h-12 img-class"
+		/>
+		<div class="absolute -top-[7px] -left-[7px] cursor-pointer transition-all group-hover:scale-110">
+			@components.SVGHeart(s.IsFavorite, "red", 20, 20)
+		</div>
+	</div>
 }

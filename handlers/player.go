@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/helper"
@@ -14,6 +16,28 @@ import (
 )
 
 var MaxPlayerByTeam = 8
+
+func (h *Handler) HandlersUpdatePlayer(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	name := strings.TrimSpace(r.FormValue("name"))
+	idPlayer, _ := strconv.Atoi(vars["idPlayer"])
+	if name == "" {
+		log.Printf("%s", fmt.Sprintf("Player (%d) need a name not (%s)", idPlayer, name))
+		http.Error(w, "Player need a name", http.StatusBadRequest)
+		return
+	}
+
+	err := model.UpdatePlayer(idPlayer, model.PlayerUpdate{
+		Name: &name,
+	})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err.Error())
+		return
+	}
+
+}
 
 func (h *Handler) HandlersCreatePlayer(w http.ResponseWriter, r *http.Request) {
 	userOauth2, _ := h.auth.GetSessionUser(r)

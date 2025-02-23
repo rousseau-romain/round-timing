@@ -265,7 +265,7 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	spellsPlayer, err := model.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId)
+	spellsPlayer, err := model.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId, user.Id)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -316,7 +316,7 @@ func (h *Handler) HandlerToggleMatchMastery(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	spellsPlayers, err := model.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId)
+	spellsPlayers, err := model.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId, user.Id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -354,7 +354,7 @@ func (h *Handler) HandlerMatchNextRound(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	spellsPlayers, err := model.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId)
+	spellsPlayers, err := model.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId, user.Id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

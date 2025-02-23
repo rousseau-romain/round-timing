@@ -1,5 +1,8 @@
 es:
   global:
+    team:
+      red: "Rojo"
+      indigo: "Azul"
     header:
       signin: "Iniciar sesión"
       select-language: "Seleccionar idioma"
@@ -73,9 +76,8 @@ es:
     profile:
       title: "Perfil"
       h1: "Perfil"
-      h2-hello: "Hola, %{name}!"
-      p: "Aquí está tu perfil."
       p-user-id: "Tu ID es:"
+      h2-spells-favorites: "Hechizos favoritos:"
       logout: "Cerrar sesión"
       no-spectate: "No tienes ningúno espectador, agrege uno mediante el formulario de abajo."
     signin:

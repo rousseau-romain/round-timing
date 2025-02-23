@@ -27,7 +27,21 @@ func (h *Handler) HandlersProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page.ProfilePage(userOauth2, user, h.error, getPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, idUserShares).Render(r.Context(), w)
+	classes, err := model.GetClasses(user.IdLanguage)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	spells, err := model.GetFavoriteSpellsByIdUser(user.IdLanguage, user.Id)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	page.ProfilePage(userOauth2, user, h.error, getPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, idUserShares, classes, spells).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersProfileAddSpectate(w http.ResponseWriter, r *http.Request) {

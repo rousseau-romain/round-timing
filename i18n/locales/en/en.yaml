@@ -1,5 +1,8 @@
 en:
   global:
+    team:
+      red: "Red"
+      indigo: "Blue"
     header:
       signin: "Sign in"
       select-language: "Select language"
@@ -73,9 +76,8 @@ en:
     profile:
       title: "Profile"
       h1: "Profile"
-      h2-hello: "Hello, %{name}!"
-      p: "Here is your profile."
       p-user-id: "Your ID is:"
+      h2-spells-favorites: "Favorite spells:"
       logout: "Log out"
       no-spectate: "You have no spectators, add one through the form below."
     signin:

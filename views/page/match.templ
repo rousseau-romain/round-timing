@@ -10,8 +10,18 @@ import (
 
 templ TeamPlayer(p model.Player, m model.Match) {
 	<tr class={ "bg-" + p.Team.Color + "-200" }>
-		<td class="text-center whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">
-			{ p.Name }
+		<td
+			class="text-center whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white"
+		>
+			<input
+				class="text-center bg-transparent"
+				type="text"
+				name="name"
+				value={ p.Name }
+				hx-patch={ fmt.Sprintf("/match/%d/player/%d", m.Id, p.Id) }
+				hx-swap="none"
+				hx-trigger="input changed delay:500ms, keyup[key=='Enter']"
+			/>
 		</td>
 		<td class="whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">
 			<img onclick="handleClickImage(this)" alt={ p.Class.Name } src={ p.Class.UrlImage + "F.svg" } class="h-8 m-auto img-class"/>
@@ -19,14 +29,6 @@ templ TeamPlayer(p model.Player, m model.Match) {
 		<td class="text-center whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">
 			{ p.Team.Name }
 		</td>
-		// <td class="whitespace-nowrap px-4 py-2">
-		// 	<a
-		// 		href={ templ.SafeURL(fmt.Sprintf("/player/%d", p.Id)) }
-		// 		class="inline-block rounded bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700"
-		// 	>
-		// 		{ i18n.T(ctx, "global.buttons.see") }
-		// 	</a>
-		// </td>
 		<td class="whitespace-nowrap px-4 py-2">
 			<button
 				hx-delete={ fmt.Sprintf("/match/%d/player/%d", m.Id, p.Id) }
@@ -102,7 +104,7 @@ templ TeamPlayerListPage(userGoth goth.User, user model.User, errors components.
 					{ i18n.T(ctx, "page.match.button.reset-match") }
 				</button>
 			} else {
-				for _, team := range teams {
+				for it, team := range teams {
 					<div
 						class={ "flex items-center justify-between",
 								"border-2 rounded-md p-2 mb-2",
@@ -115,8 +117,12 @@ templ TeamPlayerListPage(userGoth goth.User, user model.User, errors components.
 									"bg-" + team.Color + "-200",
 								}
 								hx-post={ fmt.Sprintf("/match/%d/player", match.Id) }
-								hx-vals={ fmt.Sprintf(`{"idTeam": "%d", "idClass": "%d", "name": "%s"}`, team.Id, class.Id, class.Name+" - "+team.Color) }
-								hx-swap="afterbegin"
+								hx-vals={ fmt.Sprintf(`{"idTeam": "%d", "idClass": "%d", "name": "%s"}`, team.Id, class.Id, class.Name+" - "+i18n.T(ctx, "global.team."+team.Color)) }
+								if it == 0 {
+									hx-swap="afterbegin"
+								} else {
+									hx-swap="afterend"
+								}
 								hx-target="next tbody"
 								hx-on::after-request="performAnimation()"
 								hx-target-error="#errors"

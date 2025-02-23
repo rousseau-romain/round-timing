@@ -50,7 +50,7 @@ func (h *Handler) HandlerSpectateMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	spellsPlayers, err := model.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId)
+	spellsPlayers, err := model.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId, user.Id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -95,7 +95,7 @@ func (h *Handler) HandlerMatchTableLive(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 
-		spellsPlayers, err := model.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId)
+		spellsPlayers, err := model.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId, user.Id)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
