@@ -76,9 +76,8 @@ pt:
     profile:
       title: "Perfil"
       h1: "Perfil"
-      h2-hello: "Olá, %{name}!"
-      p: "Aqui está o seu perfil."
       p-user-id: "Seu ID é:"
+      h2-spells-favorites: "Spells favoritos:"
       logout: "Sair"
       no-spectate: " Vocé não tem nenhum espectador, adicione via o formulário abaixo."
     signin:

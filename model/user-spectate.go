@@ -17,7 +17,7 @@ type UserSpectateCreate struct {
 
 func GetUsersSpectateByIdUser(idUser int) ([]string, error) {
 
-	sql := "SELECT id_user_share FROM user_spectate WHERE id_user_share = ?"
+	sql := "SELECT id_user_share FROM user_spectate WHERE id_user = ?"
 
 	rows, err := db.Query(sql, idUser)
 
