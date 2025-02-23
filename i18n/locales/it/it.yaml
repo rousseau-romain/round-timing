@@ -76,9 +76,8 @@ it:
     profile:
       title: "Profilo"
       h1: "Profilo"
-      h2-hello: "Ciao, %{name}!"
-      p: "Ecco il tuo profilo."
       p-user-id: "Il tuo ID é:"
+      h2-spells-favorites: "Incantesimi preferiti:"
       logout: "Disconnetti"
       no-spectate: "Non hai nessun osservatore, aggiungi uno tramite il form qui sotto."
     signin:

@@ -75,10 +75,9 @@ fr:
       input-placeholder-player-name: "Nom du joueur"
     profile:
       title: "Profile"
-      h1: "Profile"
-      h2-hello: "Bonjour, %{name} !"
-      p: "Voici votre profil."
+      h1: "Profile:"
       p-user-id: "Votre identifiant est:"
+      h2-spells-favorites: "Sorts favoris:"
       logout: "Deconnexion"
       no-spectate: "Vous n'avez aucun spectateur, ajouter en via le formulaire ci-dessous."
     signin:

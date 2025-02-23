@@ -1006,6 +1006,34 @@ footer a:hover {
   top: 0.5rem;
 }
 
+.-right-\[15px\] {
+  right: -15px;
+}
+
+.-top-\[15px\] {
+  top: -15px;
+}
+
+.-right-\[10px\] {
+  right: -10px;
+}
+
+.-top-\[10px\] {
+  top: -10px;
+}
+
+.-right-\[7px\] {
+  right: -7px;
+}
+
+.-top-\[7px\] {
+  top: -7px;
+}
+
+.-left-\[7px\] {
+  left: -7px;
+}
+
 .z-20 {
   z-index: 20;
 }
@@ -1016,6 +1044,22 @@ footer a:hover {
 
 .m-auto {
   margin: auto;
+}
+
+.m-12 {
+  margin: 3rem;
+}
+
+.m-8 {
+  margin: 2rem;
+}
+
+.m-6 {
+  margin: 1.5rem;
+}
+
+.m-2 {
+  margin: 0.5rem;
 }
 
 .mx-auto {
@@ -1075,6 +1119,10 @@ footer a:hover {
   display: inline-block;
 }
 
+.inline {
+  display: inline;
+}
+
 .flex {
   display: flex;
 }
@@ -1129,6 +1177,10 @@ footer a:hover {
   height: 100vh;
 }
 
+.h-auto {
+  height: auto;
+}
+
 .min-h-screen {
   min-height: 100vh;
 }
@@ -1179,6 +1231,10 @@ footer a:hover {
   width: 100vw;
 }
 
+.w-auto {
+  width: auto;
+}
+
 .min-w-full {
   min-width: 100%;
 }
@@ -1200,6 +1256,14 @@ footer a:hover {
   max-width: 1280px;
 }
 
+.flex-shrink {
+  flex-shrink: 1;
+}
+
+.flex-shrink-0 {
+  flex-shrink: 0;
+}
+
 .table-auto {
   table-layout: auto;
 }
@@ -1218,6 +1282,10 @@ footer a:hover {
 
 .grid-cols-1 {
   grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.flex-row {
+  flex-direction: row;
 }
 
 .flex-col {
@@ -1347,6 +1415,16 @@ footer a:hover {
 
 .border-2 {
   border-width: 2px;
+}
+
+.border-x {
+  border-left-width: 1px;
+  border-right-width: 1px;
+}
+
+.border-y {
+  border-top-width: 1px;
+  border-bottom-width: 1px;
 }
 
 .border-s-4 {
@@ -1583,6 +1661,11 @@ footer a:hover {
   padding-bottom: 0.75rem;
 }
 
+.px-6 {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
 .pb-2 {
   padding-bottom: 0.5rem;
 }
@@ -1607,12 +1690,20 @@ footer a:hover {
   padding-top: 1.5rem;
 }
 
+.pt-2 {
+  padding-top: 0.5rem;
+}
+
 .text-left {
   text-align: left;
 }
 
 .text-center {
   text-align: center;
+}
+
+.align-middle {
+  vertical-align: middle;
 }
 
 .text-2xl {
@@ -1926,6 +2017,11 @@ tr.htmx-swapping td {
   background-color: rgb(254 240 138 / var(--tw-bg-opacity, 1));
 }
 
+.hover\:bg-red-500:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(239 68 68 / var(--tw-bg-opacity, 1));
+}
+
 .hover\:text-gray-500\/75:hover {
   color: rgb(107 114 128 / 0.75);
 }
@@ -1984,6 +2080,12 @@ tr.htmx-swapping td {
 .active\:bg-gray-700:active {
   --tw-bg-opacity: 1;
   background-color: rgb(55 65 81 / var(--tw-bg-opacity, 1));
+}
+
+.group:hover .group-hover\:scale-110 {
+  --tw-scale-x: 1.1;
+  --tw-scale-y: 1.1;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
 .dark\:divide-gray-700:is(.dark *) > :not([hidden]) ~ :not([hidden]) {

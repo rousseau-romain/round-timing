@@ -100,6 +100,7 @@ func run() error {
 	r.Handle("/match/{idMatch:[0-9]+}/player/{idPlayer:[0-9]+}", auth.RequireAuthAndHisMatch(handler.HandlersDeletePlayer, authService)).Methods("DELETE")
 
 	r.Handle("/profile", auth.RequireAuth(handler.HandlersProfile, authService)).Methods("GET")
+	r.Handle("/profile/spell-favorite/{idSpell:[0-9]+}/toggle-favorite", auth.RequireAuth(handler.HandlersToggleSpellFavorite, authService)).Methods("PATCH")
 	r.Handle("/profile/user-spectate", auth.RequireAuth(handler.HandlersProfileAddSpectate, authService)).Methods("POST")
 	r.Handle("/profile/user-spectate", auth.RequireAuth(handler.HandlersProfileDeleteSpectate, authService)).Methods("DELETE")
 	r.Handle(fmt.Sprintf("/user/{idUser:[0-9]+}/locale/{code:(?:%s)}", regexCode), auth.RequireAuthAndHisAccount(handler.HandlersPlayerLanguage, authService)).Methods("PATCH")
