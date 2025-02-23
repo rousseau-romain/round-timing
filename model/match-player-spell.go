@@ -70,14 +70,14 @@ func GetSpellPlayerByIdSpellsPlayers(idLanguage int, idSpellPlayer int) (MatchPl
 	return matchSpell, err
 }
 
-func GetSpellsPlayersByIdMatch(idLanguage, idMatch int) ([]MatchPlayerSpell, error) {
+func GetSpellsPlayersByIdMatch(idLanguage, idMatch, idUser int) ([]MatchPlayerSpell, error) {
 	matchSpells := []MatchPlayerSpell{}
-	masteryClause := "(m.multiple_mastery_enabled = 0 AND (s.id NOT IN ("
+	masteryClause := "m.multiple_mastery_enabled = 0 AND (s.id NOT IN ("
 	for _, id := range helper.MasteryIdSpells {
 		masteryClause += fmt.Sprintf("%d, ", id)
 	}
 	masteryClause = masteryClause[:len(masteryClause)-2]
-	masteryClause += ")))"
+	masteryClause += "))"
 
 	sql := `
 		SELECT
@@ -94,13 +94,21 @@ func GetSpellsPlayersByIdMatch(idLanguage, idMatch int) ([]MatchPlayerSpell, err
 		FROM match_player_spell AS mps
 		JOIN spell AS s ON s.id = mps.spell_id
 		JOIN spell_translation AS st ON st.id_spell = s.id AND st.id_language = ?
-		JOIN ` + "`match`" + ` AS m ON m.id = mps.match_id 
-		WHERE match_id = ?
-		AND ` + masteryClause + `
-		OR (m.multiple_mastery_enabled = 1)
+		JOIN ` + "`match`" + ` AS m ON m.id = mps.match_id
+		LEFT JOIN favorite_spell fs ON fs.id_spell = s.id AND fs.id_user = ?
+		WHERE (
+			mps.match_id = ?
+			AND (
+				(
+					` + masteryClause + `
+				)
+				OR (m.multiple_mastery_enabled = 1)
+			)
+		)
+		ORDER BY mps.player_id DESC, IF(fs.id_spell IS NULL , 1, 2) DESC, fs.id ASC ,s.id ASC
 	`
 	// why can't use ?
-	rows, err := db.Query(sql, idLanguage, idMatch)
+	rows, err := db.Query(sql, idLanguage, idUser, idMatch)
 
 	if err != nil {
 		log.Println(err)
