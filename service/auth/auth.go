@@ -1,12 +1,15 @@
 package auth
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/rousseau-romain/round-timing/config"
 	"github.com/rousseau-romain/round-timing/helper"
 	"github.com/rousseau-romain/round-timing/model"
@@ -42,40 +45,51 @@ func NewAuthService(store sessions.Store) *AuthService {
 	return &AuthService{}
 }
 
-func enabledUserIfWhiteListed(w http.ResponseWriter, user model.User) {
+func GenerateCSRFToken(sessionID string) string {
+	token, _ := helper.GenerateSalt()
+	csrfTokens[sessionID] = token
+	return token
+}
+
+var csrfTokens = make(map[string]string) // Store CSRF tokens
+
+type Claims struct {
+	Email string `json:"email"`
+	jwt.RegisteredClaims
+}
+
+func enabledUserIfWhiteListed(w http.ResponseWriter, user model.User) bool {
 	if model.GetFeatureFlagIsEnabled("WHITE_LIST") && !user.Enabled {
 		isWhiteListed, err := model.IsEmailWhiteListed(user.Email)
 		if err != nil {
 			log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return false
 		}
 		if isWhiteListed {
 			var t = true
 			model.UpdateUser(user.Id, model.UserUpdate{Enabled: &t})
-			return
+			return true
 		}
 		errorTitle := "You can't acces here"
 		errorMessage := fmt.Sprintf("Ask to be add to whitelist at email %s", helper.MailContact)
 		log.Printf("User (%v) is not white listed!", user.Email)
-		w.Header().Set("Location", fmt.Sprintf("/?errorTitle=%s&errorMessage=%s", url.QueryEscape(errorTitle), errorMessage))
+		w.Header().Set("Location", fmt.Sprintf("/?errorTitle=%s&errorMessages=%s", url.QueryEscape(errorTitle), errorMessage))
 		w.WriteHeader(http.StatusTemporaryRedirect)
-		return
+		return false
 	}
+	return true
 }
 
 func (s *AuthService) GetSessionUser(r *http.Request) (goth.User, error) {
-	session, err := gothic.Store.Get(r, SessionName)
-	if err != nil {
-		return goth.User{}, err
-	}
 
-	u := session.Values["user"]
-	if u == nil {
-		return goth.User{}, fmt.Errorf("user is not authenticated! %v", u)
-	}
+	user, err := s.GetAuthenticateUserFromRequest(r)
 
-	return u.(goth.User), nil
+	return goth.User{
+		Email:  user.Email,
+		UserID: strconv.Itoa(user.Id),
+	}, err
+
 }
 
 func (s *AuthService) StoreUserSession(w http.ResponseWriter, r *http.Request, user goth.User) error {
@@ -95,6 +109,23 @@ func (s *AuthService) StoreUserSession(w http.ResponseWriter, r *http.Request, u
 }
 
 func (s *AuthService) RemoveUserSession(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,            // Ensure Secure flag is set if using HTTPS
+		Expires:  time.Unix(0, 0), // Expire the cookie immediately
+	})
+
+	// Expire the CSRF token cookie as well
+	http.SetCookie(w, &http.Cookie{
+		Name:    "csrf_token",
+		Value:   "",
+		Path:    "/",
+		Expires: time.Unix(0, 0),
+	})
+
 	session, err := gothic.Store.Get(r, SessionName)
 	if err != nil {
 		log.Println(err)
@@ -103,7 +134,6 @@ func (s *AuthService) RemoveUserSession(w http.ResponseWriter, r *http.Request) 
 	}
 
 	session.Values["user"] = goth.User{}
-	// delete the cookie immediately
 	session.Options.MaxAge = -1
 
 	session.Save(r, w)
@@ -111,27 +141,85 @@ func (s *AuthService) RemoveUserSession(w http.ResponseWriter, r *http.Request) 
 
 func AllowToBeAuth(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		user, _ := auth.GetAuthenticateUserFromRequest(r)
+		log.Println("AllowToBeAuth", user)
 		handlerFunc(w, r)
 	}
 }
 
+func getCookieHandler(r *http.Request, name string) (http.Cookie, error) {
+	// Retrieve a specific cookie by name
+	cookie, err := r.Cookie(name)
+	if err != nil {
+		// Handle error if the cookie is not found
+		if err == http.ErrNoCookie {
+			return http.Cookie{}, errors.New("cookie not found")
+		} else {
+			return http.Cookie{}, fmt.Errorf("error retrieving cookie: %v", err)
+		}
+	}
+	return *cookie, err
+}
+
+func (s *AuthService) GetAuthenticateUserFromRequest(r *http.Request) (model.User, error) {
+	session, err := gothic.Store.Get(r, SessionName)
+	var user model.User
+	if err != nil {
+		return user, err
+	}
+
+	u := session.Values["user"]
+
+	// User is not from OAuth2 verify if user is authenticated by email
+	if u == nil {
+		cookieToken, err := getCookieHandler(r, "token")
+		if err != nil {
+			log.Println(err)
+			return user, errors.New("user is not authenticated")
+		}
+
+		claims := Claims{}
+		token, err := jwt.ParseWithClaims(cookieToken.Value, &claims, func(token *jwt.Token) (interface{}, error) {
+			return []byte(config.JWT_SECRET_KEY), nil
+		})
+		if err != nil || !token.Valid {
+			log.Printf("Unauthorized: Invalid token %s", cookieToken.Value)
+			return user, err
+		}
+
+		// Extract claims and use them
+		if claims, ok := token.Claims.(*Claims); ok && token.Valid {
+			user, err := model.GetUserByEmail(claims.Email)
+			if err != nil {
+				log.Printf("Error fetching user by email: %s %v", claims.Email, err)
+				return user, err
+			}
+			return user, nil
+		}
+		log.Println("user is not authenticated")
+		return user, errors.New("user is not authenticated")
+	}
+
+	goticUser := u.(goth.User)
+	userDb, err := model.GetUserByOauth2Id(goticUser.UserID)
+	if err != nil {
+		log.Println("Error fetching user:", err)
+		return userDb, err
+	}
+	return userDb, nil
+}
+
 func RequireAuth(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		session, err := auth.GetSessionUser(r)
+		user, err := auth.GetAuthenticateUserFromRequest(r)
 		if err != nil {
-			log.Println("User is not authenticated!")
 			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
 			return
 		}
-		user, err := model.GetUserByOauth2Id(session.UserID)
 
-		if err != nil {
-			log.Println(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+		if !enabledUserIfWhiteListed(w, user) {
 			return
 		}
-
-		enabledUserIfWhiteListed(w, user)
 
 		handlerFunc(w, r)
 	}
@@ -139,21 +227,15 @@ func RequireAuth(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFu
 
 func RequireAuthAndAdmin(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		session, err := auth.GetSessionUser(r)
+		user, err := auth.GetAuthenticateUserFromRequest(r)
 		if err != nil {
-			log.Println("User is not authenticated!")
 			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
 			return
 		}
-		user, err := model.GetUserByOauth2Id(session.UserID)
 
-		if err != nil {
-			log.Println(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+		if !enabledUserIfWhiteListed(w, user) {
 			return
 		}
-
-		enabledUserIfWhiteListed(w, user)
 
 		if !user.IsAdmin {
 			errorTitle := "You can't acces here"
@@ -169,8 +251,8 @@ func RequireAuthAndAdmin(handlerFunc http.HandlerFunc, auth *AuthService) http.H
 
 func RequireNotAuth(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, err := auth.GetSessionUser(r)
-		if err != nil {
+		user, _ := auth.GetAuthenticateUserFromRequest(r)
+		if user.Id == 0 {
 			handlerFunc(w, r)
 			return
 		}
@@ -181,21 +263,15 @@ func RequireNotAuth(handlerFunc http.HandlerFunc, auth *AuthService) http.Handle
 
 func RequireAuthAndSpectateOfUserMatch(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		session, err := auth.GetSessionUser(r)
+		user, err := auth.GetAuthenticateUserFromRequest(r)
 		if err != nil {
-			log.Println("User is not authenticated!")
 			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
 			return
 		}
-		user, err := model.GetUserByOauth2Id(session.UserID)
 
-		if err != nil {
-			log.Println(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+		if !enabledUserIfWhiteListed(w, user) {
 			return
 		}
-
-		enabledUserIfWhiteListed(w, user)
 
 		vars := mux.Vars(r)
 
@@ -233,21 +309,15 @@ func RequireAuthAndSpectateOfUserMatch(handlerFunc http.HandlerFunc, auth *AuthS
 
 func RequireAuthAndHisMatch(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		session, err := auth.GetSessionUser(r)
+		user, err := auth.GetAuthenticateUserFromRequest(r)
 		if err != nil {
-			log.Println("User is not authenticated!")
 			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
 			return
 		}
-		user, err := model.GetUserByOauth2Id(session.UserID)
 
-		if err != nil {
-			log.Println(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+		if !enabledUserIfWhiteListed(w, user) {
 			return
 		}
-
-		enabledUserIfWhiteListed(w, user)
 
 		vars := mux.Vars(r)
 
@@ -271,21 +341,16 @@ func RequireAuthAndHisMatch(handlerFunc http.HandlerFunc, auth *AuthService) htt
 
 func RequireAuthAndHisAccount(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		session, err := auth.GetSessionUser(r)
+		user, err := auth.GetAuthenticateUserFromRequest(r)
 		if err != nil {
-			log.Println("User is not authenticated!")
+			log.Println(err)
 			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
 			return
 		}
-		user, err := model.GetUserByOauth2Id(session.UserID)
 
-		if err != nil {
-			log.Println(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+		if !enabledUserIfWhiteListed(w, user) {
 			return
 		}
-
-		enabledUserIfWhiteListed(w, user)
 
 		vars := mux.Vars(r)
 

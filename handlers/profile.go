@@ -13,8 +13,7 @@ import (
 )
 
 func (h *Handler) HandlersProfile(w http.ResponseWriter, r *http.Request) {
-	userOauth2, _ := h.auth.GetSessionUser(r)
-	user, err := model.GetUserByOauth2Id(userOauth2.UserID)
+	user, err := h.auth.GetAuthenticateUserFromRequest(r)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -41,22 +40,19 @@ func (h *Handler) HandlersProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page.ProfilePage(userOauth2, user, h.error, getPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, idUserShares, classes, spells).Render(r.Context(), w)
+	page.ProfilePage(user, h.error, getPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, idUserShares, classes, spells).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersProfileAddSpectate(w http.ResponseWriter, r *http.Request) {
-	userOauth2, _ := h.auth.GetSessionUser(r)
-	user, err := model.GetUserByOauth2Id(userOauth2.UserID)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
 
 	if err := uuid.Validate(r.FormValue("idUserShare")); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		RenderComponentError("User spectate need a valid id", []string{"User spectate need a valid id"}, w, r)
-		log.Printf("%s", fmt.Sprintf("User spectate need a valid idShared not (%s)", r.FormValue("idUserShare")))
+		RenderComponentErrorAndLog(
+			"User spectate need a valid id",
+			[]string{"User spectate need a valid id"},
+			[]string{fmt.Sprintf("User spectate need a valid idShared not (%s)", r.FormValue("idUserShare"))},
+			http.StatusBadRequest, w, r,
+		)
 		return
 	}
 
@@ -68,9 +64,12 @@ func (h *Handler) HandlersProfileAddSpectate(w http.ResponseWriter, r *http.Requ
 	}
 
 	if !userSpectateExist {
-		w.WriteHeader(http.StatusBadRequest)
-		RenderComponentError("User spectate does not exist", []string{"User spectate does not exist"}, w, r)
-		log.Println("User spectate does not exist")
+		RenderComponentErrorAndLog(
+			"User spectate does not exist",
+			[]string{"User spectate does not exist"},
+			[]string{"User spectate does not exist"},
+			http.StatusBadRequest, w, r,
+		)
 		return
 	}
 
@@ -82,9 +81,12 @@ func (h *Handler) HandlersProfileAddSpectate(w http.ResponseWriter, r *http.Requ
 	}
 
 	if IsAlreadyUsersSpectate {
-		w.WriteHeader(http.StatusBadRequest)
-		RenderComponentError("User spectate already exist", []string{"User spectate already exist"}, w, r)
-		log.Println("User spectate already exist")
+		RenderComponentErrorAndLog(
+			"User spectate already exist",
+			[]string{"User spectate already exist"},
+			[]string{"User spectate already exist"},
+			http.StatusBadRequest, w, r,
+		)
 		return
 	}
 
@@ -103,13 +105,7 @@ func (h *Handler) HandlersProfileAddSpectate(w http.ResponseWriter, r *http.Requ
 }
 
 func (h *Handler) HandlersProfileDeleteSpectate(w http.ResponseWriter, r *http.Request) {
-	userOauth2, _ := h.auth.GetSessionUser(r)
-	user, err := model.GetUserByOauth2Id(userOauth2.UserID)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
 
 	if err := uuid.Validate(r.FormValue("idUserShare")); err != nil {
 		log.Println("User spectate need a id")
@@ -117,8 +113,7 @@ func (h *Handler) HandlersProfileDeleteSpectate(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	err = model.DeleteUserSpectate(user.Id, r.FormValue("idUserShare"))
-	if err != nil {
+	if err := model.DeleteUserSpectate(user.Id, r.FormValue("idUserShare")); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

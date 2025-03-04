@@ -40,8 +40,7 @@ func (h *Handler) HandlersUpdatePlayer(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandlersCreatePlayer(w http.ResponseWriter, r *http.Request) {
-	userOauth2, _ := h.auth.GetSessionUser(r)
-	user, _ := model.GetUserByOauth2Id(userOauth2.UserID)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
 	vars := mux.Vars(r)
 
 	idMatch, _ := strconv.Atoi(vars["idMatch"])
@@ -64,10 +63,11 @@ func (h *Handler) HandlersCreatePlayer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if canCreatePlayerInTeam == MaxPlayerByTeam {
-		w.WriteHeader(http.StatusBadRequest)
-		RenderComponentError(
+		RenderComponentErrorAndLog(
 			i18n.T(r.Context(), "global.error")+" "+r.FormValue("name"),
 			[]string{i18n.T(r.Context(), "page.match.max-player-by-team")},
+			[]string{i18n.T(r.Context(), "page.match.max-player-by-team")},
+			http.StatusBadRequest,
 			w,
 			r,
 		)
@@ -136,8 +136,7 @@ func (h *Handler) HandlersDeletePlayer(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) HandlersPlayerLanguage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	userOauth2, _ := h.auth.GetSessionUser(r)
-	user, _ := model.GetUserByOauth2Id(userOauth2.UserID)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
 
 	code := vars["code"]
 	idLanguage := helper.SupportedLanguages[code]

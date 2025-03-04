@@ -1,14 +1,13 @@
-package page
+package page 
 
 import (
 	"github.com/invopop/ctxi18n/i18n"
-	"github.com/markbates/goth"
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/shared/components"
 )
 
-templ NotFoundPage(userGoth goth.User, errors components.Error, navItems []components.NavItem, languages []model.Language, pageSlug string) {
-	@components.Layout(i18n.T(ctx, "page.404.title"), errors, userGoth, model.User{}, navItems, languages, pageSlug) {
+templ NotFoundPage(popinMessage components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string) {
+	@components.Layout(i18n.T(ctx, "page.404.title"), popinMessage, model.User{}, navItems, languages, pageSlug) {
 		<div class="grid place-content-center bg-white px-4 dark:bg-gray-900">
 			<div class="text-center">
 				<h1 class="text-9xl font-black text-gray-200 dark:text-gray-700">404</h1>

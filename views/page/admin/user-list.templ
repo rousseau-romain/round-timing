@@ -3,7 +3,6 @@ package pageAdmin
 import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
-	"github.com/markbates/goth"
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/shared/components"
 )
@@ -50,7 +49,7 @@ templ UserTable(users []model.User) {
 			<thead>
 				<tr>
 					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">{ i18n.T(ctx, "global.table.id") }</th>
-					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">{ i18n.T(ctx, "global.table.email") }</th>
+					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">{ i18n.T(ctx, "global.email") }</th>
 					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">{ i18n.T(ctx, "global.table.enabled") }</th>
 					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">{ i18n.T(ctx, "global.table.role") }</th>
 				</tr>
@@ -64,8 +63,8 @@ templ UserTable(users []model.User) {
 	</div>
 }
 
-templ UserListPage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, pageSlug string, modelUser model.User, users []model.User) {
-	@components.Layout(i18n.T(ctx, "page.admin.title"), errors, userGoth, user, navItems, languages, pageSlug) {
+templ UserListPage(user model.User, popinMessage components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string, modelUser model.User, users []model.User) {
+	@components.Layout(i18n.T(ctx, "page.admin.title"), popinMessage, user, navItems, languages, pageSlug) {
 		<div class="container mx-auto">
 			<h1>{ i18n.T(ctx, "page.admin.h1") }</h1>
 			@UserTable(users)

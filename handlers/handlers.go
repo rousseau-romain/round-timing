@@ -3,6 +3,7 @@ package handlers
 import (
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/service/auth"
@@ -11,7 +12,7 @@ import (
 
 type Handler struct {
 	auth      *auth.AuthService
-	error     components.Error
+	error     components.PopinMessages
 	languages []model.Language
 }
 
@@ -23,7 +24,7 @@ func New(auth *auth.AuthService) *Handler {
 	}
 	return &Handler{
 		auth: auth,
-		error: components.Error{
+		error: components.PopinMessages{
 			Title:    "",
 			Messages: []string{},
 		},
@@ -31,9 +32,12 @@ func New(auth *auth.AuthService) *Handler {
 	}
 }
 
-func RenderComponentError(title string, message []string, w http.ResponseWriter, r *http.Request) {
-	components.ErrorMessages(components.Error{
+func RenderComponentErrorAndLog(title string, message, messageLog []string, httpCode int, w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(httpCode)
+	components.PopinMessage(components.PopinMessages{
 		Title:    title,
 		Messages: message,
+		Type:     "error",
 	}).Render(r.Context(), w)
+	log.Println(strings.Join(messageLog, "\n"))
 }
