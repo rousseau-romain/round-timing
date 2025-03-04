@@ -106,9 +106,9 @@ it:
       signup-button: "Registrati"
     signin:
       title: "Accedi"
-      h1: "Inizia oggi"
-      p: "Accedi al tuo account"
+      h1: "Accedi al tuo account"
       signin-button: "Accedi con %{provider}"
+      connect-with-email: "Accedi con la tua email"
       already-exists-with-provider: "Un account è già stato creato con l'email %{email} e il provider %{provider}."
       invalid-credentials: "Login o password errati"
       no-account: "Non hai un account?"
