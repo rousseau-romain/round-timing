@@ -25,19 +25,17 @@ func main() {
 
 func languageMiddleware(handler http.Handler, auth *auth.AuthService) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		session, err := auth.GetSessionUser(r)
+		user, _ := auth.GetAuthenticateUserFromRequest(r)
 		var lang string
-		if err != nil {
+		var err error
+		if user.Id == 0 {
 			lang = helper.GetPreferredLanguage(r)
 		} else {
-			user, err := model.GetUserByOauth2Id(session.UserID)
-			if user.Id != 0 {
-				lang, err = model.GetLanguageLocaleById(user.IdLanguage)
-				if err != nil {
-					log.Println(err)
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
-				}
+			lang, err = model.GetLanguageLocaleById(user.IdLanguage)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
 			}
 		}
 
