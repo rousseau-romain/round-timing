@@ -105,7 +105,11 @@ func run() error {
 	r.Handle("/profile/user-spectate", auth.RequireAuth(handler.HandlersProfileDeleteSpectate, authService)).Methods("DELETE")
 	r.Handle(fmt.Sprintf("/user/{idUser:[0-9]+}/locale/{code:(?:%s)}", regexCode), auth.RequireAuthAndHisAccount(handler.HandlersPlayerLanguage, authService)).Methods("PATCH")
 
+	r.Handle("/signup", auth.RequireNotAuth(handler.HandleSignupEmail, authService)).Methods("GET")
 	r.Handle("/signin", auth.RequireNotAuth(handler.HandleLogin, authService)).Methods("GET")
+
+	r.HandleFunc("/signup", handler.HandleCreateUser).Methods("POST")
+	r.HandleFunc("/signin", handler.HandleLoginEmail).Methods("POST")
 	r.HandleFunc("/auth/{provider}", handler.HandleProviderLogin).Methods("GET")
 	r.HandleFunc("/auth/{provider}/callback", handler.HandleAuthCallbackFunction).Methods("GET")
 	r.HandleFunc("/auth/logout/{provider}", handler.HandleLogout).Methods("GET")

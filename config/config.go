@@ -15,6 +15,7 @@ var (
 	DB_USER,
 	DB_URL,
 	DB_DRIVER,
+	SALT_SECRET,
 	JWT_SECRET_KEY,
 	DB_PORT,
 	PUBLIC_HOST_PORT,
@@ -44,6 +45,7 @@ func init() {
 	DB_DRIVER = os.Getenv("DB_DRIVER")
 	DB_PORT = os.Getenv("DB_PORT")
 	DB_URL = os.Getenv("DB_URL")
+	SALT_SECRET = os.Getenv("SALT_SECRET")
 	JWT_SECRET_KEY = os.Getenv("JWT_SECRET_KEY")
 
 	PUBLIC_HOST_PORT = os.Getenv("PUBLIC_HOST_PORT")

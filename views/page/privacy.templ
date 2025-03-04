@@ -2,13 +2,12 @@ package page
 
 import (
 	"github.com/invopop/ctxi18n/i18n"
-	"github.com/markbates/goth"
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/shared/components"
 )
 
-templ Privacy(userGoth goth.User, errors components.Error, navItems []components.NavItem, languages []model.Language, pageSlug string) {
-	@components.Layout(i18n.T(ctx, "page.privacy.title"), errors, userGoth, model.User{}, navItems, languages, pageSlug) {
+templ Privacy(popinMessages components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string) {
+	@components.Layout(i18n.T(ctx, "page.privacy.title"), popinMessages, model.User{}, navItems, languages, pageSlug) {
 		<div class="grid place-content-center bg-white px-4 dark:bg-gray-900">
 			<h1 class="text-center text-2xl font-bold text-indigo-600 sm:text-3xl">{ i18n.T(ctx, "page.privacy.h1") }</h1>
 			<div>
@@ -23,7 +22,7 @@ templ Privacy(userGoth goth.User, errors components.Error, navItems []components
 					<li>Améliorer le support en cas de bugs / demandes d'aide</li>
 					<li>Vous contacter par e-mail</li>
 				</ul>
-				<h2 class="text-lg font-semibold">3. Divulgation à des tiers </h2>
+				<h2 class="font-semibold text-lg">3. Divulgation à des tiers </h2>
 				<p class="mb-4">Nous ne vendons, n’échangeons et ne transférons pas vos informations personnelles identifiables à des tiers. Cela ne comprend pas les tierce parties de confiance qui nous aident à exploiter notre site Web ou à mener nos affaires, tant que ces parties conviennent de garder ces informations confidentielles. Nous pensons qu’il est nécessaire de partager des informations afin d’enquêter, de prévenir ou de prendre des mesures concernant des activités illégales, fraudes présumées, situations impliquant des menaces potentielles à la sécurité physique de toute personne, violations de nos conditions d’utilisation, ou quand la loi nous y contraint. Les informations non-privées, cependant, peuvent être fournies à d’autres parties pour le marketing et la publicité. </p>
 				<h2 class="text-lg font-semibold">4. Protection des informations </h2>
 				<p class="mb-4">Nous mettons en œuvre une variété de mesures de sécurité pour préserver la sécurité de vos informations personnelles. Nous utilisons un cryptage à la pointe de la technologie pour protéger les informations sensibles transmises en ligne. Les ordinateurs et serveurs utilisés pour stocker des informations personnelles identifiables sont conservés dans un environnement sécurisé. </p>

@@ -14,6 +14,7 @@ type User struct {
 	Oauth2Id      string `json:"oauth2_id"`
 	Enabled       bool   `json:"enabled"`
 	Email         string `json:"email"`
+	Hash          string `json:"hash"`
 	IdLanguage    int    `json:"id_language"`
 	IsAdmin       bool   `json:"is_admin"`
 	IdShare       string `json:"id_share"`
@@ -27,6 +28,7 @@ type UserCreate struct {
 	ProviderLogin string
 	Oauth2Id      string
 	Email         string
+	Hash          string
 	IdLanguage    int
 }
 
@@ -69,6 +71,44 @@ func GetUsers() ([]User, error) {
 	}
 
 	return users, err
+}
+
+func GetUserByEmail(email string) (User, error) {
+	user := User{}
+
+	sql := `
+			SELECT
+				id,
+				oauth2_id,
+				enabled,
+				email,
+				provider_login,
+				hash,
+				id_language,
+				is_admin,
+				id_share
+			FROM user
+			WHERE email = ?
+		`
+
+	err := db.QueryRow(sql, email).Scan(
+		&user.Id,
+		&user.Oauth2Id,
+		&user.Enabled,
+		&user.Email,
+		&user.ProviderLogin,
+		&user.Hash,
+		&user.IdLanguage,
+		&user.IsAdmin,
+		&user.IdShare,
+	)
+
+	if err != nil {
+		log.Println(err)
+		return user, err
+	}
+
+	return user, err
 }
 
 func GetUserById(idUser int) (User, error) {
@@ -137,10 +177,10 @@ func GetUserByOauth2Id(oauth2Id string) (User, error) {
 	user := User{}
 
 	sb := sqlbuilder.NewSelectBuilder()
-	sb.Select("id", "oauth2_id", "enabled", "email", "id_language", "is_admin", "id_share").From("user").Where(sb.Equal("oauth2_id", oauth2Id))
+	sb.Select("id", "oauth2_id", "enabled", "email", "provider_login", "id_language", "is_admin", "id_share").From("user").Where(sb.Equal("oauth2_id", oauth2Id))
 	sql, args := sb.Build()
 
-	err := db.QueryRow(sql, args...).Scan(&user.Id, &user.Oauth2Id, &user.Enabled, &user.Email, &user.IdLanguage, &user.IsAdmin, &user.IdShare)
+	err := db.QueryRow(sql, args...).Scan(&user.Id, &user.Oauth2Id, &user.Enabled, &user.Email, &user.ProviderLogin, &user.IdLanguage, &user.IsAdmin, &user.IdShare)
 	if err != nil && err.Error() == "sql: no rows in result set" {
 		return user, nil
 	}
@@ -215,11 +255,11 @@ func IsAdminUser(userId int) (bool, error) {
 func CreateUser(user UserCreate) (int64, error) {
 
 	sql := `
-		INSERT INTO user (provider_login, oauth2_id, email, id_language)
-		VALUES (?, ?, ?, ?)
+		INSERT INTO user (provider_login, oauth2_id, email, id_language, hash)
+		VALUES (?, ?, ?, ?, ?)
 	`
 
-	response, err := db.Exec(sql, user.ProviderLogin, user.Oauth2Id, user.Email, user.IdLanguage)
+	response, err := db.Exec(sql, user.ProviderLogin, user.Oauth2Id, user.Email, user.IdLanguage, user.Hash)
 
 	if err != nil {
 		log.Println(err)

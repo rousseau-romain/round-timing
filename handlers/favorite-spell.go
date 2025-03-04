@@ -11,8 +11,7 @@ import (
 )
 
 func (h *Handler) HandlersToggleSpellFavorite(w http.ResponseWriter, r *http.Request) {
-	userOauth2, _ := h.auth.GetSessionUser(r)
-	user, _ := model.GetUserByOauth2Id(userOauth2.UserID)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
 	vars := mux.Vars(r)
 	idSpell, _ := strconv.Atoi(vars["idSpell"])
 
