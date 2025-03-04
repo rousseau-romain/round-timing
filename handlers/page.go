@@ -15,8 +15,6 @@ import (
 	"github.com/rousseau-romain/round-timing/views/page"
 
 	"io"
-
-	"github.com/markbates/goth"
 )
 
 func GetPageNavDefault(r *http.Request) []components.NavItem {
@@ -80,51 +78,32 @@ func (h *Handler) HandlerCommitId(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandlersNotFound(w http.ResponseWriter, r *http.Request) {
-	userOauth2, _ := h.auth.GetSessionUser(r)
-	page.NotFoundPage(userOauth2, h.error, GetPageNavDefault(r), h.languages, r.URL.Path).Render(r.Context(), w)
+	page.NotFoundPage(h.error, GetPageNavDefault(r), h.languages, r.URL.Path).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersHome(w http.ResponseWriter, r *http.Request) {
-	userOauth2, _ := h.auth.GetSessionUser(r)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
 	pageNav := GetPageNavDefault(r)
 
-	h.error = components.Error{
+	h.error = components.PopinMessages{
 		Title:    r.URL.Query().Get("errorTitle"),
 		Messages: strings.Split(r.URL.Query().Get("errorMessages"), ","),
 	}
 
-	if userOauth2.Email != "" {
-		user, err := model.GetUserByOauth2Id(userOauth2.UserID)
-		if err != nil {
-			log.Println(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	if user.Id != 0 {
 		pageNav = getPageNavCustom(r, user, model.Match{})
-		page.HomePage(userOauth2, user, h.error, pageNav, h.languages, r.URL.Path).Render(r.Context(), w)
+		page.HomePage(user, h.error, pageNav, h.languages, r.URL.Path).Render(r.Context(), w)
 		return
 	}
-	page.HomePage(goth.User{}, model.User{}, h.error, pageNav, h.languages, r.URL.Path).Render(r.Context(), w)
+	page.HomePage(model.User{}, h.error, pageNav, h.languages, r.URL.Path).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerCGU(w http.ResponseWriter, r *http.Request) {
-	userOauth2, _ := h.auth.GetSessionUser(r)
-	user, err := model.GetUserByOauth2Id(userOauth2.UserID)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	page.CGU(userOauth2, h.error, getPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path).Render(r.Context(), w)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
+	page.CGU(h.error, getPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerPrivacy(w http.ResponseWriter, r *http.Request) {
-	userOauth2, _ := h.auth.GetSessionUser(r)
-	user, err := model.GetUserByOauth2Id(userOauth2.UserID)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	page.Privacy(userOauth2, h.error, getPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path).Render(r.Context(), w)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
+	page.Privacy(h.error, getPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path).Render(r.Context(), w)
 }

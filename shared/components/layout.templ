@@ -3,7 +3,6 @@ package components
 import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
-	"github.com/markbates/goth"
 	"github.com/rousseau-romain/round-timing/model"
 	"strconv"
 	"time"
@@ -11,12 +10,13 @@ import (
 
 var isDebug = false
 
-type Error struct {
+type PopinMessages struct {
 	Title    string
 	Messages []string
+	Type     string
 }
 
-templ Layout(title string, errors Error, userGoth goth.User, user model.User, navItems []NavItem, languages []model.Language, pageSlug string) {
+templ Layout(title string, popinMessages PopinMessages, user model.User, navItems []NavItem, languages []model.Language, pageSlug string) {
 	<html>
 		<head>
 			<title>Round Timing - { title }</title>
@@ -33,11 +33,11 @@ templ Layout(title string, errors Error, userGoth goth.User, user model.User, na
 			if isDebug {
 				<button class="border border-red-600 bg-red-300 text-red-600 top-0 right-0 absolute">Debug MOD</button>
 			}
-			@Nav(userGoth, user, navItems, languages, pageSlug)
+			@Nav(user, navItems, languages, pageSlug)
 			<div class="min-h-screen" id="content" hx-ext="response-targets">
-				<div id="errors">
-					if errors.Title != "" {
-						@ErrorMessages(errors)
+				<div id="popinMessages">
+					if popinMessages.Title != "" {
+						@PopinMessage(popinMessages)
 					}
 				</div>
 				{ children... }
@@ -51,7 +51,7 @@ type NavItem struct {
 	Name, Url string
 }
 
-templ Nav(userGoth goth.User, user model.User, navItems []NavItem, languages []model.Language, pageSlug string) {
+templ Nav(user model.User, navItems []NavItem, languages []model.Language, pageSlug string) {
 	<header class="bg-white dark:bg-gray-900">
 		<div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
 			<div class="flex h-16 items-center justify-between">
@@ -88,8 +88,12 @@ templ Nav(userGoth goth.User, user model.User, navItems []NavItem, languages []m
 				</div>
 				<div class="flex items-center gap-4">
 					<div class="sm:flex sm:gap-4">
-						if userGoth.Email != "" {
-							<a href="/profile"><img class="w-10 h-10 p-1 rounded-full" src={ userGoth.AvatarURL } alt="Bordered avatar"/></a>
+						if user.Email != "" {
+							<a href="/profile">
+								<div class="w-10 h-10 p-1 rounded-full bg-gray-200">
+									@SVGUser("currentColor", 32, 32)
+								</div>
+							</a>
 							<img alt="flag" id="header-select-language" class="cursor-pointer w-10 h-8" src={ "/public/img/flag/" + strconv.Itoa(user.IdLanguage) + ".svg" }/>
 							@PopinSelectLanguage(user, languages)
 							<script>
@@ -103,26 +107,18 @@ templ Nav(userGoth goth.User, user model.User, navItems []NavItem, languages []m
 								document.querySelector("#popin-language div").addEventListener("click", (e) => e.stopPropagation());
 							</script>
 						} else {
-							if pageSlug != "/signin" {
+							if pageSlug != "/signin" && pageSlug != "/signup" {
 								<a
 									class="rounded-md bg-sky-600 px-5 py-2.5 text-sm font-medium text-white shadow dark:hover:bg-sky-500"
 									href="/signin"
 								>
-									{ i18n.T(ctx, "global.header.signin") }
+									{ i18n.T(ctx, "global.signin") }
 								</a>
 								<div class="relative w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
 									<svg class="absolute w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
 								</div>
 							}
 						}
-						// <div class="hidden sm:flex">
-						// 	<a
-						// 		class="rounded-md bg-gray-100 px-5 py-2.5 text-sm font-medium text-sky-600 dark:bg-gray-800 dark:text-white dark:hover:text-white/75"
-						// 		href="/signup"
-						// 	>
-						// 		Register
-						// 	</a>
-						// </div>
 					</div>
 					<div class="block md:hidden">
 						<button
@@ -146,7 +142,7 @@ templ Nav(userGoth goth.User, user model.User, navItems []NavItem, languages []m
 		</div>
 	</header>
 	<div class="absolute right-0 w-fit bg-white border">
-		@MobileMenu(userGoth, user, navItems)
+		@MobileMenu(user, navItems)
 	</div>
 	<script>
 		document.querySelector("#button-burger-menu").addEventListener("click", () => {
@@ -155,7 +151,7 @@ templ Nav(userGoth goth.User, user model.User, navItems []NavItem, languages []m
 	</script>
 }
 
-templ MobileMenu(userGoth goth.User, user model.User, navItems []NavItem) {
+templ MobileMenu(user model.User, navItems []NavItem) {
 	<ul id="menu-mobile" class=" hidden space-y-1 border">
 		for _, nav := range navItems {
 			<li class="block">
@@ -165,12 +161,19 @@ templ MobileMenu(userGoth goth.User, user model.User, navItems []NavItem) {
 	</ul>
 }
 
-templ ErrorMessages(errors Error) {
-	if len(errors.Messages) > 0 {
-		<div class="error w-screen h-screen absolute top-0 right-0 bg-gray-800 bg-opacity-40 cursor-pointer place-items-center justify-center flex">
+templ PopinMessage(popinMessages PopinMessages) {
+	if len(popinMessages.Messages) > 0 {
+		<div class="popin-message w-screen h-screen absolute top-0 right-0 bg-gray-800 bg-opacity-40 cursor-pointer place-items-center justify-center flex">
 			<div
 				role="alert"
-				class="z-50 pr-10 relative mr-4 ml-4 w-fit rounded border-s-4 border-red-500 bg-red-50 p-4 dark:border-red-600 dark:bg-red-900"
+				class={
+					"z-50 pr-10 relative mr-4 ml-4 w-fit rounded border-s-4 p-4",
+					"border-gray-500 bg-gray-50 text-gray-700 dark:bg-gray-900 dark:border-gray-600",
+					templ.KV("border-green-500 bg-green-50 text-green-700 dark:bg-green-900 dark:border-green-600", popinMessages.Type == "success"),
+					templ.KV("border-red-500 bg-red-50 border600-red-700 dark:bg-red-900 dark:border-red-600", popinMessages.Type == "error"),
+					templ.KV("border-yellow-500 bg-yellow-50 text-yellow-700 dark:bg-yellow-900 dark:border-yellow-600", popinMessages.Type == "warning"),
+					templ.KV("border-sky-500 bg-sky-50 text-sky-700 dark:bg-sky-900 dark:border-sky-600", popinMessages.Type == "info"),
+				}
 			>
 				<div class="close absolute right-2 top-2">
 					<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -178,8 +181,16 @@ templ ErrorMessages(errors Error) {
 						<line x1="19" y1="5" x2="5" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
 					</svg>
 				</div>
-				if errors.Title != "" {
-					<div class="flex items-center gap-2 text-red-800 dark:text-red-100">
+				if popinMessages.Title != "" {
+					<div
+						class={
+							"flex items-center gap-2",
+							templ.KV("text-green-800 dark:text-green-100", popinMessages.Type == "success"),
+							templ.KV("text-red-800 dark:text-red-100", popinMessages.Type == "error"),
+							templ.KV("text-yellow-800 dark:text-yellow-100", popinMessages.Type == "warning"),
+							templ.KV("text-sky-800 dark:text-sky-100", popinMessages.Type == "info"),
+						}
+					>
 						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
 							<path
 								fill-rule="evenodd"
@@ -187,28 +198,40 @@ templ ErrorMessages(errors Error) {
 								clip-rule="evenodd"
 							></path>
 						</svg>
-						<strong class="block font-medium">{ errors.Title }</strong>
+						<strong class="block font-medium">{ popinMessages.Title }</strong>
 					</div>
 				}
-				for _, e := range errors.Messages {
+				for _, e := range popinMessages.Messages {
 					if e != "" {
-						<p class="mt-2 text-sm text-red-700 dark:text-red-200">{ e }</p>
+						<p
+							class={
+								"mt-2 text-sm",
+								templ.KV("text-green-700 dark:text-green-200", popinMessages.Type == "success"),
+								templ.KV("text-red-700 dark:text-red-200", popinMessages.Type == "error"),
+								templ.KV("text-yellow-700 dark:text-yellow-200", popinMessages.Type == "warning"),
+								templ.KV("text-sky-700 dark:text-sky-200", popinMessages.Type == "info"),
+							}
+						>
+							{ e }
+						</p>
 					}
 				}
 			</div>
 			<script>
-			function closeError() {
-				document.querySelector(".error").remove()
+			function closeMessage() {
+				document.querySelector(".popin-message").remove()
 				const url = new URL(window.location);
-				url.searchParams.delete('errorTitle');
-				url.searchParams.delete('errorMessages');
-				window.history.replaceState({}, document.title, url);
-				location.reload();
+				if (url.searchParams.has("errorTitle") || url.searchParams.has("errorMessages")) {
+					url.searchParams.delete("errorTitle");
+					url.searchParams.delete("errorMessages");
+					window.history.replaceState({}, document.title, url);
+					location.reload();
+				}
 			}
-			document.querySelector(".error").addEventListener("click", closeError)
-			document.querySelector(".error .close").addEventListener("click", closeError)
-			document.querySelector(".error div").addEventListener("click", (e) => e.stopPropagation())
-		</script>
+			document.querySelector(".popin-message").addEventListener("click", closeMessage)
+			document.querySelector(".popin-message .close").addEventListener("click", closeMessage)
+			document.querySelector(".popin-message div").addEventListener("click", (e) => e.stopPropagation())
+			</script>
 		</div>
 	}
 }

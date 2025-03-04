@@ -1,10 +1,12 @@
 es:
   global:
+    email: "Correo electrónico"
+    password: "Contraseña"
+    signin: "Iniciar sesión"
     team:
       red: "Rojo"
       indigo: "Azul"
     header:
-      signin: "Iniciar sesión"
       select-language: "Seleccionar idioma"
       last-match: "Última partida %{name} (%{id})"
     footer:
@@ -22,7 +24,6 @@ es:
     error: "Error"
     table:
       id: "Id"
-      email: "Correo electrónico"
       enabled: "Activo"
       disabled: "Inactivo"
       role: "Rol"
@@ -80,12 +81,38 @@ es:
       h2-spells-favorites: "Hechizos favoritos:"
       logout: "Cerrar sesión"
       no-spectate: "No tienes ningúno espectador, agrege uno mediante el formulario de abajo."
+    signup:
+      title: "Registrarse"
+      h1: "Crea tu cuenta"
+      p-already-account: "Ya tienes una cuenta?"
+      p-agree-terms:
+        1: "Al crear una cuenta, aceptas nuestros "
+        2: "términos y condiciones de uso"
+        3: " y "
+        4: "política de privacidad"
+      password-confirmation: "Confirmación de la contraseña"
+      error:
+        title: "Por favor, verifica los criterios siguientes:"
+        email:
+          not-valid: "La dirección de correo electrónica no es válida."
+          already-exists: "Ya existe una cuenta con esta dirección de correo electrónica (login Discord / Google o login clásico)."
+        password:
+          too-short: "La contraseña debe tener al menos 8 caracteres."
+          uppercase: "La contraseña debe contener al menos una letra mayúscula (A-Z)."
+          lowercase: "La contraseña debe contener al menos una letra minúscula (a-z)."
+          digit: "La contraseña debe incluir al menos un número (0-9)."
+          special: "La contraseña debe incluir al menos un caracter especial (@, $, !, %, *, ?, &)."
+          confirmation: "La contraseña y la confirmación deben coincidir."
+      signup-button: "Registrarse"
     signin:
       title: "Iniciar sesión"
-      h1: "Empieza hoy"
-      p: "Inicia sesión en tu cuenta"
+      h1: "Inicia sesión en tu cuenta"
       signin-button: "Iniciar sesión con %{provider}"
+      connect-with-email: "Iniciar sesión con tu correo electrónica"
       already-exists-with-provider: "Ya existe una cuenta con el correo electrónico %{email} y el proveedor %{provider}."
+      invalid-credentials: "Login o contraseña incorrectos"
+      no-account: "No tienes una cuenta?"
+      create-account: "Crear una"
     start-match:
       title: "Partida en curso"
       h1: "Partida en curso"

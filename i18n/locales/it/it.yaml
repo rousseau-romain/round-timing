@@ -1,10 +1,12 @@
 it:
   global:
+    email: "Email"
+    password: "Password"
+    signin: "Accedi"
     team:
       red: "Rosso"
       indigo: "Azzurro"
     header:
-      signin: "Accedi"
       select-language: "Seleziona lingua"
       last-match: "Ultima partita %{name} (%{id})"
     footer:
@@ -22,7 +24,6 @@ it:
     error: "Errore"
     table:
       id: "Id"
-      email: "Email"
       enabled: "Attivo"
       disabled: "Inattivo"
       role: "Ruolo"
@@ -80,12 +81,38 @@ it:
       h2-spells-favorites: "Incantesimi preferiti:"
       logout: "Disconnetti"
       no-spectate: "Non hai nessun osservatore, aggiungi uno tramite il form qui sotto."
+    signup:
+      title: "Registrati"
+      h1: "Crea il tuo account"
+      p-allready-account: "Hai già un account?"
+      p-agree-terms:
+        1: "Registrando un account, accetti le "
+        2: "condizioni generali d'uso"
+        3: " e "
+        4: "politica sulla privacy"
+      password-confirmation: "Conferma la password"
+      error:
+        title: "Verifica le seguenti condizioni:"
+        email:
+          not-valid: "L'indirizzo email non é valido."
+          already-exists: "Un account é stato creato con questo indirizzo email (login Discord / Google o login classico)."
+        password:
+          too-short: "La password deve avere almeno 8 caratteri."
+          uppercase: "La password deve contenere almeno una lettera maiuscola (A-Z)."
+          lowercase: "La password deve contenere almeno una lettera minuscola (a-z)."
+          digit: "La password deve includere almeno un numero (0-9)."
+          special: "La password deve includere almeno un carattere speciale (@, $, !, %, *, ?, &)."
+          confirmation: "La password e la conferma devono corrispondere."
+      signup-button: "Registrati"
     signin:
       title: "Accedi"
-      h1: "Inizia oggi"
-      p: "Accedi al tuo account"
+      h1: "Accedi al tuo account"
       signin-button: "Accedi con %{provider}"
+      connect-with-email: "Accedi con la tua email"
       already-exists-with-provider: "Un account è già stato creato con l'email %{email} e il provider %{provider}."
+      invalid-credentials: "Login o password errati"
+      no-account: "Non hai un account?"
+      create-account: "Crea uno"
     start-match:
       title: "Partita in corso"
       h1: "Partita in corso"

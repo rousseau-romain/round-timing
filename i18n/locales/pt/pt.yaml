@@ -1,10 +1,12 @@
 pt:
   global:
+    email: "Email"
+    password: "Senha"
+    signin: "Entrar"
     team:
       red: "Vermelho"
       indigo: "Azul"
     header:
-      signin: "Entrar"
       select-language: "Selecionar idioma"
       last-match: "Última partida %{name} (%{id})"
     footer:
@@ -22,7 +24,6 @@ pt:
     error: "Erro"
     table:
       id: "Id"
-      email: "Email"
       enabled: "Ativo"
       disabled: "Inativo"
       role: "Função"
@@ -80,12 +81,38 @@ pt:
       h2-spells-favorites: "Spells favoritos:"
       logout: "Sair"
       no-spectate: " Vocé não tem nenhum espectador, adicione via o formulário abaixo."
+    signup:
+      title: "Criar uma conta"
+      h1: "Crie sua conta"
+      p-already-account: "Já tem uma conta?"
+      p-agree-terms:
+        1: "Ao criar uma conta, vocé concorda com nossos "
+        2: "termos e condições"
+        3: " e "
+        4: "política de privacidade"
+      password-confirmation: "Confirmação da senha"
+      error:
+        title: "Verifique as seguintes condições:"
+        email:
+          not-valid: "O e-mail fornecido é inválido."
+          already-exists: "Uma conta foi criada com esse e-mail (login Discord / Google ou login classico)."
+        password:
+          too-short: "A senha deve ter pelo menos 8 caracteres."
+          uppercase: "A senha deve conter pelo menos uma letra maiúscula (A-Z)."
+          lowercase: "A senha deve conter pelo menos uma letra minúscula (a-z)."
+          digit: "A senha deve incluir pelo menos um dígito (0-9)."
+          special: "A senha deve incluir pelo menos um caractere especial (@, $, !, %, *, ?, &)."
+          confirmation: "A senha e a confirmação devem ser iguais."
+      signup-button: "Criar uma conta"
     signin:
       title: "Entrar"
-      h1: "Comece hoje"
-      p: "Faça login na sua conta"
+      h1: "Faça login na sua conta"
       signin-button: "Entrar com %{provider}"
+      connect-with-email: "Entrar com o seu e-mail"
       already-exists-with-provider: "Uma conta já foi criada com o e-mail %{email} e o provedor %{provider}."
+      invalid-credentials: "Login ou senha incorretos"
+      no-account: "Vocé não tem uma conta?"
+      create-account: "Criar uma"
     start-match:
       title: "Partida em andamento"
       h1: "Partida em andamento"

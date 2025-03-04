@@ -3,7 +3,6 @@ package page
 import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
-	"github.com/markbates/goth"
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/shared/components"
 )
@@ -91,8 +90,8 @@ templ TeamPlayerTable(players []model.Player, match model.Match) {
 	</div>
 }
 
-templ TeamPlayerListPage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, pageSlug string, modelUser model.User, match model.Match, teams []model.Team, classes []model.Class, players []model.Player) {
-	@components.Layout(i18n.T(ctx, "page.match.title", i18n.M{"name": match.Name}), errors, userGoth, user, navItems, languages, pageSlug) {
+templ TeamPlayerListPage(user model.User, popinMessages components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string, modelUser model.User, match model.Match, teams []model.Team, classes []model.Class, players []model.Player) {
+	@components.Layout(i18n.T(ctx, "page.match.title", i18n.M{"name": match.Name}), popinMessages, user, navItems, languages, pageSlug) {
 		<div class="container mx-auto">
 			<h1 class="mb-2">{ i18n.T(ctx, "page.match.h1") }</h1>
 			if match.Round > 0 {
@@ -125,7 +124,7 @@ templ TeamPlayerListPage(userGoth goth.User, user model.User, errors components.
 								}
 								hx-target="next tbody"
 								hx-on::after-request="performAnimation()"
-								hx-target-error="#errors"
+								hx-target-error="#popinMessages"
 							>
 								<img class="img-class lg:h-12 md:h-9 h-6 w-max mx-auto" alt={ class.Name } src={ class.UrlImage + "F.svg" }/>
 							</button>

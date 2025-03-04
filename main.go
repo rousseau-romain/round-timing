@@ -25,19 +25,17 @@ func main() {
 
 func languageMiddleware(handler http.Handler, auth *auth.AuthService) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		session, err := auth.GetSessionUser(r)
+		user, _ := auth.GetAuthenticateUserFromRequest(r)
 		var lang string
-		if err != nil {
+		var err error
+		if user.Id == 0 {
 			lang = helper.GetPreferredLanguage(r)
 		} else {
-			user, err := model.GetUserByOauth2Id(session.UserID)
-			if user.Id != 0 {
-				lang, err = model.GetLanguageLocaleById(user.IdLanguage)
-				if err != nil {
-					log.Println(err)
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
-				}
+			lang, err = model.GetLanguageLocaleById(user.IdLanguage)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
 			}
 		}
 
@@ -105,7 +103,11 @@ func run() error {
 	r.Handle("/profile/user-spectate", auth.RequireAuth(handler.HandlersProfileDeleteSpectate, authService)).Methods("DELETE")
 	r.Handle(fmt.Sprintf("/user/{idUser:[0-9]+}/locale/{code:(?:%s)}", regexCode), auth.RequireAuthAndHisAccount(handler.HandlersPlayerLanguage, authService)).Methods("PATCH")
 
+	r.Handle("/signup", auth.RequireNotAuth(handler.HandleSignupEmail, authService)).Methods("GET")
 	r.Handle("/signin", auth.RequireNotAuth(handler.HandleLogin, authService)).Methods("GET")
+
+	r.HandleFunc("/signup", handler.HandleCreateUser).Methods("POST")
+	r.HandleFunc("/signin", handler.HandleLoginEmail).Methods("POST")
 	r.HandleFunc("/auth/{provider}", handler.HandleProviderLogin).Methods("GET")
 	r.HandleFunc("/auth/{provider}/callback", handler.HandleAuthCallbackFunction).Methods("GET")
 	r.HandleFunc("/auth/logout/{provider}", handler.HandleLogout).Methods("GET")

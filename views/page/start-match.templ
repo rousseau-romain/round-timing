@@ -3,20 +3,19 @@ package page
 import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
-	"github.com/markbates/goth"
 	"github.com/rousseau-romain/round-timing/config"
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/shared/components"
 	"strconv"
 )
 
-templ StartMatchPage(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, pageSlug string, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell, isSpectator bool) {
-	@components.Layout("Start match", errors, userGoth, user, navItems, languages, pageSlug) {
-		@MatchPageTable(userGoth, user, errors, navItems, languages, pageSlug, match, players, playersSpells, isSpectator)
+templ StartMatchPage(user model.User, popinMessages components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell, isSpectator bool) {
+	@components.Layout("Start match", popinMessages, user, navItems, languages, pageSlug) {
+		@MatchPageTable(user, popinMessages, navItems, languages, pageSlug, match, players, playersSpells, isSpectator)
 	}
 }
 
-templ MatchPageTable(userGoth goth.User, user model.User, errors components.Error, navItems []components.NavItem, languages []model.Language, pageSlug string, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell, isSpectator bool) {
+templ MatchPageTable(user model.User, popinMessages components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell, isSpectator bool) {
 	<div class="flex flex-wrap justify-center gap-2">
 		<button
 			type="submit"
