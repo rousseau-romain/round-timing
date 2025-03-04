@@ -101,7 +101,7 @@ fr:
           uppercase: "Le mot de passe doit contenir au moins une lettre majuscule (A-Z)."
           lowercase: "Le mot de passe doit contenir au moins une lettre minuscule (a-z)."
           digit: "Le mot de passe doit inclure au moins un chiffre (0-9)."
-          special: "Le mot de passe doit inclure au moins un caractère special (@, $, !, %, *, ?, &)."
+          special: "Le mot de passe doit inclure au moins un caractère special (@, $, !, %, *, ?)."
           confirmation: "Le mot de passe et la confirmation doivent correspondre."
       signup-button: "S'inscrire"
     signin:

@@ -90,19 +90,19 @@ func IsValidPassword(r *http.Request, password string) (bool, []string) {
 	}
 
 	if len(password) < 8 {
-		errors = append(errors, i18n.T(r.Context(), "page.signup.password.error.too-short"))
+		errors = append(errors, i18n.T(r.Context(), "page.signup.error.password.too-short"))
 	}
 	if !hasUpper {
-		errors = append(errors, i18n.T(r.Context(), "page.signup.password.error.uppercase"))
+		errors = append(errors, i18n.T(r.Context(), "page.signup.error.password.uppercase"))
 	}
 	if !hasLower {
-		errors = append(errors, i18n.T(r.Context(), "page.signup.password.error.lowercase"))
+		errors = append(errors, i18n.T(r.Context(), "page.signup.error.password.lowercase"))
 	}
 	if !hasNumber {
-		errors = append(errors, i18n.T(r.Context(), "page.signup.password.error.digit"))
+		errors = append(errors, i18n.T(r.Context(), "page.signup.error.password.digit"))
 	}
 	if !hasSpecial {
-		errors = append(errors, i18n.T(r.Context(), "page.signup.password.error.special"))
+		errors = append(errors, i18n.T(r.Context(), "page.signup.error.password.special"))
 	}
 
 	if len(errors) == 0 {
