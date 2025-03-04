@@ -101,7 +101,7 @@ it:
           uppercase: "La password deve contenere almeno una lettera maiuscola (A-Z)."
           lowercase: "La password deve contenere almeno una lettera minuscola (a-z)."
           digit: "La password deve includere almeno un numero (0-9)."
-          special: "La password deve includere almeno un carattere speciale (@, $, !, %, *, ?, &)."
+          special: "La password deve includere almeno un carattere speciale (@, $, !, %, *, ?)."
           confirmation: "La password e la conferma devono corrispondere."
       signup-button: "Registrati"
     signin:
