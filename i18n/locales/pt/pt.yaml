@@ -101,7 +101,7 @@ pt:
           uppercase: "A senha deve conter pelo menos uma letra maiúscula (A-Z)."
           lowercase: "A senha deve conter pelo menos uma letra minúscula (a-z)."
           digit: "A senha deve incluir pelo menos um dígito (0-9)."
-          special: "A senha deve incluir pelo menos um caractere especial (@, $, !, %, *, ?, &)."
+          special: "A senha deve incluir pelo menos um caractere especial (@, $, !, %, *, ?)."
           confirmation: "A senha e a confirmação devem ser iguais."
       signup-button: "Criar uma conta"
     signin:

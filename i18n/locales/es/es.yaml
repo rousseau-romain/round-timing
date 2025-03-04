@@ -101,7 +101,7 @@ es:
           uppercase: "La contraseña debe contener al menos una letra mayúscula (A-Z)."
           lowercase: "La contraseña debe contener al menos una letra minúscula (a-z)."
           digit: "La contraseña debe incluir al menos un número (0-9)."
-          special: "La contraseña debe incluir al menos un caracter especial (@, $, !, %, *, ?, &)."
+          special: "La contraseña debe incluir al menos un caracter especial (@, $, !, %, *, ?)."
           confirmation: "La contraseña y la confirmación deben coincidir."
       signup-button: "Registrarse"
     signin:

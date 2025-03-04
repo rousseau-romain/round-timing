@@ -101,7 +101,7 @@ en:
           uppercase: "Password must contain at least one uppercase letter (A-Z)."
           lowercase: "Password must contain at least one lowercase letter (a-z)."
           digit: "Password must include at least one digit (0-9)."
-          special: "Password must include at least one special character (@, $, !, %, *, ?, &)."
+          special: "Password must include at least one special character (@, $, !, %, *, ?)."
           confirmation: "Password and confirmation must match."
       signup-button: "Sign up"
     signin:
