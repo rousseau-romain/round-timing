@@ -27,8 +27,7 @@ var upgrader = websocket.Upgrader{
 var clients = make(map[string]*websocket.Conn) // Maps userID to WebSocket connection
 
 func (h *Handler) HandlerSpectateMatch(w http.ResponseWriter, r *http.Request) {
-	userOauth2, _ := h.auth.GetSessionUser(r)
-	user, _ := model.GetUserByOauth2Id(userOauth2.UserID)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
 	vars := mux.Vars(r)
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 
@@ -56,12 +55,11 @@ func (h *Handler) HandlerSpectateMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page.SpectateMatchPage(userOauth2, user, h.error, getPageNavCustom(r, user, matchFromUser), h.languages, r.URL.Path, match, players, spellsPlayers, true).Render(r.Context(), w)
+	page.SpectateMatchPage(user, h.error, getPageNavCustom(r, user, matchFromUser), h.languages, r.URL.Path, match, players, spellsPlayers, true).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerMatchTableLive(w http.ResponseWriter, r *http.Request) {
-	userOauth2, _ := h.auth.GetSessionUser(r)
-	user, _ := model.GetUserByOauth2Id(userOauth2.UserID)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
 	vars := mux.Vars(r)
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 	userMatchUniqueString := fmt.Sprintf("%d-%d", user.Id, matchId)

@@ -11,8 +11,7 @@ import (
 )
 
 func (h *Handler) HandlersListUser(w http.ResponseWriter, r *http.Request) {
-	userOauth2, _ := h.auth.GetSessionUser(r)
-	user, _ := model.GetUserByOauth2Id(userOauth2.UserID)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
 
 	users, err := model.GetUsers()
 	if err != nil {
@@ -20,8 +19,7 @@ func (h *Handler) HandlersListUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	pageAdmin.UserListPage(userOauth2, user, h.error, GetPageNavDefault(r), h.languages, r.URL.Path, user, users).Render(r.Context(), w)
+	pageAdmin.UserListPage(user, h.error, GetPageNavDefault(r), h.languages, r.URL.Path, user, users).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersUserEnabled(w http.ResponseWriter, r *http.Request) {
