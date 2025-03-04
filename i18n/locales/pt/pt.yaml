@@ -106,9 +106,9 @@ pt:
       signup-button: "Criar uma conta"
     signin:
       title: "Entrar"
-      h1: "Comece hoje"
-      p: "Faça login na sua conta"
+      h1: "Faça login na sua conta"
       signin-button: "Entrar com %{provider}"
+      connect-with-email: "Entrar com o seu e-mail"
       already-exists-with-provider: "Uma conta já foi criada com o e-mail %{email} e o provedor %{provider}."
       invalid-credentials: "Login ou senha incorretos"
       no-account: "Vocé não tem uma conta?"

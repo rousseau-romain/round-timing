@@ -141,8 +141,6 @@ func (s *AuthService) RemoveUserSession(w http.ResponseWriter, r *http.Request) 
 
 func AllowToBeAuth(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		user, _ := auth.GetAuthenticateUserFromRequest(r)
-		log.Println("AllowToBeAuth", user)
 		handlerFunc(w, r)
 	}
 }
@@ -174,7 +172,6 @@ func (s *AuthService) GetAuthenticateUserFromRequest(r *http.Request) (model.Use
 	if u == nil {
 		cookieToken, err := getCookieHandler(r, "token")
 		if err != nil {
-			log.Println(err)
 			return user, errors.New("user is not authenticated")
 		}
 

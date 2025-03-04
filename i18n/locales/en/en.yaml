@@ -106,9 +106,9 @@ en:
       signup-button: "Sign up"
     signin:
       title: "Sign in"
-      h1: "Start today"
-      p: "Sign in to your account"
+      h1: "Sign in to your account"
       signin-button: "Sign in with %{provider}"
+      connect-with-email: "Sign in with your email"
       already-exists-with-provider: "An account has already been created with the email %{email} and the provider %{provider}."
       invalid-credentials: "Invalid login or password"
       no-account: "You don't have an account?"

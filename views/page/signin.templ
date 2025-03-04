@@ -11,7 +11,6 @@ templ SigninPage(navItems []components.NavItem, languages []model.Language, page
 		<div class="mx-auto max-w-screen-xl px-4 py-16 sm:px-6 lg:px-8">
 			<div class="mb-4 mx-auto max-w-lg flex flex-col space-y-4">
 				<h1 class="text-center text-2xl font-bold text-indigo-600 sm:text-3xl">{ i18n.T(ctx, "page.signin.h1") }</h1>
-				<p class="text-center text-lg font-medium">{ i18n.T(ctx, "page.signin.p") }</p>
 				<a
 					href="/auth/discord"
 					class="block w-full rounded-lg bg-indigo-600 px-5 py-3 text-sm font-medium text-white text-center"
@@ -25,7 +24,7 @@ templ SigninPage(navItems []components.NavItem, languages []model.Language, page
 					{ i18n.T(ctx, "page.signin.signin-button", i18n.M{"provider": "Google"}) }
 				</a>
 			</div>
-			<h1 class="text-center text-lg font-medium">{ i18n.T(ctx, "se connecter via email") }</h1>
+			<h1 class="text-center text-lg font-medium">{ i18n.T(ctx, "page.signin.connect-with-email") }</h1>
 			<div class="mx-auto max-w-lg flex flex-col space-y-4">
 				<form
 					hx-post="/signin"
