@@ -106,9 +106,9 @@ es:
       signup-button: "Registrarse"
     signin:
       title: "Iniciar sesión"
-      h1: "Empieza hoy"
-      p: "Inicia sesión en tu cuenta"
+      h1: "Inicia sesión en tu cuenta"
       signin-button: "Iniciar sesión con %{provider}"
+      connect-with-email: "Iniciar sesión con tu correo electrónica"
       already-exists-with-provider: "Ya existe una cuenta con el correo electrónico %{email} y el proveedor %{provider}."
       invalid-credentials: "Login o contraseña incorrectos"
       no-account: "No tienes una cuenta?"
