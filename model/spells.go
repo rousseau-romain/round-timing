@@ -14,6 +14,8 @@ type Spell struct {
 	UrlImage       string `json:"url_image"`
 	IdClass        int    `json:"id_class"`
 	Name           string `json:"name"`
+	ShortName      string `json:"short_name"`
+	Color          string `json:"color"`
 	Delay          int    `json:"delay"`
 	IsGlobal       bool   `json:"is_global"`
 	IsTeam         bool   `json:"is_team"`
@@ -33,6 +35,8 @@ func GetSpellsByIdClass(idLanguage int, idClass []int, idsToExclude []int) ([]Sp
 			` + helper.GetUrlImageSpellClause("s.id") + ` AS url_image,
 			s.id_class,
 			st.name,
+			st.short_name,
+			s.color,
 			s.delay,
 			s.is_global,
 			s.is_team,
@@ -66,6 +70,8 @@ func GetSpellsByIdClass(idLanguage int, idClass []int, idsToExclude []int) ([]Sp
 			&spell.UrlImage,
 			&spell.IdClass,
 			&spell.Name,
+			&spell.ShortName,
+			&spell.Color,
 			&spell.Delay,
 			&spell.IsGlobal,
 			&spell.IsTeam,
