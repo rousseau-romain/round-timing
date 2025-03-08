@@ -79,6 +79,7 @@ en:
       h1: "Profile"
       p-user-id: "Your ID is:"
       h2-spells-favorites: "Favorite spells:"
+      h2-configuration: "Configuration:"
       logout: "Log out"
       no-spectate: "You have no spectators, add one through the form below."
     signup:

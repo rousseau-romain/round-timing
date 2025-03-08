@@ -74,8 +74,15 @@ func GetSpellPlayerByIdSpellsPlayers(idLanguage int, idSpellPlayer int) (MatchPl
 	return matchSpell, err
 }
 
-func GetSpellsPlayersByIdMatch(idLanguage, idMatch, idUser int) ([]MatchPlayerSpell, error) {
+func GetSpellsPlayersByIdMatch(idLanguage, idMatch, idUser int, getOnlyFavorite bool) ([]MatchPlayerSpell, error) {
 	matchSpells := []MatchPlayerSpell{}
+
+	joinFavoriteClause := "LEFT"
+	if getOnlyFavorite {
+		joinFavoriteClause = "INNER"
+
+	}
+
 	masteryClause := "m.multiple_mastery_enabled = 0 AND (s.id NOT IN ("
 	for _, id := range helper.MasteryIdSpells {
 		masteryClause += fmt.Sprintf("%d, ", id)
@@ -101,7 +108,7 @@ func GetSpellsPlayersByIdMatch(idLanguage, idMatch, idUser int) ([]MatchPlayerSp
 		JOIN spell AS s ON s.id = mps.spell_id
 		JOIN spell_translation AS st ON st.id_spell = s.id AND st.id_language = ?
 		JOIN ` + "`match`" + ` AS m ON m.id = mps.match_id
-		LEFT JOIN favorite_spell fs ON fs.id_spell = s.id AND fs.id_user = ?
+		` + joinFavoriteClause + ` JOIN favorite_spell fs ON fs.id_spell = s.id AND fs.id_user = ?
 		WHERE (
 			mps.match_id = ?
 			AND (

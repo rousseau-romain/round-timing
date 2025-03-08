@@ -7,7 +7,7 @@ import (
 	"github.com/rousseau-romain/round-timing/shared/components"
 )
 
-templ ProfilePage(user model.User, popinMessages components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string, idUserShares []string, classes []model.Class, spells []model.SpellByClass) {
+templ ProfilePage(user model.User, popinMessages components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string, idUserShares []string, classes []model.Class, spells []model.SpellByClass, userConfigurations []model.UserConfiguration) {
 	@components.Layout(i18n.T(ctx, "page.profile.title"), popinMessages, user, navItems, languages, pageSlug) {
 		<div class="mx-auto container">
 			<h1 class="text-2xl font-semibold">{ i18n.T(ctx, "page.profile.h1") }</h1>
@@ -44,6 +44,8 @@ templ ProfilePage(user model.User, popinMessages components.PopinMessages, navIt
 				</form>
 			</div>
 			@TableUserSpectate(idUserShares)
+			<h2 class="font-semibold mb-2">{ i18n.T(ctx, "page.profile.h2-configuration") }</h2>
+			@TableUserConfiguration(userConfigurations)
 			<h2 class="font-semibold mb-2">{ i18n.T(ctx, "page.profile.h2-spells-favorites") }</h2>
 			<div class="mb-2 p-2">
 				@ListSpellClass(classes, spells)
@@ -58,6 +60,39 @@ templ ProfilePage(user model.User, popinMessages components.PopinMessages, navIt
 	}
 }
 
+templ TableUserConfiguration(userConfigurations []model.UserConfiguration) {
+	<table class="table-auto mb-2 border">
+		<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+			<tr>
+				<th>{ i18n.T(ctx, "global.table.name") }</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody
+			hx-swap="outerHTML"
+			hx-target="closest tr"
+		>
+			for _, uc := range(userConfigurations) {
+				<tr class="border-b">
+					<td class="first-letter:uppercase p-2">{ uc.Name }</td>
+					<td>
+						@UserConfiguration(uc)
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+
+templ UserConfiguration(uc model.UserConfiguration) {
+	@components.ButtonEnableDisable(
+		i18n.T(ctx, "global.table.enabled"),
+		i18n.T(ctx, "global.table.disabled"),
+		fmt.Sprintf("/profile/configuration/%d/toggle-configuration", uc.IdConfiguration),
+		uc.IsEnabled,
+	)
+}
+
 templ TableUserSpectate(idUserShares []string) {
 	<table class="table-auto mb-2">
 		<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -66,10 +101,7 @@ templ TableUserSpectate(idUserShares []string) {
 				<th></th>
 			</tr>
 		</thead>
-		<tbody
-			hx-swap="outerHTML"
-			hx-target="closest tr"
-		>
+		<tbody>
 			for _, idUserShare := range(idUserShares) {
 				@UserSpectate(idUserShare)
 			}
