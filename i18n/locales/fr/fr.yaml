@@ -79,6 +79,7 @@ fr:
       h1: "Profile:"
       p-user-id: "Votre identifiant est:"
       h2-spells-favorites: "Sorts favoris:"
+      h2-configuration: "Configuration:"
       logout: "Deconnexion"
       no-spectate: "Vous n'avez aucun spectateur, ajouter en via le formulaire ci-dessous."
     signup:

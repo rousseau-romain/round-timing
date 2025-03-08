@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"fmt"
+	"strconv"
 
 	"log"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/views/page"
 
@@ -40,7 +42,36 @@ func (h *Handler) HandlersProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page.ProfilePage(user, h.error, getPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, idUserShares, classes, spells).Render(r.Context(), w)
+	userConfigurations, err := model.GetAllConfigurationByIdUser(user.IdLanguage, user.Id)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	page.ProfilePage(user, h.error, getPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, idUserShares, classes, spells, userConfigurations).Render(r.Context(), w)
+}
+
+func (h *Handler) HandlersProfileToggleUserConfiguration(w http.ResponseWriter, r *http.Request) {
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
+	vars := mux.Vars(r)
+	idConfiguration, _ := strconv.Atoi(vars["idConfiguration"])
+
+	err := model.ToggleUserConfiguration(user.Id, idConfiguration)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	userConfiguration, err := model.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, idConfiguration)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	page.UserConfiguration(userConfiguration).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersProfileAddSpectate(w http.ResponseWriter, r *http.Request) {

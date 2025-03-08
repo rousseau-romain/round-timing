@@ -79,6 +79,7 @@ pt:
       h1: "Perfil"
       p-user-id: "Seu ID é:"
       h2-spells-favorites: "Spells favoritos:"
+      h2-configuration: "Configuração:"
       logout: "Sair"
       no-spectate: " Vocé não tem nenhum espectador, adicione via o formulário abaixo."
     signup:

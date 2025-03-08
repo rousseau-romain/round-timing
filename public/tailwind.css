@@ -1042,6 +1042,10 @@ footer a:hover {
   margin: auto;
 }
 
+.m-1 {
+  margin: 0.25rem;
+}
+
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -1403,6 +1407,10 @@ footer a:hover {
 
 .border-t {
   border-top-width: 1px;
+}
+
+.border-b {
+  border-bottom-width: 1px;
 }
 
 .border-blue-600 {
@@ -1984,6 +1992,10 @@ tr.htmx-swapping td {
 .has-tooltip:hover .tooltip {
   visibility: visible;
   z-index: 50;
+}
+
+.first-letter\:uppercase::first-letter {
+  text-transform: uppercase;
 }
 
 .hover\:scale-110:hover {
