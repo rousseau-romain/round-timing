@@ -95,9 +95,6 @@ func (h *Handler) HandlersNotFound(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandlersHome(w http.ResponseWriter, r *http.Request) {
-	h.Slog = h.Slog.With("handlerPage", "HandlersHome")
-	h.Slog = h.Slog.With("handlerPage", "HandlersHome")
-	h.Slog.Info("testttt")
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	pageNav := GetPageNavDefault(r)
 
