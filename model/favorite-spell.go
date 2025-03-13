@@ -1,8 +1,6 @@
 package model
 
 import (
-	"log"
-
 	"github.com/rousseau-romain/round-timing/helper"
 )
 
@@ -66,7 +64,6 @@ func GetFavoriteSpellsByIdUser(idLanguage, idUser int) ([]SpellByClass, error) {
 	rows, err := db.Query(sql, idLanguage, idUser)
 
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
@@ -82,7 +79,6 @@ func GetFavoriteSpellsByIdUser(idLanguage, idUser int) ([]SpellByClass, error) {
 			&spellByClass.IsFavorite,
 		)
 		if err != nil {
-			log.Println(err)
 			return nil, err
 		}
 		spellByClasses = append(spellByClasses, spellByClass)
@@ -96,7 +92,6 @@ func ToggleIsFavoriteSpell(idUser, idSpell int) error {
 
 	rows, err := db.Query("SELECT id FROM favorite_spell WHERE id_user = ? AND id_spell = ?", idUser, idSpell)
 	if err != nil {
-		log.Println(err)
 		return err
 	}
 

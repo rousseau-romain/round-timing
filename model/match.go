@@ -2,7 +2,6 @@ package model
 
 import (
 	"errors"
-	"log"
 
 	"github.com/huandu/go-sqlbuilder"
 )
@@ -180,13 +179,11 @@ func ResetMatch(idMatch int) error {
 	var multipleMasteryEnabled = 1
 	err := UpdateMatch(idMatch, MatchUpdate{Round: &round, MultipleMasteryEnabled: &multipleMasteryEnabled})
 	if err != nil {
-		log.Println(err)
 		return err
 	}
 
 	err = ResetMatchPlayersSpells(idMatch)
 	if err != nil {
-		log.Println(err)
 		return err
 	}
 

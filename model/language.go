@@ -1,9 +1,5 @@
 package model
 
-import (
-	"log"
-)
-
 type Language struct {
 	Id     int    `json:"id"`
 	Locale string `json:"locale"`
@@ -22,7 +18,6 @@ func GetLanguages() ([]Language, error) {
 	rows, err := db.Query(sql)
 
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
@@ -33,7 +28,6 @@ func GetLanguages() ([]Language, error) {
 			&language.Locale,
 		)
 		if err != nil {
-			log.Println(err)
 			return nil, err
 		}
 		languages = append(languages, language)

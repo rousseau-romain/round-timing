@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -18,11 +17,11 @@ import (
 var NumberOfMatchMax = 50
 
 func (h *Handler) HandlersListMatch(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 
 	matchs, err := model.GetMatchsByIdUser(user.Id)
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -31,23 +30,23 @@ func (h *Handler) HandlersListMatch(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	err := r.ParseForm()
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	numberOfMatch, err := model.GetNumberOfMatchByUserId(user.Id)
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	if strings.TrimSpace(r.FormValue("name")) == "" {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, "Match need a name", http.StatusBadRequest)
 		return
 	}
@@ -75,7 +74,7 @@ func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
 	match, err := model.GetMatch(matchId)
 
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -87,7 +86,7 @@ func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -99,7 +98,7 @@ func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -137,7 +136,7 @@ func (h *Handler) HandlersDeleteMatch(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandlersMatch(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 
 	vars := mux.Vars(r)
 
@@ -167,25 +166,27 @@ func (h *Handler) HandlersMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page.TeamPlayerListPage(user, h.error, getPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, user, match, teams, classes, players).Render(r.Context(), w)
+	page.TeamPlayerListPage(user, h.error, h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, user, match, teams, classes, players).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) {
 	var idClassGlobal = 13
 
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 
 	vars := mux.Vars(r)
 
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 	match, err := model.GetMatch(matchId)
 	if err != nil {
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	players, err := model.GetPlayersByIdMatch(user.IdLanguage, matchId)
 	if err != nil {
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -203,6 +204,7 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 		}
 		spells, err := model.GetSpellsByIdClass(user.IdLanguage, classeIds, idSpellToExclude)
 		if err != nil {
+			h.Slog.Error(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -213,6 +215,7 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 
 		globalSpells, err := model.GetSpellsByIdClass(user.IdLanguage, []int{idClassGlobal}, idSpellToExclude)
 		if err != nil {
+			h.Slog.Error(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -220,6 +223,7 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 		var round = 1
 		err = model.UpdateMatch(matchId, model.MatchUpdate{Round: &round})
 		if err != nil {
+			h.Slog.Error(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -256,7 +260,7 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 
 	userConfigurationFavoriteSpells, err := model.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, 1)
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -264,11 +268,12 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 	spellsPlayer, err := model.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
 
 	if err != nil {
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	page.StartMatchPage(user, h.error, getPageNavCustom(r, user, match), h.languages, r.URL.Path, match, players, spellsPlayer, false).Render(r.Context(), w)
+	page.StartMatchPage(user, h.error, h.GetPageNavCustom(r, user, match), h.languages, r.URL.Path, match, players, spellsPlayer, false).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerResetMatchPage(w http.ResponseWriter, r *http.Request) {
@@ -285,7 +290,7 @@ func (h *Handler) HandlerResetMatchPage(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *Handler) HandlerToggleMatchMastery(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	vars := mux.Vars(r)
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 	multipleMasteryEnabled, _ := strconv.Atoi(vars["toggleBool"])
@@ -313,7 +318,7 @@ func (h *Handler) HandlerToggleMatchMastery(w http.ResponseWriter, r *http.Reque
 
 	userConfigurationFavoriteSpells, err := model.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, 1)
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -324,11 +329,11 @@ func (h *Handler) HandlerToggleMatchMastery(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	page.MatchPageTable(user, h.error, getPageNavCustom(r, user, match), h.languages, r.URL.Path, match, players, spellsPlayers, false).Render(r.Context(), w)
+	page.MatchPageTable(user, h.error, h.GetPageNavCustom(r, user, match), h.languages, r.URL.Path, match, players, spellsPlayers, false).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerMatchNextRound(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	vars := mux.Vars(r)
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 
@@ -357,7 +362,7 @@ func (h *Handler) HandlerMatchNextRound(w http.ResponseWriter, r *http.Request) 
 
 	userConfigurationFavoriteSpells, err := model.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, 1)
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -372,7 +377,7 @@ func (h *Handler) HandlerMatchNextRound(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *Handler) HandlerUsePlayerSpell(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	vars := mux.Vars(r)
 	idPlayerSpell, _ := strconv.Atoi(vars["idPlayerSpell"])
 
@@ -393,7 +398,7 @@ func (h *Handler) HandlerUsePlayerSpell(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *Handler) HandlerRemoveRoundRecoveryPlayerSpell(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	vars := mux.Vars(r)
 	idPlayerSpell, _ := strconv.Atoi(vars["idPlayerSpell"])
 

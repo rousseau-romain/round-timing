@@ -3,7 +3,6 @@ package model
 import (
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/huandu/go-sqlbuilder"
 )
@@ -47,7 +46,6 @@ func GetUsers() ([]User, error) {
 	rows, err := db.Query(sql)
 
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
@@ -64,7 +62,6 @@ func GetUsers() ([]User, error) {
 			&user.IdShare,
 		)
 		if err != nil {
-			log.Println(err)
 			return nil, err
 		}
 		users = append(users, user)
@@ -104,7 +101,6 @@ func GetUserByEmail(email string) (User, error) {
 	)
 
 	if err != nil {
-		log.Println(err)
 		return user, err
 	}
 
@@ -138,7 +134,6 @@ func GetUserById(idUser int) (User, error) {
 	)
 
 	if err != nil {
-		log.Println(err)
 		return user, err
 	}
 
@@ -165,9 +160,6 @@ func GetUserIdByMatch(idmatch int) (User, error) {
 	err := db.QueryRow(sql, idmatch).Scan(&user.Id, &user.Oauth2Id, &user.Enabled, &user.Email, &user.IdLanguage, &user.IsAdmin, &user.IdShare)
 	if err != nil && err.Error() == "sql: no rows in result set" {
 		return user, nil
-	}
-	if err != nil {
-		log.Println(err)
 	}
 
 	return user, err
@@ -262,7 +254,6 @@ func CreateUser(user UserCreate) (int64, error) {
 	response, err := db.Exec(sql, user.ProviderLogin, user.Oauth2Id, user.Email, user.IdLanguage, user.Hash)
 
 	if err != nil {
-		log.Println(err)
 		return 0, err
 	}
 

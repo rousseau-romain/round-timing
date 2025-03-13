@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -15,58 +14,60 @@ import (
 )
 
 func (h *Handler) HandlersProfile(w http.ResponseWriter, r *http.Request) {
-	user, err := h.auth.GetAuthenticateUserFromRequest(r)
+	h.Slog = h.Slog.With("handlerPage", "HandlersProfile")
+	user, err := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	h.Slog = h.Slog.With("userId", user.Id)
 	idUserShares, err := model.GetUsersSpectateByIdUser(user.Id)
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	classes, err := model.GetClasses(user.IdLanguage)
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	spells, err := model.GetFavoriteSpellsByIdUser(user.IdLanguage, user.Id)
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	userConfigurations, err := model.GetAllConfigurationByIdUser(user.IdLanguage, user.Id)
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	page.ProfilePage(user, h.error, getPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, idUserShares, classes, spells, userConfigurations).Render(r.Context(), w)
+	page.ProfilePage(user, h.error, h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, idUserShares, classes, spells, userConfigurations).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersProfileToggleUserConfiguration(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	vars := mux.Vars(r)
 	idConfiguration, _ := strconv.Atoi(vars["idConfiguration"])
 
 	err := model.ToggleUserConfiguration(user.Id, idConfiguration)
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	userConfiguration, err := model.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, idConfiguration)
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -75,7 +76,7 @@ func (h *Handler) HandlersProfileToggleUserConfiguration(w http.ResponseWriter, 
 }
 
 func (h *Handler) HandlersProfileAddSpectate(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 
 	if err := uuid.Validate(r.FormValue("idUserShare")); err != nil {
 		RenderComponentErrorAndLog(
@@ -90,7 +91,7 @@ func (h *Handler) HandlersProfileAddSpectate(w http.ResponseWriter, r *http.Requ
 	userSpectateExist, err := model.UserExistsByIdShare(r.FormValue("idUserShare"))
 
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
@@ -107,7 +108,7 @@ func (h *Handler) HandlersProfileAddSpectate(w http.ResponseWriter, r *http.Requ
 	IsAlreadyUsersSpectate, err := model.IsUsersSpectateByIdUser(user.Id, r.FormValue("idUserShare"))
 
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
@@ -127,7 +128,7 @@ func (h *Handler) HandlersProfileAddSpectate(w http.ResponseWriter, r *http.Requ
 	})
 
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -136,15 +137,16 @@ func (h *Handler) HandlersProfileAddSpectate(w http.ResponseWriter, r *http.Requ
 }
 
 func (h *Handler) HandlersProfileDeleteSpectate(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 
 	if err := uuid.Validate(r.FormValue("idUserShare")); err != nil {
-		log.Println("User spectate need a id")
+		h.Slog.Error("User spectate need a id", "error", err)
 		http.Error(w, "User spectate need a id", http.StatusBadRequest)
 		return
 	}
 
 	if err := model.DeleteUserSpectate(user.Id, r.FormValue("idUserShare")); err != nil {
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

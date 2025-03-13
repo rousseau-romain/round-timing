@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 
@@ -11,11 +10,11 @@ import (
 )
 
 func (h *Handler) HandlersListUser(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 
 	users, err := model.GetUsers()
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -33,14 +32,14 @@ func (h *Handler) HandlersUserEnabled(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	user, err := model.GetUserById(idUser)
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

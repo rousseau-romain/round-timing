@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -23,7 +21,7 @@ func (h *Handler) HandlersUpdatePlayer(w http.ResponseWriter, r *http.Request) {
 	name := strings.TrimSpace(r.FormValue("name"))
 	idPlayer, _ := strconv.Atoi(vars["idPlayer"])
 	if name == "" {
-		log.Printf("%s", fmt.Sprintf("Player (%d) need a name not (%s)", idPlayer, name))
+		h.Slog.Info("Player need a name", "idPlayer", idPlayer, "name", name)
 		http.Error(w, "Player need a name", http.StatusBadRequest)
 		return
 	}
@@ -33,38 +31,41 @@ func (h *Handler) HandlersUpdatePlayer(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Println(err.Error())
+		h.Slog.Error(err.Error())
 		return
 	}
 
 }
 
 func (h *Handler) HandlersCreatePlayer(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	vars := mux.Vars(r)
 
 	idMatch, _ := strconv.Atoi(vars["idMatch"])
 	idTeam, _ := strconv.Atoi(r.FormValue("idTeam"))
+	name := strings.TrimSpace(r.FormValue("name"))
 
-	if r.FormValue("name") == "" {
+	if name == "" {
+		h.Slog.Info("Player need a name", "idPlayer", user.Id, "name", name)
 		http.Error(w, "Player need a name", http.StatusBadRequest)
 		return
 	}
 
 	if _, err := strconv.ParseInt(r.FormValue("idTeam"), 10, 64); err != nil {
+		h.Slog.Info("Player need a color", "idPlayer", user.Id, "name", name)
 		http.Error(w, "Player need a color", http.StatusBadRequest)
 		return
 	}
 
 	canCreatePlayerInTeam, err := model.NumberPlayerInTeamByTeamId(idTeam)
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
 	if canCreatePlayerInTeam == MaxPlayerByTeam {
 		RenderComponentErrorAndLog(
-			i18n.T(r.Context(), "global.error")+" "+r.FormValue("name"),
+			i18n.T(r.Context(), "global.error")+" "+name,
 			[]string{i18n.T(r.Context(), "page.match.max-player-by-team")},
 			[]string{i18n.T(r.Context(), "page.match.max-player-by-team")},
 			http.StatusBadRequest,
@@ -75,6 +76,7 @@ func (h *Handler) HandlersCreatePlayer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, err := strconv.ParseInt(r.FormValue("idClass"), 10, 64); err != nil {
+		h.Slog.Info("Player need a class", "idPlayer", user.Id, "name", name)
 		http.Error(w, "Player need a class", http.StatusBadRequest)
 		return
 	}
@@ -82,24 +84,26 @@ func (h *Handler) HandlersCreatePlayer(w http.ResponseWriter, r *http.Request) {
 	match, err := model.GetMatch(idMatch)
 
 	if err != nil {
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	if match.Round > 0 {
+		h.Slog.Info("Match already started", "idPlayer", user.Id, "name", name)
 		http.Error(w, "Match already started", http.StatusBadRequest)
 		return
 	}
 
 	idClass, _ := strconv.Atoi(r.FormValue("idClass"))
 	idPlayer, err := model.CreatePlayer(model.PlayerCreate{
-		Name:    r.FormValue("name"),
+		Name:    name,
 		IdTeam:  idTeam,
 		IdClass: idClass,
 	})
 
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -107,6 +111,7 @@ func (h *Handler) HandlersCreatePlayer(w http.ResponseWriter, r *http.Request) {
 	player, err := model.GetPlayer(user.IdLanguage, idPlayer)
 
 	if err != nil {
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -121,14 +126,15 @@ func (h *Handler) HandlersDeletePlayer(w http.ResponseWriter, r *http.Request) {
 
 	err := model.DeleteMatchPlayersSpellsByPlayer(idPlayer)
 	if err != nil {
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	err = model.DeletePlayer(idPlayer)
 	if err != nil {
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Println(err.Error())
 		return
 	}
 }
@@ -136,7 +142,7 @@ func (h *Handler) HandlersDeletePlayer(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) HandlersPlayerLanguage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 
 	code := vars["code"]
 	idLanguage := helper.SupportedLanguages[code]
@@ -147,7 +153,7 @@ func (h *Handler) HandlersPlayerLanguage(w http.ResponseWriter, r *http.Request)
 
 	err := model.UpdateUser(user.Id, userUpdate)
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

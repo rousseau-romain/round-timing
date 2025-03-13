@@ -1,9 +1,5 @@
 package model
 
-import (
-	"log"
-)
-
 type UserSpectate struct {
 	Id          int    `json:"id"`
 	IdUser      int    `json:"id_user"`
@@ -22,7 +18,6 @@ func GetUsersSpectateByIdUser(idUser int) ([]string, error) {
 	rows, err := db.Query(sql, idUser)
 
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
@@ -38,7 +33,6 @@ func GetUsersSpectateByIdUser(idUser int) ([]string, error) {
 			&userShareId,
 		)
 		if err != nil {
-			log.Println(err)
 			return nil, err
 		}
 		userShareIds = append(userShareIds, userShareId)
@@ -68,7 +62,6 @@ func CreateUserSpectate(user UserSpectateCreate) (int64, error) {
 	response, err := db.Exec(sql, user.IdUser, user.IdUserShare)
 
 	if err != nil {
-		log.Println(err)
 		return 0, err
 	}
 

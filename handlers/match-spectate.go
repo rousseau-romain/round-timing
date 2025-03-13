@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -28,50 +27,50 @@ var upgrader = websocket.Upgrader{
 var clients = make(map[string]*websocket.Conn) // Maps userID to WebSocket connection
 
 func (h *Handler) HandlerSpectateMatch(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	vars := mux.Vars(r)
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 
 	matchFromUser, err := model.GetLastMatchByUserId(user.Id)
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	match, err := model.GetMatch(matchId)
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	players, err := model.GetPlayersByIdMatch(user.IdLanguage, matchId)
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	userConfigurationFavoriteSpells, err := model.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, 1)
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	spellsPlayers, err := model.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	page.SpectateMatchPage(user, h.error, getPageNavCustom(r, user, matchFromUser), h.languages, r.URL.Path, match, players, spellsPlayers, true).Render(r.Context(), w)
+	page.SpectateMatchPage(user, h.error, h.GetPageNavCustom(r, user, matchFromUser), h.languages, r.URL.Path, match, players, spellsPlayers, true).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerMatchTableLive(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	vars := mux.Vars(r)
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 	userMatchUniqueString := fmt.Sprintf("%d-%d", user.Id, matchId)
@@ -81,7 +80,7 @@ func (h *Handler) HandlerMatchTableLive(w http.ResponseWriter, r *http.Request) 
 		fmt.Println("Error upgrading to WebSocket:", err)
 		return
 	}
-	conn.SetReadDeadline(time.Now().Add(60 * time.Second)) // 1-minute timeout
+	conn.SetReadDeadline(time.Now().Add(60 * time.Second))
 
 	clients[userMatchUniqueString] = conn
 
@@ -91,7 +90,7 @@ func (h *Handler) HandlerMatchTableLive(w http.ResponseWriter, r *http.Request) 
 	}()
 
 	for {
-		time.Sleep(2 * time.Second) // Send updates every 5 seconds
+		time.Sleep(2 * time.Second)
 
 		match, err := model.GetMatch(matchId)
 		if err != nil {
@@ -107,7 +106,7 @@ func (h *Handler) HandlerMatchTableLive(w http.ResponseWriter, r *http.Request) 
 
 		userConfigurationFavoriteSpells, err := model.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, 1)
 		if err != nil {
-			log.Println(err)
+			h.Slog.Error(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}

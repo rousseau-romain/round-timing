@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
 	"strings"
 
@@ -12,18 +12,19 @@ import (
 
 type Handler struct {
 	auth      *auth.AuthService
+	Slog      *slog.Logger
 	error     components.PopinMessages
 	languages []model.Language
 }
 
-func New(auth *auth.AuthService) *Handler {
+func New(auth *auth.AuthService, slog *slog.Logger) *Handler {
 	languages, err := model.GetLanguages()
 	if err != nil {
-		log.Println(err)
 		languages = []model.Language{}
 	}
 	return &Handler{
 		auth: auth,
+		Slog: slog,
 		error: components.PopinMessages{
 			Title:    "",
 			Messages: []string{},
@@ -39,5 +40,5 @@ func RenderComponentErrorAndLog(title string, message, messageLog []string, http
 		Messages: message,
 		Type:     "error",
 	}).Render(r.Context(), w)
-	log.Println(strings.Join(messageLog, "\n"))
+	slog.Error(strings.Join(messageLog, "\n"))
 }
