@@ -74,6 +74,11 @@ pt:
         start-match: "Começar a partida"
         go-to-match: "Ver partida"
       input-placeholder-player-name: "Nome do jogador"
+      unauthorized:
+        h1: "Vocé não tem permissão para ver este match."
+        p: "Vocé deve ser o proprietário da match %{matchName} (%{matchId})."
+        button:
+          go-back-list: "Voltar para a lista de partidas"
     profile:
       title: "Perfil"
       h1: "Perfil"

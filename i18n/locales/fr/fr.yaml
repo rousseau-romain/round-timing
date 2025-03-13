@@ -74,6 +74,11 @@ fr:
         start-match: "Commencer le match"
         go-to-match: "Voir le match"
       input-placeholder-player-name: "Nom du joueur"
+      unauthorized:
+        h1: "Vous n'avez pas le droit de voir ce match."
+        p: "Vous devez etre le proprietaire du match %{matchName} (%{matchId})."
+        button:
+          go-back-list: "Retourner sur la liste des matchs"
     profile:
       title: "Profile"
       h1: "Profile:"

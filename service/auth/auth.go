@@ -238,7 +238,7 @@ func RequireAuthAndAdmin(handlerFunc http.HandlerFunc, auth *AuthService, slog *
 
 		if !user.IsAdmin {
 			errorTitle := "You can't acces here"
-			slog.Error("User is not Admin", "userId", user.Id)
+			slog.Info("User is not Admin", "userId", user.Id)
 			w.Header().Set("Location", fmt.Sprintf("/?errorTitle=%s", url.QueryEscape(errorTitle)))
 			w.WriteHeader(http.StatusTemporaryRedirect)
 			return
@@ -328,8 +328,8 @@ func RequireAuthAndHisMatch(handlerFunc http.HandlerFunc, auth *AuthService, slo
 		}
 
 		if userMatch.Id != user.Id {
-			slog.Error("User is not the owner of the match", "userId", user.Id, "userMatchId", userMatch.Id)
-			http.Error(w, fmt.Sprintf("User %v is not the owner of the match %v", user.Id, userMatch.Id), http.StatusUnauthorized)
+			slog.Info("User is not the owner of the match", "userId", user.Id, "userMatchId", userMatch.Id)
+			http.Redirect(w, r, fmt.Sprintf("/match/%d/unautorized", matchId), http.StatusTemporaryRedirect)
 			return
 		}
 
@@ -355,7 +355,7 @@ func RequireAuthAndHisAccount(handlerFunc http.HandlerFunc, auth *AuthService, s
 		userId, _ := strconv.Atoi(vars["idUser"])
 
 		if user.Id != userId {
-			slog.Error("User is not the owner of the account", "userId", user.Id, "userId", userId)
+			slog.Info("User is not the owner of the account", "userId", user.Id, "userId", userId)
 			http.Error(w, fmt.Sprintf("User %v is not the owner of the account %v", user.Id, userId), http.StatusUnauthorized)
 			return
 		}

@@ -74,6 +74,11 @@ en:
         start-match: "Start match"
         go-to-match: "View match"
       input-placeholder-player-name: "Player name"
+      unauthorized:
+        h1: "You don't have the permission to view this match."
+        p: "You must be the owner of the match %{matchName} (%{matchId})."
+        button:
+          go-back-list: "Go back to the list of matchs"
     profile:
       title: "Profile"
       h1: "Profile"

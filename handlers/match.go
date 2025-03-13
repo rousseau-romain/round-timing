@@ -26,7 +26,7 @@ func (h *Handler) HandlersListMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page.MatchListPage(user, h.error, GetPageNavDefault(r), h.languages, r.URL.Path, user, matchs).Render(r.Context(), w)
+	page.MatchListPage(user, h.error, GetPageNavDefault(r), h.languages, r.URL.Path, matchs).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
@@ -37,6 +37,7 @@ func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	name := strings.TrimSpace(r.FormValue("name"))
 
 	numberOfMatch, err := model.GetNumberOfMatchByUserId(user.Id)
 	if err != nil {
@@ -45,15 +46,15 @@ func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if strings.TrimSpace(r.FormValue("name")) == "" {
-		h.Slog.Error(err.Error())
+	if name == "" {
+		h.Slog.Error("Match need a name", "userId", user.Id, "name", name)
 		http.Error(w, "Match need a name", http.StatusBadRequest)
 		return
 	}
 
 	if numberOfMatch >= NumberOfMatchMax {
 		RenderComponentErrorAndLog(
-			i18n.T(r.Context(), "global.error")+" "+r.FormValue("name"),
+			i18n.T(r.Context(), "global.error")+" "+name,
 			[]string{i18n.T(r.Context(), "page.match-list.max-match")},
 			[]string{i18n.T(r.Context(), "page.match-list.max-match")},
 			http.StatusBadRequest, w, r,
@@ -62,11 +63,12 @@ func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	matchId, err := model.CreateMatch(model.MatchCreate{
-		Name:   r.FormValue("name"),
+		Name:   name,
 		IdUser: user.Id,
 	})
 
 	if err != nil {
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -166,7 +168,23 @@ func (h *Handler) HandlersMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page.TeamPlayerListPage(user, h.error, h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, user, match, teams, classes, players).Render(r.Context(), w)
+	page.TeamPlayerListPage(user, h.error, h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, match, teams, classes, players).Render(r.Context(), w)
+}
+
+func (h *Handler) HandlersMatchUnAutorized(w http.ResponseWriter, r *http.Request) {
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+
+	vars := mux.Vars(r)
+
+	matchId, _ := strconv.Atoi(vars["idMatch"])
+
+	match, err := model.GetMatch(matchId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	page.TeamPlayerListPageUnAutorized(user, h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, match).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) {
