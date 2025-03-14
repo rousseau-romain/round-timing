@@ -87,6 +87,11 @@ it:
       h2-configuration: "Configurazione:"
       logout: "Disconnetti"
       no-spectate: "Non hai nessun osservatore, aggiungi uno tramite il form qui sotto."
+      errors:
+        user-spectate:
+          already-exist: "L'utente spectate (%{userSpectateId}) già esiste"
+          does-not-exist: "L'utente spectate (%{userSpectateId}) non esiste"
+          not-valid: "L'utente spettatore (%{userSpectateId}) non è valido, esempio (3320e85f-5fc2-4bdd-96ac-994f34c381db)"
     signup:
       title: "Registrati"
       h1: "Crea il tuo account"

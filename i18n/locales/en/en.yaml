@@ -87,6 +87,11 @@ en:
       h2-configuration: "Configuration:"
       logout: "Log out"
       no-spectate: "You have no spectators, add one through the form below."
+      errors:
+        user-spectate:
+          already-exist: "The user spectate (%{userSpectateId}) already listed"
+          does-not-exist: "The user spectate (%{userSpectateId}) does not exist"
+          not-valid: "The spectator user (%{userSpectateId}) is invalid, example (3320e85f-5fc2-4bdd-96ac-994f34c381db)"
     signup:
       title: "Sign up"
       h1: "Create your account"

@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	"fmt"
 	"strconv"
 
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/views/page"
 
@@ -83,8 +83,8 @@ func (h *Handler) HandlersProfileAddSpectate(w http.ResponseWriter, r *http.Requ
 
 	if err := uuid.Validate(r.FormValue("idUserShare")); err != nil {
 		RenderComponentError(
-			"User spectate need a valid id",
-			[]string{fmt.Sprintf("User spectate need a valid id not (%s)", r.FormValue("idUserShare"))},
+			i18n.T(r.Context(), "page.profile.errors.user-spectate.not-valid", i18n.M{"userSpectateId": r.FormValue("idUserShare")}),
+			[]string{""},
 			http.StatusBadRequest, w, r,
 		)
 		h.Slog.Error("User spectate need a valid id", "userSpectateId", r.FormValue("idUserShare"))
@@ -100,8 +100,8 @@ func (h *Handler) HandlersProfileAddSpectate(w http.ResponseWriter, r *http.Requ
 
 	if !userSpectateExist {
 		RenderComponentError(
-			"User spectate does not exist",
-			[]string{"User spectate does not exist"},
+			i18n.T(r.Context(), "page.profile.errors.user-spectate.does-not-exist", i18n.M{"userSpectateId": r.FormValue("idUserShare")}),
+			[]string{""},
 			http.StatusBadRequest, w, r,
 		)
 		h.Slog.Error("User spectate does not exist", "userSpectateId", r.FormValue("idUserShare"))
@@ -118,8 +118,8 @@ func (h *Handler) HandlersProfileAddSpectate(w http.ResponseWriter, r *http.Requ
 
 	if IsAlreadyUsersSpectate {
 		RenderComponentError(
-			"User spectate already exist",
-			[]string{"User spectate already exist"},
+			i18n.T(r.Context(), "page.profile.errors.user-spectate.already-exist", i18n.M{"userSpectateId": r.FormValue("idUserShare")}),
+			[]string{""},
 			http.StatusBadRequest, w, r,
 		)
 		h.Slog.Error("User spectate already exist", "userSpectateId", r.FormValue("idUserShare"))

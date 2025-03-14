@@ -87,6 +87,11 @@ es:
       h2-configuration: "Configuración:"
       logout: "Cerrar sesión"
       no-spectate: "No tienes ningúno espectador, agrege uno mediante el formulario de abajo."
+      errors:
+        user-spectate:
+          already-exist: "El espectador del usuario (%{userSpectateId}) ya existe"
+          does-not-exist: "El espectador del usuario (%{userSpectateId}) no existe"
+          not-valid: "El espectador del usuario (%{userSpectateId}) no es válido, ejemplo (3320e85f-5fc2-4bdd-96ac-994f34c381db)"
     signup:
       title: "Registrarse"
       h1: "Crea tu cuenta"
