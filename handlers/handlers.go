@@ -49,3 +49,12 @@ func RenderComponentInfo(title string, message []string, httpCode int, w http.Re
 		Type:     "info",
 	}).Render(r.Context(), w)
 }
+
+func RenderComponentWarning(title string, message []string, httpCode int, w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(httpCode)
+	components.PopinMessage(components.PopinMessages{
+		Title:    title,
+		Messages: message,
+		Type:     "warning",
+	}).Render(r.Context(), w)
+}

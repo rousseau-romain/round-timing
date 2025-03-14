@@ -69,7 +69,7 @@ func (h *Handler) HandlersCreatePlayer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if canCreatePlayerInTeam == MaxPlayerByTeam {
-		RenderComponentInfo(
+		RenderComponentWarning(
 			i18n.T(r.Context(), "global.error")+" "+name,
 			[]string{i18n.T(r.Context(), "page.match.max-player-by-team")},
 			http.StatusBadRequest,
