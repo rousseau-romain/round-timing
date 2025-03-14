@@ -28,6 +28,8 @@ var clients = make(map[string]*websocket.Conn) // Maps userID to WebSocket conne
 
 func (h *Handler) HandlerSpectateMatch(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	h.Slog = h.Slog.With("userId", user.Id)
+
 	vars := mux.Vars(r)
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 
@@ -71,6 +73,8 @@ func (h *Handler) HandlerSpectateMatch(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) HandlerMatchTableLive(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	h.Slog = h.Slog.With("userId", user.Id)
+
 	vars := mux.Vars(r)
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 	userMatchUniqueString := fmt.Sprintf("%d-%d", user.Id, matchId)

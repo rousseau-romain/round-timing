@@ -18,6 +18,7 @@ var NumberOfMatchMax = 50
 
 func (h *Handler) HandlersListMatch(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	h.Slog = h.Slog.With("userId", user.Id)
 
 	matchs, err := model.GetMatchsByIdUser(user.Id)
 	if err != nil {
@@ -31,6 +32,8 @@ func (h *Handler) HandlersListMatch(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	h.Slog = h.Slog.With("userId", user.Id)
+
 	err := r.ParseForm()
 	if err != nil {
 		h.Slog.Error(err.Error())
@@ -109,6 +112,9 @@ func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandlersDeleteMatch(w http.ResponseWriter, r *http.Request) {
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	h.Slog = h.Slog.With("userId", user.Id)
+
 	vars := mux.Vars(r)
 	matchId := vars["idMatch"]
 
@@ -139,6 +145,7 @@ func (h *Handler) HandlersDeleteMatch(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) HandlersMatch(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
 
@@ -173,6 +180,7 @@ func (h *Handler) HandlersMatch(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) HandlersMatchUnAutorized(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
 
@@ -191,6 +199,7 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 	var idClassGlobal = 13
 
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
 
@@ -295,6 +304,9 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *Handler) HandlerResetMatchPage(w http.ResponseWriter, r *http.Request) {
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	h.Slog = h.Slog.With("userId", user.Id)
+
 	vars := mux.Vars(r)
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 
@@ -309,6 +321,8 @@ func (h *Handler) HandlerResetMatchPage(w http.ResponseWriter, r *http.Request) 
 
 func (h *Handler) HandlerToggleMatchMastery(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	h.Slog = h.Slog.With("userId", user.Id)
+
 	vars := mux.Vars(r)
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 	multipleMasteryEnabled, _ := strconv.Atoi(vars["toggleBool"])
@@ -352,6 +366,8 @@ func (h *Handler) HandlerToggleMatchMastery(w http.ResponseWriter, r *http.Reque
 
 func (h *Handler) HandlerMatchNextRound(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	h.Slog = h.Slog.With("userId", user.Id)
+
 	vars := mux.Vars(r)
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 
@@ -396,6 +412,8 @@ func (h *Handler) HandlerMatchNextRound(w http.ResponseWriter, r *http.Request) 
 
 func (h *Handler) HandlerUsePlayerSpell(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	h.Slog = h.Slog.With("userId", user.Id)
+
 	vars := mux.Vars(r)
 	idPlayerSpell, _ := strconv.Atoi(vars["idPlayerSpell"])
 
@@ -417,6 +435,8 @@ func (h *Handler) HandlerUsePlayerSpell(w http.ResponseWriter, r *http.Request) 
 
 func (h *Handler) HandlerRemoveRoundRecoveryPlayerSpell(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	h.Slog = h.Slog.With("userId", user.Id)
+
 	vars := mux.Vars(r)
 	idPlayerSpell, _ := strconv.Atoi(vars["idPlayerSpell"])
 

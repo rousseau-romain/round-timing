@@ -11,6 +11,7 @@ import (
 
 func (h *Handler) HandlersListUser(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	h.Slog = h.Slog.With("userId", user.Id)
 
 	users, err := model.GetUsers()
 	if err != nil {
@@ -22,6 +23,9 @@ func (h *Handler) HandlersListUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandlersUserEnabled(w http.ResponseWriter, r *http.Request) {
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	h.Slog = h.Slog.With("userId", user.Id)
+
 	vars := mux.Vars(r)
 	idUser, _ := strconv.Atoi(vars["idUser"])
 
@@ -37,12 +41,12 @@ func (h *Handler) HandlersUserEnabled(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := model.GetUserById(idUser)
+	userEnabled, err := model.GetUserById(idUser)
 	if err != nil {
 		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	pageAdmin.UserEnabled(user).Render(r.Context(), w)
+	pageAdmin.UserEnabled(userEnabled).Render(r.Context(), w)
 }

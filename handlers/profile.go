@@ -14,7 +14,6 @@ import (
 )
 
 func (h *Handler) HandlersProfile(w http.ResponseWriter, r *http.Request) {
-	h.Slog = h.Slog.With("handlerPage", "HandlersProfile")
 	user, err := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	if err != nil {
 		h.Slog.Error(err.Error())
@@ -22,6 +21,7 @@ func (h *Handler) HandlersProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.Slog = h.Slog.With("userId", user.Id)
+
 	idUserShares, err := model.GetUsersSpectateByIdUser(user.Id)
 	if err != nil {
 		h.Slog.Error(err.Error())
@@ -55,6 +55,8 @@ func (h *Handler) HandlersProfile(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) HandlersProfileToggleUserConfiguration(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	h.Slog = h.Slog.With("userId", user.Id)
+
 	vars := mux.Vars(r)
 	idConfiguration, _ := strconv.Atoi(vars["idConfiguration"])
 
@@ -77,6 +79,7 @@ func (h *Handler) HandlersProfileToggleUserConfiguration(w http.ResponseWriter, 
 
 func (h *Handler) HandlersProfileAddSpectate(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	h.Slog = h.Slog.With("userId", user.Id)
 
 	if err := uuid.Validate(r.FormValue("idUserShare")); err != nil {
 		RenderComponentErrorAndLog(
@@ -138,6 +141,7 @@ func (h *Handler) HandlersProfileAddSpectate(w http.ResponseWriter, r *http.Requ
 
 func (h *Handler) HandlersProfileDeleteSpectate(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	h.Slog = h.Slog.With("userId", user.Id)
 
 	if err := uuid.Validate(r.FormValue("idUserShare")); err != nil {
 		h.Slog.Error("User spectate need a id", "error", err)

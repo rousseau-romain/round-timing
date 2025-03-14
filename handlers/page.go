@@ -104,6 +104,7 @@ func (h *Handler) HandlersHome(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if user.Id != 0 {
+		h.Slog = h.Slog.With("userId", user.Id)
 		pageNav = h.GetPageNavCustom(r, user, model.Match{})
 		page.HomePage(user, h.error, pageNav, h.languages, r.URL.Path).Render(r.Context(), w)
 		return
@@ -113,10 +114,16 @@ func (h *Handler) HandlersHome(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) HandlerCGU(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	if user.Id != 0 {
+		h.Slog = h.Slog.With("userId", user.Id)
+	}
 	page.CGU(h.error, h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerPrivacy(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	if user.Id != 0 {
+		h.Slog = h.Slog.With("userId", user.Id)
+	}
 	page.Privacy(h.error, h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path).Render(r.Context(), w)
 }

@@ -16,6 +16,9 @@ import (
 var MaxPlayerByTeam = 8
 
 func (h *Handler) HandlersUpdatePlayer(w http.ResponseWriter, r *http.Request) {
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	h.Slog = h.Slog.With("userId", user.Id)
+
 	vars := mux.Vars(r)
 
 	name := strings.TrimSpace(r.FormValue("name"))
@@ -39,6 +42,8 @@ func (h *Handler) HandlersUpdatePlayer(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) HandlersCreatePlayer(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	h.Slog = h.Slog.With("userId", user.Id)
+
 	vars := mux.Vars(r)
 
 	idMatch, _ := strconv.Atoi(vars["idMatch"])
@@ -120,6 +125,9 @@ func (h *Handler) HandlersCreatePlayer(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandlersDeletePlayer(w http.ResponseWriter, r *http.Request) {
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	h.Slog = h.Slog.With("userId", user.Id)
+
 	vars := mux.Vars(r)
 
 	idPlayer, _ := strconv.Atoi(vars["idPlayer"])
@@ -140,9 +148,10 @@ func (h *Handler) HandlersDeletePlayer(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandlersPlayerLanguage(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	h.Slog = h.Slog.With("userId", user.Id)
+
+	vars := mux.Vars(r)
 
 	code := vars["code"]
 	idLanguage := helper.SupportedLanguages[code]
