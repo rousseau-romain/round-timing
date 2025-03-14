@@ -1,9 +1,5 @@
 package model
 
-import (
-	"log"
-)
-
 type UserConfiguration struct {
 	Id              int    `json:"id"`
 	IdUser          int    `json:"id_user"`
@@ -19,11 +15,11 @@ func GetConfigurationByIdConfigurationIdUser(idLanguage, idUser, idConfiguration
 			IFNULL(uc.id_user, 0) AS id_user,
 			IFNULL(c.id, 0) AS id_configuration,
 			ct.name,
-			IF(uc.id_user IS NULL, 0, 1) AS isEnabled
+			IF(uc.id_user IS NULL, 0, 1) AS is_enabled
 		FROM configuration AS c
 		LEFT JOIN user_configuration AS uc ON uc.id_configuration = c.id
 		JOIN configuration_translation AS ct ON ct.id_configuration = c.id AND ct.id_language = ?
-		WHERE (uc.id_user = ? OR uc.id_user IS NULL) AND c.id = ?;
+		WHERE (uc.id_user = ? OR uc.id_user IS NULL) AND c.id = ?
 	`
 
 	rows := db.QueryRow(sql, idLanguage, idUser, idConfiguration)
@@ -52,7 +48,7 @@ func GetAllConfigurationByIdUser(idLanguage, idUser int) ([]UserConfiguration, e
 			IFNULL(uc.id_user, 0) AS id_user,
 			IFNULL(c.id, 0) AS id_configuration,
 			ct.name,
-			IF(uc.id_user IS NULL, 0, 1) AS isEnabled
+			IF(uc.id_user IS NULL, 0, 1) AS is_enabled
 		FROM user_configuration AS uc
 		RIGHT JOIN configuration AS c ON c.id = uc.id_configuration
 		JOIN configuration_translation AS ct ON ct.id_configuration = c.id AND ct.id_language = ? 
@@ -62,7 +58,6 @@ func GetAllConfigurationByIdUser(idLanguage, idUser int) ([]UserConfiguration, e
 	rows, err := db.Query(sql, idLanguage, idUser)
 
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
@@ -78,7 +73,6 @@ func GetAllConfigurationByIdUser(idLanguage, idUser int) ([]UserConfiguration, e
 			&configuration.IsEnabled,
 		)
 		if err != nil {
-			log.Println(err)
 			return nil, err
 		}
 		configurationByIdUser = append(configurationByIdUser, configuration)
@@ -93,14 +87,12 @@ func ToggleUserConfiguration(idUser, idConfiguration int) error {
 	var isEnable bool
 
 	if row.Err() != nil {
-		log.Println(row.Err())
 		return row.Err()
 	}
 
 	err := row.Scan(&isEnable)
 
 	if err != nil {
-		log.Println(err)
 		return err
 	}
 

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"net/mail"
 	"net/url"
@@ -27,8 +26,7 @@ func (h *Handler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) HandleProviderLogin(w http.ResponseWriter, r *http.Request) {
 	// try to get the user without re-authenticating
 	if u, err := gothic.CompleteUserAuth(w, r); err == nil {
-		log.Printf("User already authenticated! %v", u)
-
+		h.Slog.Info("User already authenticated", "goticUserId", u.UserID)
 		page.SigninPage(GetPageNavDefault(r), h.languages, r.URL.Path, h.error).Render(r.Context(), w)
 	} else {
 		gothic.BeginAuthHandler(w, r)
@@ -39,24 +37,26 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 	user, err := gothic.CompleteUserAuth(w, r)
 	if err != nil {
 		fmt.Fprintln(w, err)
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		return
 	}
 
 	userAlreadyExists, err := model.UserExistsByOauth2Id(user.UserID)
 
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		fmt.Fprintln(w, err)
 		return
 	}
+
+	h.Slog = h.Slog.With("userOauth2Id", user.UserID)
 
 	if !userAlreadyExists {
 		providerLoginName, err := model.UserExistsByEmail(user.Email)
 
 		if err != nil {
 			fmt.Fprintln(w, err)
-			log.Println(err)
+			h.Slog.Error(err.Error())
 			return
 		}
 
@@ -65,11 +65,11 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 			errorMessage := i18n.T(r.Context(), "page.signin.already-exists-with-provider", i18n.M{"email": user.Email, "provider": providerLoginName})
 			err := gothic.Logout(w, r)
 			if err != nil {
-				log.Println(err)
+				h.Slog.Error(err.Error())
 				return
 			}
 
-			h.auth.RemoveUserSession(w, r)
+			h.auth.RemoveUserSession(w, r, h.Slog)
 
 			w.Header().Set("Location", fmt.Sprintf("/?errorTitle=%s&errorMessages=%s", url.QueryEscape(errorTitle), url.QueryEscape(errorMessage)))
 			w.WriteHeader(http.StatusTemporaryRedirect)
@@ -94,7 +94,7 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 		}
 	}
 
-	err = h.auth.StoreUserSession(w, r, user)
+	err = h.auth.StoreUserSession(w, r, h.Slog, user)
 	if err != nil {
 		fmt.Fprintln(w, err)
 		return
@@ -110,7 +110,7 @@ func (h *Handler) HandleSignupEmail(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -123,6 +123,7 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	if _, err := mail.ParseAddress(email); err != nil {
 		errMessages = append(errMessages, i18n.T(r.Context(), "page.signup.error.email.not-valid"))
 	}
+	h.Slog = h.Slog.With("email", email)
 
 	passwordIsValid, errorMessages := helper.IsValidPassword(r, password)
 	if !passwordIsValid {
@@ -134,34 +135,34 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(errMessages) > 0 {
-		RenderComponentErrorAndLog(
+		RenderComponentError(
 			i18n.T(r.Context(), "page.signup.error.title"),
-			errMessages,
 			errMessages,
 			http.StatusBadRequest, w, r,
 		)
+		h.Slog.Info(strings.Join(errorMessages, "\n"))
 		return
 	}
 
 	provider, err := model.UserExistsByEmail(email)
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, "can't create user", http.StatusInternalServerError)
 		return
 	}
 	if provider != "" {
-		RenderComponentErrorAndLog(
+		RenderComponentError(
 			i18n.T(r.Context(), "page.signup.error.email.already-exists", i18n.M{"email": email, "provider": provider}),
 			[]string{""},
-			[]string{i18n.T(r.Context(), "page.signup.error.email.already-exists", i18n.M{"email": email, "provider": provider})},
 			http.StatusConflict, w, r,
 		)
+		h.Slog.Info("Email already exist", "email", email, "provider", provider)
 		return
 	}
 
 	salt, err := helper.GenerateSalt()
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, "can't create user", http.StatusInternalServerError)
 		return
 	}
@@ -171,7 +172,7 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	lang := helper.GetPreferredLanguage(r)
 	idLanguage, err := model.GetLanguagesIdByCode(lang)
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, "can't create user", http.StatusInternalServerError)
 		return
 	}
@@ -185,7 +186,7 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 
 	_, err = model.CreateUser(user)
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, "can't create user", http.StatusInternalServerError)
 		return
 	}
@@ -209,7 +210,7 @@ func generateToken(email string) (string, error) {
 func (h *Handler) HandleLoginEmail(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -218,20 +219,28 @@ func (h *Handler) HandleLoginEmail(w http.ResponseWriter, r *http.Request) {
 	password := strings.TrimSpace(r.FormValue("password"))
 
 	user, err := model.GetUserByEmail(email)
-	if err != nil || !helper.CheckPassword(user.Hash, password) {
+
+	if err != nil {
+		h.Slog.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	h.Slog = h.Slog.With("userId", user.Id)
+
+	if !helper.CheckPassword(user.Hash, password) {
 		errMessage := i18n.T(r.Context(), "page.signin.invalid-credentials")
-		RenderComponentErrorAndLog(
+		RenderComponentError(
 			errMessage,
-			[]string{errMessage},
 			[]string{errMessage},
 			http.StatusBadRequest, w, r,
 		)
+		h.Slog.Info("Invalid credentials: " + errMessage)
 		return
 	}
 
 	token, err := generateToken(user.Email)
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		http.Error(w, "Could not generate token", http.StatusInternalServerError)
 		return
 	}
@@ -259,13 +268,15 @@ func (h *Handler) HandleLoginEmail(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleLogout(w http.ResponseWriter, r *http.Request) {
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	h.Slog = h.Slog.With("userId", user.Id)
 	err := gothic.Logout(w, r)
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		return
 	}
 
-	h.auth.RemoveUserSession(w, r)
+	h.auth.RemoveUserSession(w, r, h.Slog)
 
 	w.Header().Set("Location", "/")
 	w.WriteHeader(http.StatusTemporaryRedirect)

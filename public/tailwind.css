@@ -970,6 +970,10 @@ footer a:hover {
   position: relative;
 }
 
+.-bottom-1 {
+  bottom: -0.25rem;
+}
+
 .-left-1 {
   left: -0.25rem;
 }
@@ -982,12 +986,8 @@ footer a:hover {
   left: -100%;
 }
 
-.-right-0\.5 {
-  right: -0.125rem;
-}
-
-.-top-0\.5 {
-  top: -0.125rem;
+.-right-1 {
+  right: -0.25rem;
 }
 
 .-top-3\/4 {
@@ -1014,18 +1014,6 @@ footer a:hover {
   top: 0.5rem;
 }
 
-.-bottom-0\.5 {
-  bottom: -0.125rem;
-}
-
-.-bottom-1 {
-  bottom: -0.25rem;
-}
-
-.-right-1 {
-  right: -0.25rem;
-}
-
 .z-20 {
   z-index: 20;
 }
@@ -1040,10 +1028,6 @@ footer a:hover {
 
 .m-auto {
   margin: auto;
-}
-
-.m-1 {
-  margin: 0.25rem;
 }
 
 .mx-auto {
@@ -1320,10 +1304,6 @@ footer a:hover {
   gap: 2rem;
 }
 
-.gap-1 {
-  gap: 0.25rem;
-}
-
 .space-y-1 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-y-reverse: 0;
   margin-top: calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));
@@ -1401,16 +1381,16 @@ footer a:hover {
   border-width: 2px;
 }
 
+.border-b {
+  border-bottom-width: 1px;
+}
+
 .border-s-4 {
   border-inline-start-width: 4px;
 }
 
 .border-t {
   border-top-width: 1px;
-}
-
-.border-b {
-  border-bottom-width: 1px;
 }
 
 .border-blue-600 {
@@ -1888,14 +1868,6 @@ footer a:hover {
 .text-yellow-800 {
   --tw-text-opacity: 1;
   color: rgb(133 77 14 / var(--tw-text-opacity, 1));
-}
-
-.text-\[\#\%s\] {
-  color: #%s;
-}
-
-.text-\[\%s\] {
-  color: %s;
 }
 
 .underline {

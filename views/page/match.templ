@@ -90,50 +90,57 @@ templ TeamPlayerTable(players []model.Player, match model.Match) {
 	</div>
 }
 
-templ TeamPlayerListPage(user model.User, popinMessages components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string, modelUser model.User, match model.Match, teams []model.Team, classes []model.Class, players []model.Player) {
+templ teamPlayerListPageLayout(user model.User, popinMessages components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string, match model.Match) {
 	@components.Layout(i18n.T(ctx, "page.match.title", i18n.M{"name": match.Name}), popinMessages, user, navItems, languages, pageSlug) {
 		<div class="container mx-auto">
-			<h1 class="mb-2">{ i18n.T(ctx, "page.match.h1") }</h1>
-			if match.Round > 0 {
-				<button
-					type="submit"
-					class="inline-block w-full rounded-lg bg-red-600 px-5 py-3 font-medium text-white sm:w-auto"
-					hx-patch={ fmt.Sprintf("/match/%d/reset", match.Id) }
-				>
-					{ i18n.T(ctx, "page.match.button.reset-match") }
-				</button>
-			} else {
-				for it, team := range teams {
-					<div
-						class={ "flex items-center justify-between",
+			{ children... }
+		</div>
+	}
+}
+
+templ TeamPlayerListPage(user model.User, popinMessages components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string, match model.Match, teams []model.Team, classes []model.Class, players []model.Player) {
+	@teamPlayerListPageLayout(user, popinMessages, navItems, languages, pageSlug, match) {
+		<h1 class="mb-2">{ i18n.T(ctx, "page.match.h1") }</h1>
+		if match.Round > 0 {
+			<button
+				type="submit"
+				class="inline-block w-full rounded-lg bg-red-600 px-5 py-3 font-medium text-white sm:w-auto"
+				hx-patch={ fmt.Sprintf("/match/%d/reset", match.Id) }
+			>
+				{ i18n.T(ctx, "page.match.button.reset-match") }
+			</button>
+		} else {
+			for it, team := range teams {
+				<div
+					class={ "flex items-center justify-between",
 								"border-2 rounded-md p-2 mb-2",
 								"border-" + team.Color + "-200" }
-					>
-						for _, class := range classes {
-							<button
-								class={
-									"rounded-md lg:w-16 lg:h-16 md:w-12 md:h-12 w-8 h-8",
-									"bg-" + team.Color + "-200",
-								}
-								hx-post={ fmt.Sprintf("/match/%d/player", match.Id) }
-								hx-vals={ fmt.Sprintf(`{"idTeam": "%d", "idClass": "%d", "name": "%s"}`, team.Id, class.Id, class.Name+" - "+i18n.T(ctx, "global.team."+team.Color)) }
-								if it == 0 {
-									hx-swap="afterbegin"
-								} else {
-									hx-swap="afterend"
-								}
-								hx-target="next tbody"
-								hx-on::after-request="performAnimation()"
-								hx-target-error="#popinMessages"
-							>
-								<img class="img-class lg:h-12 md:h-9 h-6 w-max mx-auto" alt={ class.Name } src={ class.UrlImage + "F.svg" }/>
-							</button>
-						}
-					</div>
-				}
+				>
+					for _, class := range classes {
+						<button
+							class={
+								"rounded-md lg:w-16 lg:h-16 md:w-12 md:h-12 w-8 h-8",
+								"bg-" + team.Color + "-200",
+							}
+							hx-post={ fmt.Sprintf("/match/%d/player", match.Id) }
+							hx-vals={ fmt.Sprintf(`{"idTeam": "%d", "idClass": "%d", "name": "%s"}`, team.Id, class.Id, class.Name+" - "+i18n.T(ctx, "global.team."+team.Color)) }
+							if it == 0 {
+								hx-swap="afterbegin"
+							} else {
+								hx-swap="afterend"
+							}
+							hx-target="next tbody"
+							hx-on::after-request="performAnimation()"
+							hx-target-error="#popinMessages"
+						>
+							<img class="img-class lg:h-12 md:h-9 h-6 w-max mx-auto" alt={ class.Name } src={ class.UrlImage + "F.svg" }/>
+						</button>
+					}
+				</div>
 			}
-			@TeamPlayerTable(players, match)
-			<script>
+		}
+		@TeamPlayerTable(players, match)
+		<script>
 				function performAnimation() {
 					const tbody = document.querySelector("tbody");
 					const divTableButton = document.getElementById("div-table-button");
@@ -148,7 +155,19 @@ templ TeamPlayerListPage(user model.User, popinMessages components.PopinMessages
 					}
 				}
 				performAnimation()
-    		</script>
-		</div>
+            </script>
+	}
+}
+
+templ TeamPlayerListPageUnAutorized(user model.User, navItems []components.NavItem, languages []model.Language, pageSlug string, match model.Match) {
+	@teamPlayerListPageLayout(user, components.PopinMessages{}, navItems, languages, pageSlug, match) {
+		<h1 class="mb-2">{ i18n.T(ctx, "page.match.unauthorized.h1") }</h1>
+		<p>{ i18n.T(ctx, "page.match.unauthorized.p", i18n.M{"matchName": match.Name, "matchId": match.Id }) }</p>
+		<a
+			class="inline-block w-full rounded-lg bg-black px-5 py-3 font-medium text-white sm:w-auto"
+			href="/match"
+		>
+			{ i18n.T(ctx, "page.match.unauthorized.button.go-back-list") }
+		</a>
 	}
 }

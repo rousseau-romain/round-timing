@@ -2,7 +2,6 @@ package model
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 
@@ -57,7 +56,6 @@ func GetSpellsByIdClass(idLanguage int, idClass []int, idsToExclude []int) ([]Sp
 	rows, err := db.Query(sql, idLanguage)
 
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
@@ -79,7 +77,6 @@ func GetSpellsByIdClass(idLanguage int, idClass []int, idsToExclude []int) ([]Sp
 			&spell.IsEndingCaster,
 		)
 		if err != nil {
-			log.Println(err)
 			return nil, err
 		}
 		spells = append(spells, spell)

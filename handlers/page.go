@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"log"
 	"net/http"
 	"os"
 	"strings"
 
 	"github.com/invopop/ctxi18n/i18n"
+	"github.com/rousseau-romain/round-timing/config"
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/shared/components"
 	"github.com/rousseau-romain/round-timing/views/page"
@@ -26,7 +26,7 @@ func GetPageNavDefault(r *http.Request) []components.NavItem {
 	}
 }
 
-func getPageNavCustom(r *http.Request, user model.User, match model.Match) []components.NavItem {
+func (h *Handler) GetPageNavCustom(r *http.Request, user model.User, match model.Match) []components.NavItem {
 	var pageNav = GetPageNavDefault(r)
 	if user.Id != 0 {
 		if match.Id != 0 {
@@ -37,7 +37,7 @@ func getPageNavCustom(r *http.Request, user model.User, match model.Match) []com
 		} else {
 			lastMatch, err := model.GetLastMatchByUserId(user.Id)
 			if err != nil {
-				log.Println(err)
+				h.Slog.Error(err.Error())
 				return pageNav
 			}
 			if lastMatch.Id != 0 {
@@ -59,7 +59,7 @@ func getPageNavCustom(r *http.Request, user model.User, match model.Match) []com
 func (h *Handler) HandlerCommitId(w http.ResponseWriter, r *http.Request) {
 	jsonFile, err := os.Open("config/commit-id.json")
 	if err != nil {
-		log.Println(err)
+		h.Slog.Error(err.Error())
 		fmt.Println(err)
 	}
 
@@ -77,12 +77,25 @@ func (h *Handler) HandlerCommitId(w http.ResponseWriter, r *http.Request) {
 	w.Write(byteValue)
 }
 
+func (h *Handler) HandlerVersion(w http.ResponseWriter, r *http.Request) {
+	var version struct {
+		Version string `json:"version"`
+	}
+
+	version.Version = config.VERSION
+
+	byteValue, _ := json.Marshal(version)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(byteValue)
+}
+
 func (h *Handler) HandlersNotFound(w http.ResponseWriter, r *http.Request) {
 	page.NotFoundPage(h.error, GetPageNavDefault(r), h.languages, r.URL.Path).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersHome(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	pageNav := GetPageNavDefault(r)
 
 	h.error = components.PopinMessages{
@@ -91,7 +104,8 @@ func (h *Handler) HandlersHome(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if user.Id != 0 {
-		pageNav = getPageNavCustom(r, user, model.Match{})
+		h.Slog = h.Slog.With("userId", user.Id)
+		pageNav = h.GetPageNavCustom(r, user, model.Match{})
 		page.HomePage(user, h.error, pageNav, h.languages, r.URL.Path).Render(r.Context(), w)
 		return
 	}
@@ -99,11 +113,17 @@ func (h *Handler) HandlersHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandlerCGU(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
-	page.CGU(h.error, getPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path).Render(r.Context(), w)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	if user.Id != 0 {
+		h.Slog = h.Slog.With("userId", user.Id)
+	}
+	page.CGU(h.error, h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerPrivacy(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r)
-	page.Privacy(h.error, getPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path).Render(r.Context(), w)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	if user.Id != 0 {
+		h.Slog = h.Slog.With("userId", user.Id)
+	}
+	page.Privacy(h.error, h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path).Render(r.Context(), w)
 }

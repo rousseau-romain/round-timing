@@ -74,6 +74,11 @@ fr:
         start-match: "Commencer le match"
         go-to-match: "Voir le match"
       input-placeholder-player-name: "Nom du joueur"
+      unauthorized:
+        h1: "Vous n'avez pas le droit de voir ce match."
+        p: "Vous devez etre le proprietaire du match %{matchName} (%{matchId})."
+        button:
+          go-back-list: "Retourner sur la liste des matchs"
     profile:
       title: "Profile"
       h1: "Profile:"
@@ -82,6 +87,11 @@ fr:
       h2-configuration: "Configuration:"
       logout: "Deconnexion"
       no-spectate: "Vous n'avez aucun spectateur, ajouter en via le formulaire ci-dessous."
+      errors:
+        user-spectate:
+          already-exist: "Le spectateur (%{userSpectateId}) est déjà répertorié"
+          does-not-exist: "Le spectateur (%{userSpectateId}) n'existe pas"
+          not-valid: "Le spectateur (%{userSpectateId}) n'est pas valide, example (3320e85f-5fc2-4bdd-96ac-994f34c381db)"
     signup:
       title: "Inscription"
       h1: "Créez votre compte"

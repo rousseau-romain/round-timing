@@ -74,6 +74,11 @@ pt:
         start-match: "Começar a partida"
         go-to-match: "Ver partida"
       input-placeholder-player-name: "Nome do jogador"
+      unauthorized:
+        h1: "Vocé não tem permissão para ver este match."
+        p: "Vocé deve ser o proprietário da match %{matchName} (%{matchId})."
+        button:
+          go-back-list: "Voltar para a lista de partidas"
     profile:
       title: "Perfil"
       h1: "Perfil"
@@ -82,6 +87,11 @@ pt:
       h2-configuration: "Configuração:"
       logout: "Sair"
       no-spectate: " Vocé não tem nenhum espectador, adicione via o formulário abaixo."
+      errors:
+        user-spectate:
+          already-exist: "O usuário espectador (%{userSpectateId}) já existe"
+          does-not-exist: "O usuário espectador (%{userSpectateId}) não existe"
+          not-valid: "O usuário espectador (%{userSpectateId}) é inválido, exemplo (3320e85f-5fc2-4bdd-96ac-994f34c381db)"
     signup:
       title: "Criar uma conta"
       h1: "Crie sua conta"

@@ -1,9 +1,5 @@
 package model
 
-import (
-	"log"
-)
-
 type Team struct {
 	Id          int    `json:"id"`
 	IdMatch     int    `json:"id_match"`
@@ -41,7 +37,6 @@ func GetTeamsByIdMatch(idMatch int) ([]Team, error) {
 	rows, err := db.Query(sql, idMatch)
 
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
@@ -57,7 +52,6 @@ func GetTeamsByIdMatch(idMatch int) ([]Team, error) {
 			&team.Color,
 		)
 		if err != nil {
-			log.Println(err)
 			return nil, err
 		}
 		teams = append(teams, team)
@@ -92,7 +86,6 @@ func CreateTeam(m TeamCreate) (int, error) {
 	response, err := db.Exec(sql, m.IdMatch, m.IdColorTeam, m.Name)
 
 	if err != nil {
-		log.Println(err)
 		return 0, err
 	}
 

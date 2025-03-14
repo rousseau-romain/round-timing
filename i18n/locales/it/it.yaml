@@ -74,6 +74,11 @@ it:
         start-match: "Inizia la partita"
         go-to-match: "Vedi la partita"
       input-placeholder-player-name: "Nome del giocatore"
+      unauthorized:
+        h1: "Non hai i permessi per vedere questa partita"
+        p: "Devi essere il proprietario della partita %{matchName} (%{matchId})."
+        button:
+          go-back-list: "Vai alla lista delle partite"
     profile:
       title: "Profilo"
       h1: "Profilo"
@@ -82,6 +87,11 @@ it:
       h2-configuration: "Configurazione:"
       logout: "Disconnetti"
       no-spectate: "Non hai nessun osservatore, aggiungi uno tramite il form qui sotto."
+      errors:
+        user-spectate:
+          already-exist: "L'utente spectate (%{userSpectateId}) già esiste"
+          does-not-exist: "L'utente spectate (%{userSpectateId}) non esiste"
+          not-valid: "L'utente spettatore (%{userSpectateId}) non è valido, esempio (3320e85f-5fc2-4bdd-96ac-994f34c381db)"
     signup:
       title: "Registrati"
       h1: "Crea il tuo account"

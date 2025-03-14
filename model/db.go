@@ -3,6 +3,7 @@ package model
 import (
 	"database/sql"
 	"log"
+	"log/slog"
 
 	"github.com/rousseau-romain/round-timing/config"
 
@@ -21,8 +22,7 @@ func ConnectDb() *sql.DB {
 
 	db, err := sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {
-		log.Println("err", err)
-
+		slog.Error("db connection error", "error", err.Error())
 		log.Fatal(err)
 	}
 	return db

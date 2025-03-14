@@ -2,7 +2,6 @@ package model
 
 import (
 	"errors"
-	"log"
 
 	"github.com/rousseau-romain/round-timing/helper"
 
@@ -52,7 +51,6 @@ func GetPlayersByIdMatch(idTranslation int, idMatch int) ([]Player, error) {
 
 	rows, err := db.Query(sql, idTranslation, idMatch)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
@@ -72,7 +70,6 @@ func GetPlayersByIdMatch(idTranslation int, idMatch int) ([]Player, error) {
 			&player.Team.Color,
 		)
 		if err != nil {
-			log.Println(err)
 			return nil, err
 		}
 		players = append(players, player)
@@ -115,7 +112,6 @@ func GetPlayer(idLanguage int, idPlayer int) (Player, error) {
 	)
 
 	if err != nil {
-		log.Println(err)
 		return Player{}, err
 	}
 
@@ -132,7 +128,6 @@ func CreatePlayer(p PlayerCreate) (int, error) {
 	response, err := db.Exec(sql, p.IdClass, p.IdTeam, p.Name)
 
 	if err != nil {
-		log.Println(err)
 		return 0, err
 	}
 

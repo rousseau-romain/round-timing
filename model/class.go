@@ -1,8 +1,6 @@
 package model
 
 import (
-	"log"
-
 	"github.com/rousseau-romain/round-timing/helper"
 )
 
@@ -26,7 +24,6 @@ func GetClasses(idLanguage int) ([]Class, error) {
 	rows, err := db.Query(sql, idLanguage)
 
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
@@ -40,7 +37,6 @@ func GetClasses(idLanguage int) ([]Class, error) {
 			&class.UrlImage,
 		)
 		if err != nil {
-			log.Println(err)
 			return nil, err
 		}
 		classes = append(classes, class)

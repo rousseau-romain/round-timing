@@ -3,7 +3,7 @@ package auth
 import (
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -58,11 +58,11 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func enabledUserIfWhiteListed(w http.ResponseWriter, user model.User) bool {
+func enabledUserIfWhiteListed(w http.ResponseWriter, slog *slog.Logger, user model.User) bool {
 	if model.GetFeatureFlagIsEnabled("WHITE_LIST") && !user.Enabled {
 		isWhiteListed, err := model.IsEmailWhiteListed(user.Email)
 		if err != nil {
-			log.Println(err)
+			slog.Error(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return false
 		}
@@ -73,7 +73,7 @@ func enabledUserIfWhiteListed(w http.ResponseWriter, user model.User) bool {
 		}
 		errorTitle := "You can't acces here"
 		errorMessage := fmt.Sprintf("Ask to be add to whitelist at email %s", helper.MailContact)
-		log.Printf("User (%v) is not white listed!", user.Email)
+		slog.Info("User is not white listed!", "userEmail", user.Email)
 		w.Header().Set("Location", fmt.Sprintf("/?errorTitle=%s&errorMessages=%s", url.QueryEscape(errorTitle), errorMessage))
 		w.WriteHeader(http.StatusTemporaryRedirect)
 		return false
@@ -81,18 +81,7 @@ func enabledUserIfWhiteListed(w http.ResponseWriter, user model.User) bool {
 	return true
 }
 
-func (s *AuthService) GetSessionUser(r *http.Request) (goth.User, error) {
-
-	user, err := s.GetAuthenticateUserFromRequest(r)
-
-	return goth.User{
-		Email:  user.Email,
-		UserID: strconv.Itoa(user.Id),
-	}, err
-
-}
-
-func (s *AuthService) StoreUserSession(w http.ResponseWriter, r *http.Request, user goth.User) error {
+func (s *AuthService) StoreUserSession(w http.ResponseWriter, r *http.Request, slog *slog.Logger, user goth.User) error {
 	// Get a session. We're ignoring the error resulted from decoding an
 	// existing session: Get() always returns a session, even if empty.
 	session, _ := gothic.Store.Get(r, SessionName)
@@ -101,6 +90,7 @@ func (s *AuthService) StoreUserSession(w http.ResponseWriter, r *http.Request, u
 
 	err := session.Save(r, w)
 	if err != nil {
+		slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return err
 	}
@@ -108,7 +98,7 @@ func (s *AuthService) StoreUserSession(w http.ResponseWriter, r *http.Request, u
 	return nil
 }
 
-func (s *AuthService) RemoveUserSession(w http.ResponseWriter, r *http.Request) {
+func (s *AuthService) RemoveUserSession(w http.ResponseWriter, r *http.Request, slog *slog.Logger) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "token",
 		Value:    "",
@@ -128,7 +118,7 @@ func (s *AuthService) RemoveUserSession(w http.ResponseWriter, r *http.Request) 
 
 	session, err := gothic.Store.Get(r, SessionName)
 	if err != nil {
-		log.Println(err)
+		slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -139,7 +129,7 @@ func (s *AuthService) RemoveUserSession(w http.ResponseWriter, r *http.Request) 
 	session.Save(r, w)
 }
 
-func AllowToBeAuth(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFunc {
+func AllowToBeAuth(handlerFunc http.HandlerFunc, auth *AuthService, slog *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		handlerFunc(w, r)
 	}
@@ -159,12 +149,15 @@ func getCookieHandler(r *http.Request, name string) (http.Cookie, error) {
 	return *cookie, err
 }
 
-func (s *AuthService) GetAuthenticateUserFromRequest(r *http.Request) (model.User, error) {
+func (s *AuthService) GetAuthenticateUserFromRequest(r *http.Request, slog *slog.Logger) (model.User, error) {
 	session, err := gothic.Store.Get(r, SessionName)
 	var user model.User
 	if err != nil {
+		slog.Error(err.Error())
 		return user, err
 	}
+
+	slog = slog.With("userEmail", user)
 
 	u := session.Values["user"]
 
@@ -180,7 +173,7 @@ func (s *AuthService) GetAuthenticateUserFromRequest(r *http.Request) (model.Use
 			return []byte(config.JWT_SECRET_KEY), nil
 		})
 		if err != nil || !token.Valid {
-			log.Printf("Unauthorized: Invalid token %s", cookieToken.Value)
+			slog.Error("Unauthorized: Invalid token", "token", cookieToken.Value)
 			return user, err
 		}
 
@@ -188,33 +181,35 @@ func (s *AuthService) GetAuthenticateUserFromRequest(r *http.Request) (model.Use
 		if claims, ok := token.Claims.(*Claims); ok && token.Valid {
 			user, err := model.GetUserByEmail(claims.Email)
 			if err != nil {
-				log.Printf("Error fetching user by email: %s %v", claims.Email, err)
+				slog.Error("Error fetching user by email", "email", claims.Email, "error", err)
 				return user, err
 			}
 			return user, nil
 		}
-		log.Println("user is not authenticated")
+		slog.Info("user is not authenticated", "userId", user.Id)
 		return user, errors.New("user is not authenticated")
 	}
 
 	goticUser := u.(goth.User)
 	userDb, err := model.GetUserByOauth2Id(goticUser.UserID)
 	if err != nil {
-		log.Println("Error fetching user:", err)
+		slog.Error("Error fetching user", "goticUserId", goticUser.UserID, "error", err)
 		return userDb, err
 	}
 	return userDb, nil
 }
 
-func RequireAuth(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFunc {
+func RequireAuth(handlerFunc http.HandlerFunc, auth *AuthService, slog *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		user, err := auth.GetAuthenticateUserFromRequest(r)
+		user, err := auth.GetAuthenticateUserFromRequest(r, slog)
 		if err != nil {
+			slog.Error(err.Error())
 			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
 			return
 		}
+		slog = slog.With("userId", user.Id)
 
-		if !enabledUserIfWhiteListed(w, user) {
+		if !enabledUserIfWhiteListed(w, slog, user) {
 			return
 		}
 
@@ -222,21 +217,22 @@ func RequireAuth(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFu
 	}
 }
 
-func RequireAuthAndAdmin(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFunc {
+func RequireAuthAndAdmin(handlerFunc http.HandlerFunc, auth *AuthService, slog *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		user, err := auth.GetAuthenticateUserFromRequest(r)
+		user, err := auth.GetAuthenticateUserFromRequest(r, slog)
 		if err != nil {
 			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
 			return
 		}
+		slog = slog.With("userId", user.Id)
 
-		if !enabledUserIfWhiteListed(w, user) {
+		if !enabledUserIfWhiteListed(w, slog, user) {
 			return
 		}
 
 		if !user.IsAdmin {
 			errorTitle := "You can't acces here"
-			log.Printf("%s", fmt.Sprintf("User (%d) is not Admin", user.Id))
+			slog.Info("User is not Admin", "userId", user.Id)
 			w.Header().Set("Location", fmt.Sprintf("/?errorTitle=%s", url.QueryEscape(errorTitle)))
 			w.WriteHeader(http.StatusTemporaryRedirect)
 			return
@@ -246,27 +242,29 @@ func RequireAuthAndAdmin(handlerFunc http.HandlerFunc, auth *AuthService) http.H
 	}
 }
 
-func RequireNotAuth(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFunc {
+func RequireNotAuth(handlerFunc http.HandlerFunc, auth *AuthService, slog *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		user, _ := auth.GetAuthenticateUserFromRequest(r)
+		user, _ := auth.GetAuthenticateUserFromRequest(r, slog)
 		if user.Id == 0 {
 			handlerFunc(w, r)
 			return
 		}
+		slog = slog.With("userId", user.Id)
 
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 	}
 }
 
-func RequireAuthAndSpectateOfUserMatch(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFunc {
+func RequireAuthAndSpectateOfUserMatch(handlerFunc http.HandlerFunc, auth *AuthService, slog *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		user, err := auth.GetAuthenticateUserFromRequest(r)
+		user, err := auth.GetAuthenticateUserFromRequest(r, slog)
 		if err != nil {
 			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
 			return
 		}
+		slog = slog.With("userId", user.Id)
 
-		if !enabledUserIfWhiteListed(w, user) {
+		if !enabledUserIfWhiteListed(w, slog, user) {
 			return
 		}
 
@@ -276,17 +274,15 @@ func RequireAuthAndSpectateOfUserMatch(handlerFunc http.HandlerFunc, auth *AuthS
 
 		userMatch, err := model.GetUserIdByMatch(matchId)
 		if err != nil {
-			log.Println(err)
+			slog.Error(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		isUsersSpectateByIdUser, err := model.IsUsersSpectateByIdUser(userMatch.Id, user.IdShare)
 
-		log.Println(user.Id, userMatch.IdShare, isUsersSpectateByIdUser)
-
 		if err != nil {
-			log.Println(err)
+			slog.Error(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -294,7 +290,7 @@ func RequireAuthAndSpectateOfUserMatch(handlerFunc http.HandlerFunc, auth *AuthS
 		if !isUsersSpectateByIdUser {
 			errorTitle := "You are not spectater"
 			errorMessage := "You are not spectator of this match ask user to add you in list spectater in this profile"
-			log.Printf("%s", fmt.Sprintf("User (%d) is not spectater for match (%d)", user.Id, matchId))
+			slog.Info("User is not spectater for match", "user", user.Id, "match", matchId)
 			w.Header().Set("Location", fmt.Sprintf("/?errorTitle=%s&errorMessages=%s", url.QueryEscape(errorTitle), url.QueryEscape(errorMessage)))
 			w.WriteHeader(http.StatusTemporaryRedirect)
 			return
@@ -304,15 +300,16 @@ func RequireAuthAndSpectateOfUserMatch(handlerFunc http.HandlerFunc, auth *AuthS
 	}
 }
 
-func RequireAuthAndHisMatch(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFunc {
+func RequireAuthAndHisMatch(handlerFunc http.HandlerFunc, auth *AuthService, slog *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		user, err := auth.GetAuthenticateUserFromRequest(r)
+		user, err := auth.GetAuthenticateUserFromRequest(r, slog)
 		if err != nil {
 			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
 			return
 		}
+		slog = slog.With("userId", user.Id)
 
-		if !enabledUserIfWhiteListed(w, user) {
+		if !enabledUserIfWhiteListed(w, slog, user) {
 			return
 		}
 
@@ -322,13 +319,14 @@ func RequireAuthAndHisMatch(handlerFunc http.HandlerFunc, auth *AuthService) htt
 
 		userMatch, err := model.GetUserIdByMatch(matchId)
 		if err != nil {
+			slog.Error(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		if userMatch.Id != user.Id {
-			log.Printf("User %v is not the owner of the match %v", user.Id, userMatch.Id)
-			http.Error(w, fmt.Sprintf("User %v is not the owner of the match %v", user.Id, userMatch.Id), http.StatusUnauthorized)
+			slog.Info("User is not the owner of the match", "userId", user.Id, "userMatchId", userMatch.Id)
+			http.Redirect(w, r, fmt.Sprintf("/match/%d/unautorized", matchId), http.StatusTemporaryRedirect)
 			return
 		}
 
@@ -336,16 +334,17 @@ func RequireAuthAndHisMatch(handlerFunc http.HandlerFunc, auth *AuthService) htt
 	}
 }
 
-func RequireAuthAndHisAccount(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFunc {
+func RequireAuthAndHisAccount(handlerFunc http.HandlerFunc, auth *AuthService, slog *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		user, err := auth.GetAuthenticateUserFromRequest(r)
+		user, err := auth.GetAuthenticateUserFromRequest(r, slog)
 		if err != nil {
-			log.Println(err)
+			slog.Error(err.Error())
 			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
 			return
 		}
+		slog = slog.With("userId", user.Id)
 
-		if !enabledUserIfWhiteListed(w, user) {
+		if !enabledUserIfWhiteListed(w, slog, user) {
 			return
 		}
 
@@ -354,7 +353,7 @@ func RequireAuthAndHisAccount(handlerFunc http.HandlerFunc, auth *AuthService) h
 		userId, _ := strconv.Atoi(vars["idUser"])
 
 		if user.Id != userId {
-			log.Printf("User %v is not the owner of the account %v", user.Id, userId)
+			slog.Info("User is not the owner of the account", "userId", user.Id, "userId", userId)
 			http.Error(w, fmt.Sprintf("User %v is not the owner of the account %v", user.Id, userId), http.StatusUnauthorized)
 			return
 		}

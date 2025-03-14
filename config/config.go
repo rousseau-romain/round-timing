@@ -9,6 +9,7 @@ import (
 )
 
 var (
+	VERSION,
 	DB_HOST,
 	DB_NAME,
 	DB_PASSWORD,
@@ -38,6 +39,7 @@ func init() {
 		log.Fatalln("Coudn't load env file!!")
 	}
 
+	VERSION = "v1.3.0"
 	DB_HOST = os.Getenv("DB_HOST")
 	DB_NAME = os.Getenv("DB_NAME")
 	DB_PASSWORD = os.Getenv("DB_PASSWORD")

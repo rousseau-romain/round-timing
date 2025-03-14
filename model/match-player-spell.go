@@ -2,7 +2,6 @@ package model
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/rousseau-romain/round-timing/helper"
 )
@@ -124,7 +123,6 @@ func GetSpellsPlayersByIdMatch(idLanguage, idMatch, idUser int, getOnlyFavorite 
 	rows, err := db.Query(sql, idLanguage, idUser, idMatch)
 
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
@@ -145,7 +143,6 @@ func GetSpellsPlayersByIdMatch(idLanguage, idMatch, idUser int, getOnlyFavorite 
 			&matchSpell.UpdatedAt,
 		)
 		if err != nil {
-			log.Println(err)
 			return nil, err
 		}
 		matchSpells = append(matchSpells, matchSpell)
@@ -169,10 +166,6 @@ func CreateMatchPlayersSpells(matchPlayersSpells []MatchPlayerSpellCreate) error
 	sql = sql[0 : len(sql)-1]
 
 	_, err := db.Exec(sql, args...)
-
-	if err != nil {
-		log.Println(err)
-	}
 
 	return err
 }

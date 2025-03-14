@@ -63,36 +63,42 @@ templ MatchTable(matchs []model.Match) {
 	</div>
 }
 
-templ MatchListPage(user model.User, popinMessages components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string, modelUser model.User, matchs []model.Match) {
-	@components.Layout(i18n.T(ctx, "page.match-list.title"), popinMessages, user, navItems, languages, pageSlug) {
+templ matchPage(user model.User, popinMessages components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string, match []model.Match) {
+	@components.Layout(i18n.T(ctx, "page.match.title"), popinMessages, user, navItems, languages, pageSlug) {
 		<div class="container mx-auto">
 			<h1>{ i18n.T(ctx, "page.match-list.h1") }</h1>
-			<form
-				class="space-y-4"
-				hx-post="/match"
-				hx-swap="afterbegin"
-				hx-target="tbody"
-				hx-target-error="#popinMessages"
-			>
-				<div>
-					<label class="sr-only" for="name">{ i18n.T(ctx, "global.table.name") }</label>
-					<input
-						class="w-full rounded-lg border-gray-200 p-3 text-sm"
-						placeholder={ i18n.T(ctx, "global.table.name") }
-						required
-						type="text"
-						name="name"
-						value={ i18n.T(ctx, "global.match") + " " + time.Now().Format("2006-01-02 15:04:05") }
-					/>
-				</div>
-				<button
-					type="submit"
-					class="inline-block w-full rounded-lg bg-black px-5 py-3 font-medium text-white sm:w-auto"
-				>
-					{ i18n.T(ctx, "page.match-list.button-create-match") }
-				</button>
-			</form>
-			@MatchTable(matchs)
+			{ children... }
 		</div>
+	}
+}
+
+templ MatchListPage(user model.User, popinMessages components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string, matchs []model.Match) {
+	@matchPage(user, popinMessages, navItems, languages, pageSlug, matchs) {
+		<form
+			class="space-y-4"
+			hx-post="/match"
+			hx-swap="afterbegin"
+			hx-target="tbody"
+			hx-target-error="#popinMessages"
+		>
+			<div>
+				<label class="sr-only" for="name">{ i18n.T(ctx, "global.table.name") }</label>
+				<input
+					class="w-full rounded-lg border-gray-200 p-3 text-sm"
+					placeholder={ i18n.T(ctx, "global.table.name") }
+					required
+					type="text"
+					name="name"
+					value={ i18n.T(ctx, "global.match") + " " + time.Now().Format("2006-01-02 15:04:05") }
+				/>
+			</div>
+			<button
+				type="submit"
+				class="inline-block w-full rounded-lg bg-black px-5 py-3 font-medium text-white sm:w-auto"
+			>
+				{ i18n.T(ctx, "page.match-list.button-create-match") }
+			</button>
+		</form>
+		@MatchTable(matchs)
 	}
 }
