@@ -178,7 +178,7 @@ func (h *Handler) HandlersMatch(w http.ResponseWriter, r *http.Request) {
 	page.TeamPlayerListPage(user, h.error, h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, match, teams, classes, players).Render(r.Context(), w)
 }
 
-func (h *Handler) HandlersMatchUnAutorized(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandlersMatchUnAuthorized(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
