@@ -227,23 +227,6 @@ func UserExistsByEmail(email string) (string, error) {
 	return providerLoginName, err
 }
 
-func IsAdminUser(userId int) (bool, error) {
-	var isAdmin int
-	sql := `
-		SELECT
-			is_admin
-		FROM user
-		WHERE user = ?;
-	`
-	err := db.QueryRow(sql, userId).Scan(&isAdmin)
-
-	if isAdmin == 1 {
-		return true, err
-	}
-
-	return false, err
-}
-
 func CreateUser(user UserCreate) (int64, error) {
 
 	sql := `

@@ -41,15 +41,6 @@ func RenderComponentError(title string, message []string, httpCode int, w http.R
 	}).Render(r.Context(), w)
 }
 
-func RenderComponentInfo(title string, message []string, httpCode int, w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(httpCode)
-	components.PopinMessage(components.PopinMessages{
-		Title:    title,
-		Messages: message,
-		Type:     "info",
-	}).Render(r.Context(), w)
-}
-
 func RenderComponentWarning(title string, message []string, httpCode int, w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(httpCode)
 	components.PopinMessage(components.PopinMessages{

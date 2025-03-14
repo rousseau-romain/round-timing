@@ -81,17 +81,6 @@ func enabledUserIfWhiteListed(w http.ResponseWriter, slog *slog.Logger, user mod
 	return true
 }
 
-func (s *AuthService) GetSessionUser(r *http.Request, slog *slog.Logger) (goth.User, error) {
-
-	user, err := s.GetAuthenticateUserFromRequest(r, slog)
-
-	return goth.User{
-		Email:  user.Email,
-		UserID: strconv.Itoa(user.Id),
-	}, err
-
-}
-
 func (s *AuthService) StoreUserSession(w http.ResponseWriter, r *http.Request, slog *slog.Logger, user goth.User) error {
 	// Get a session. We're ignoring the error resulted from decoding an
 	// existing session: Get() always returns a session, even if empty.
