@@ -56,12 +56,12 @@ func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if numberOfMatch >= NumberOfMatchMax {
-		RenderComponentErrorAndLog(
+		RenderComponentInfo(
 			i18n.T(r.Context(), "global.error")+" "+name,
-			[]string{i18n.T(r.Context(), "page.match-list.max-match")},
 			[]string{i18n.T(r.Context(), "page.match-list.max-match")},
 			http.StatusBadRequest, w, r,
 		)
+		h.Slog.Info("Max number of match", "matchName", name)
 		return
 	}
 

@@ -82,12 +82,12 @@ func (h *Handler) HandlersProfileAddSpectate(w http.ResponseWriter, r *http.Requ
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	if err := uuid.Validate(r.FormValue("idUserShare")); err != nil {
-		RenderComponentErrorAndLog(
+		RenderComponentError(
 			"User spectate need a valid id",
-			[]string{"User spectate need a valid id"},
-			[]string{fmt.Sprintf("User spectate need a valid idShared not (%s)", r.FormValue("idUserShare"))},
+			[]string{fmt.Sprintf("User spectate need a valid id not (%s)", r.FormValue("idUserShare"))},
 			http.StatusBadRequest, w, r,
 		)
+		h.Slog.Error("User spectate need a valid id", "userSpectateId", r.FormValue("idUserShare"))
 		return
 	}
 
@@ -99,12 +99,13 @@ func (h *Handler) HandlersProfileAddSpectate(w http.ResponseWriter, r *http.Requ
 	}
 
 	if !userSpectateExist {
-		RenderComponentErrorAndLog(
+		RenderComponentError(
 			"User spectate does not exist",
-			[]string{"User spectate does not exist"},
 			[]string{"User spectate does not exist"},
 			http.StatusBadRequest, w, r,
 		)
+		h.Slog.Error("User spectate does not exist", "userSpectateId", r.FormValue("idUserShare"))
+
 		return
 	}
 
@@ -116,12 +117,12 @@ func (h *Handler) HandlersProfileAddSpectate(w http.ResponseWriter, r *http.Requ
 	}
 
 	if IsAlreadyUsersSpectate {
-		RenderComponentErrorAndLog(
+		RenderComponentError(
 			"User spectate already exist",
-			[]string{"User spectate already exist"},
 			[]string{"User spectate already exist"},
 			http.StatusBadRequest, w, r,
 		)
+		h.Slog.Error("User spectate already exist", "userSpectateId", r.FormValue("idUserShare"))
 		return
 	}
 

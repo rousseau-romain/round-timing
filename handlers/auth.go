@@ -132,12 +132,12 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(errMessages) > 0 {
-		RenderComponentErrorAndLog(
+		RenderComponentError(
 			i18n.T(r.Context(), "page.signup.error.title"),
-			errMessages,
 			errMessages,
 			http.StatusBadRequest, w, r,
 		)
+		h.Slog.Info(strings.Join(errorMessages, "\n"))
 		return
 	}
 
@@ -148,12 +148,12 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if provider != "" {
-		RenderComponentErrorAndLog(
+		RenderComponentError(
 			i18n.T(r.Context(), "page.signup.error.email.already-exists", i18n.M{"email": email, "provider": provider}),
 			[]string{""},
-			[]string{i18n.T(r.Context(), "page.signup.error.email.already-exists", i18n.M{"email": email, "provider": provider})},
 			http.StatusConflict, w, r,
 		)
+		h.Slog.Info("Email already exist", "email", email, "provider", provider)
 		return
 	}
 
@@ -218,12 +218,12 @@ func (h *Handler) HandleLoginEmail(w http.ResponseWriter, r *http.Request) {
 	user, err := model.GetUserByEmail(email)
 	if err != nil || !helper.CheckPassword(user.Hash, password) {
 		errMessage := i18n.T(r.Context(), "page.signin.invalid-credentials")
-		RenderComponentErrorAndLog(
+		RenderComponentError(
 			errMessage,
-			[]string{errMessage},
 			[]string{errMessage},
 			http.StatusBadRequest, w, r,
 		)
+		h.Slog.Info("Invalid credentials: " + errMessage)
 		return
 	}
 
