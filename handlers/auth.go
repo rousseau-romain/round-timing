@@ -49,6 +49,8 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	h.Slog = h.Slog.With("userOauth2Id", user.UserID)
+
 	if !userAlreadyExists {
 		providerLoginName, err := model.UserExistsByEmail(user.Email)
 
@@ -121,6 +123,7 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	if _, err := mail.ParseAddress(email); err != nil {
 		errMessages = append(errMessages, i18n.T(r.Context(), "page.signup.error.email.not-valid"))
 	}
+	h.Slog = h.Slog.With("email", email)
 
 	passwordIsValid, errorMessages := helper.IsValidPassword(r, password)
 	if !passwordIsValid {
@@ -216,7 +219,15 @@ func (h *Handler) HandleLoginEmail(w http.ResponseWriter, r *http.Request) {
 	password := strings.TrimSpace(r.FormValue("password"))
 
 	user, err := model.GetUserByEmail(email)
-	if err != nil || !helper.CheckPassword(user.Hash, password) {
+
+	if err != nil {
+		h.Slog.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	h.Slog = h.Slog.With("userId", user.Id)
+
+	if !helper.CheckPassword(user.Hash, password) {
 		errMessage := i18n.T(r.Context(), "page.signin.invalid-credentials")
 		RenderComponentError(
 			errMessage,

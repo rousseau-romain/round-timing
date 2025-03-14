@@ -153,8 +153,11 @@ func (s *AuthService) GetAuthenticateUserFromRequest(r *http.Request, slog *slog
 	session, err := gothic.Store.Get(r, SessionName)
 	var user model.User
 	if err != nil {
+		slog.Error(err.Error())
 		return user, err
 	}
+
+	slog = slog.With("userEmail", user)
 
 	u := session.Values["user"]
 
@@ -204,6 +207,7 @@ func RequireAuth(handlerFunc http.HandlerFunc, auth *AuthService, slog *slog.Log
 			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
 			return
 		}
+		slog = slog.With("userId", user.Id)
 
 		if !enabledUserIfWhiteListed(w, slog, user) {
 			return
@@ -220,6 +224,7 @@ func RequireAuthAndAdmin(handlerFunc http.HandlerFunc, auth *AuthService, slog *
 			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
 			return
 		}
+		slog = slog.With("userId", user.Id)
 
 		if !enabledUserIfWhiteListed(w, slog, user) {
 			return
@@ -244,6 +249,7 @@ func RequireNotAuth(handlerFunc http.HandlerFunc, auth *AuthService, slog *slog.
 			handlerFunc(w, r)
 			return
 		}
+		slog = slog.With("userId", user.Id)
 
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 	}
@@ -256,6 +262,7 @@ func RequireAuthAndSpectateOfUserMatch(handlerFunc http.HandlerFunc, auth *AuthS
 			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
 			return
 		}
+		slog = slog.With("userId", user.Id)
 
 		if !enabledUserIfWhiteListed(w, slog, user) {
 			return
@@ -300,6 +307,7 @@ func RequireAuthAndHisMatch(handlerFunc http.HandlerFunc, auth *AuthService, slo
 			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
 			return
 		}
+		slog = slog.With("userId", user.Id)
 
 		if !enabledUserIfWhiteListed(w, slog, user) {
 			return
@@ -334,6 +342,7 @@ func RequireAuthAndHisAccount(handlerFunc http.HandlerFunc, auth *AuthService, s
 			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
 			return
 		}
+		slog = slog.With("userId", user.Id)
 
 		if !enabledUserIfWhiteListed(w, slog, user) {
 			return
