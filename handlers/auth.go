@@ -220,14 +220,7 @@ func (h *Handler) HandleLoginEmail(w http.ResponseWriter, r *http.Request) {
 
 	user, err := model.GetUserByEmail(email)
 
-	if err != nil {
-		h.Slog.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	h.Slog = h.Slog.With("userId", user.Id)
-
-	if !helper.CheckPassword(user.Hash, password) {
+	if err != nil || !helper.CheckPassword(user.Hash, password) {
 		errMessage := i18n.T(r.Context(), "page.signin.invalid-credentials")
 		RenderComponentError(
 			errMessage,
@@ -237,6 +230,7 @@ func (h *Handler) HandleLoginEmail(w http.ResponseWriter, r *http.Request) {
 		h.Slog.Info("Invalid credentials: " + errMessage)
 		return
 	}
+	h.Slog = h.Slog.With("userId", user.Id)
 
 	token, err := generateToken(user.Email)
 	if err != nil {
