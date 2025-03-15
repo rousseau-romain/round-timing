@@ -127,6 +127,9 @@ func run() error {
 	r.Handle("/admin/user", auth.RequireAuthAndAdmin(handler.HandlersListUser, authService, versionLogger)).Methods("GET")
 	r.Handle("/admin/user/{idUser:[0-9]+}/toggle-enabled/{toggleEnabled:(?:true|false)}", auth.RequireAuthAndAdmin(handler.HandlersUserEnabled, authService, versionLogger)).Methods("PATCH")
 
+	r.Handle("/404", auth.AllowToBeAuth(handler.HandlersNotFound, authService, versionLogger)).Methods("GET")
+	r.Handle("/403", auth.AllowToBeAuth(handler.HandlersForbidden, authService, versionLogger)).Methods("GET")
+
 	r.NotFoundHandler = http.HandlerFunc(handler.HandlersNotFound)
 
 	return http.ListenAndServe(":2468", languageMiddleware(r, authService, versionLogger))

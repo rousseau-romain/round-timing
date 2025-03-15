@@ -6,16 +6,16 @@ import (
 	"github.com/rousseau-romain/round-timing/shared/components"
 )
 
-templ NotFoundPage(errorMessage string, navItems []components.NavItem, languages []model.Language, pageSlug string, user model.User) {
-	@components.Layout(i18n.T(ctx, "page.404.title"), components.PopinMessages{}, user, navItems, languages, pageSlug) {
+templ ForbidenPage(errorMessage string, navItems []components.NavItem, languages []model.Language, pageSlug string, user model.User) {
+	@components.Layout(i18n.T(ctx, "page.403.title"), components.PopinMessages{}, user, navItems, languages, pageSlug) {
 		<div class="grid place-content-center bg-white px-4 dark:bg-gray-900">
 			<div class="text-center">
-				<h1 class="text-9xl font-black text-gray-200 dark:text-gray-700">404</h1>
+				<h1 class="text-9xl font-black text-gray-200 dark:text-gray-700">403</h1>
 				<p class="mt-4 text-gray-500 dark:text-gray-400">
 					if errorMessage != "" {
 						{ errorMessage }
 					} else {
-						{ i18n.T(ctx, "page.404.p") }
+						{ i18n.T(ctx, "page.403.p") }
 					}
 				</p>
 				<a

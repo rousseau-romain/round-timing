@@ -10,9 +10,12 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/config"
 	"github.com/rousseau-romain/round-timing/helper"
 	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/shared/components"
+	"github.com/rousseau-romain/round-timing/views/page"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
@@ -272,6 +275,16 @@ func RequireAuthAndSpectateOfUserMatch(handlerFunc http.HandlerFunc, auth *AuthS
 
 		matchId, _ := strconv.Atoi(vars["idMatch"])
 
+		_, err = model.GetMatch(matchId)
+		if err != nil {
+			languages, _ := model.GetLanguages()
+			errorMessage := i18n.T(r.Context(), "page.match.errors.match-not-found", i18n.M{"matchId": matchId})
+			slog.Error("Match not found", "matchId", matchId)
+			w.WriteHeader(http.StatusNotFound)
+			page.NotFoundPage(errorMessage, []components.NavItem{}, languages, r.URL.Path, user).Render(r.Context(), w)
+			return
+		}
+
 		userMatch, err := model.GetUserIdByMatch(matchId)
 		if err != nil {
 			slog.Error(err.Error())
@@ -288,11 +301,11 @@ func RequireAuthAndSpectateOfUserMatch(handlerFunc http.HandlerFunc, auth *AuthS
 		}
 
 		if !isUsersSpectateByIdUser {
-			errorTitle := "You are not spectater"
-			errorMessage := "You are not spectator of this match ask user to add you in list spectater in this profile"
-			slog.Info("User is not spectater for match", "user", user.Id, "match", matchId)
-			w.Header().Set("Location", fmt.Sprintf("/?errorTitle=%s&errorMessages=%s", url.QueryEscape(errorTitle), url.QueryEscape(errorMessage)))
-			w.WriteHeader(http.StatusTemporaryRedirect)
+			errorMessage := i18n.T(r.Context(), "page.match.errors.match-unauthorized-spectator", i18n.M{"matchId": matchId})
+			slog.Info("User is not spectator for match", "userId", user.Id, "userMatchId", userMatch.Id, "matchId", matchId)
+			w.WriteHeader(http.StatusForbidden)
+			languages, _ := model.GetLanguages()
+			page.ForbidenPage(errorMessage, []components.NavItem{}, languages, r.URL.Path, user).Render(r.Context(), w)
 			return
 		}
 
@@ -317,6 +330,16 @@ func RequireAuthAndHisMatch(handlerFunc http.HandlerFunc, auth *AuthService, slo
 
 		matchId, _ := strconv.Atoi(vars["idMatch"])
 
+		_, err = model.GetMatch(matchId)
+		if err != nil {
+			languages, _ := model.GetLanguages()
+			errorMessage := i18n.T(r.Context(), "page.match.errors.match-not-found", i18n.M{"matchId": matchId})
+			slog.Error("Match not found", "matchId", matchId)
+			w.WriteHeader(http.StatusNotFound)
+			page.NotFoundPage(errorMessage, []components.NavItem{}, languages, r.URL.Path, user).Render(r.Context(), w)
+			return
+		}
+
 		userMatch, err := model.GetUserIdByMatch(matchId)
 		if err != nil {
 			slog.Error(err.Error())
@@ -325,8 +348,11 @@ func RequireAuthAndHisMatch(handlerFunc http.HandlerFunc, auth *AuthService, slo
 		}
 
 		if userMatch.Id != user.Id {
+			languages, _ := model.GetLanguages()
+			errorMessage := i18n.T(r.Context(), "page.match.errors.match-unauthorized", i18n.M{"matchId": matchId})
 			slog.Info("User is not the owner of the match", "userId", user.Id, "userMatchId", userMatch.Id)
-			http.Redirect(w, r, fmt.Sprintf("/match/%d/unautorized", matchId), http.StatusTemporaryRedirect)
+			w.WriteHeader(http.StatusUnauthorized)
+			page.ForbidenPage(errorMessage, []components.NavItem{}, languages, r.URL.Path, user).Render(r.Context(), w)
 			return
 		}
 

@@ -44,6 +44,9 @@ es:
     404:
       title: "404 No encontrado"
       p: "No podemos encontrar esta página."
+    403:
+      title: "403 No autorizado"
+      p: "No tienes permiso para ver esta página"
     cgu:
       title: "CGU"
       h1: "Condiciones generales de uso de Round Timing"
@@ -79,6 +82,10 @@ es:
         p: "Debes ser el propietario de la partida %{matchName} (%{matchId})."
         button:
           go-back-list: "Volver a la lista de partidas"
+      errors:
+        match-not-found: "La partida id (%{matchId}) no existe."
+        match-unauthorized-spectator: "No tienes permiso para ver este match (%{matchId}) solicita que te agreguen a la lista de espectadores."
+        match-unauthorized: "No tienes permiso para ver este match (%{matchId})"
     profile:
       title: "Perfil"
       h1: "Perfil"
