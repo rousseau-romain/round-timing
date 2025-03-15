@@ -91,7 +91,19 @@ func (h *Handler) HandlerVersion(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandlersNotFound(w http.ResponseWriter, r *http.Request) {
-	page.NotFoundPage(h.error, GetPageNavDefault(r), h.languages, r.URL.Path).Render(r.Context(), w)
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	if user.Id != 0 {
+		h.Slog = h.Slog.With("userId", user.Id)
+	}
+	page.NotFoundPage("", h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, user).Render(r.Context(), w)
+}
+
+func (h *Handler) HandlersForbidden(w http.ResponseWriter, r *http.Request) {
+	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	if user.Id != 0 {
+		h.Slog = h.Slog.With("userId", user.Id)
+	}
+	page.ForbidenPage("", h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, user).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersHome(w http.ResponseWriter, r *http.Request) {

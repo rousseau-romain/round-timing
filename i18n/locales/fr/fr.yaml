@@ -44,6 +44,9 @@ fr:
     404:
       title: "404 non trouvée"
       p: "Nous ne pouvont pas trouver cette page."
+    403:
+      title: "403 non autorisée"
+      p: "Vous n'avez pas le droit de voir cette page"
     cgu:
       title: "CGU"
       h1: "Condition générale d'utilisation de Round Timing"
@@ -79,6 +82,10 @@ fr:
         p: "Vous devez etre le proprietaire du match %{matchName} (%{matchId})."
         button:
           go-back-list: "Retourner sur la liste des matchs"
+      errors:
+        match-not-found: "Match id (%{matchId}) introuvable"
+        match-unauthorized-spectator: "Vous n'avez pas le droit de voir ce match (%{matchId}) demandez a être ajouter dans la liste des spectateurs."
+        match-unauthorized: "Vous n'avez pas le droit de voir ce match (%{matchId})"
     profile:
       title: "Profile"
       h1: "Profile:"

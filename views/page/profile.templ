@@ -101,7 +101,10 @@ templ TableUserSpectate(idUserShares []string) {
 				<th></th>
 			</tr>
 		</thead>
-		<tbody>
+		<tbody
+			hx-swap="outerHTML"
+			hx-target="closest tr"
+		>
 			for _, idUserShare := range(idUserShares) {
 				@UserSpectate(idUserShare)
 			}
