@@ -181,26 +181,6 @@ func (h *Handler) HandlersMatch(w http.ResponseWriter, r *http.Request) {
 	page.TeamPlayerListPage(user, h.error, h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, match, teams, classes, players).Render(r.Context(), w)
 }
 
-func (h *Handler) HandlersMatchUnAuthorized(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
-	h.Slog = h.Slog.With("userId", user.Id)
-
-	vars := mux.Vars(r)
-
-	matchId, _ := strconv.Atoi(vars["idMatch"])
-
-	match, err := model.GetMatch(matchId)
-	if err != nil {
-		errorMessage := i18n.T(r.Context(), "page.match.errors.match-not-found", i18n.M{"matchId": matchId})
-		h.Slog.Error(errorMessage, "matchId", matchId)
-		w.WriteHeader(http.StatusNotFound)
-		page.NotFoundPage(errorMessage, h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, user).Render(r.Context(), w)
-		return
-	}
-
-	page.TeamPlayerListPageUnAutorized(user, h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, match).Render(r.Context(), w)
-}
-
 func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) {
 	var idClassGlobal = 13
 
