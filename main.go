@@ -94,7 +94,6 @@ func run() error {
 	r.Handle("/match", auth.RequireAuth(handler.HandlersListMatch, authService, versionLogger)).Methods("GET")
 	r.Handle("/match", auth.RequireAuth(handler.HandlersCreateMatch, authService, versionLogger)).Methods("POST")
 	r.Handle("/match/{idMatch:[0-9]+}", auth.RequireAuthAndHisMatch(handler.HandlersDeleteMatch, authService, versionLogger)).Methods("DELETE")
-	r.Handle("/match/{idMatch:[0-9]+}/unautorized", auth.RequireAuth(handler.HandlersMatchUnAuthorized, authService, versionLogger)).Methods("GET")
 	r.Handle("/match/{idMatch:[0-9]+}", auth.RequireAuthAndHisMatch(handler.HandlersMatch, authService, versionLogger)).Methods("GET")
 	r.Handle("/match/{idMatch:[0-9]+}/spectate", auth.RequireAuthAndSpectateOfUserMatch(handler.HandlerSpectateMatch, authService, versionLogger)).Methods("GET")
 	r.Handle("/match/{idMatch:[0-9]+}/start", auth.RequireAuthAndHisMatch(handler.HandlerStartMatchPage, authService, versionLogger)).Methods("GET")
