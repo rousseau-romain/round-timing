@@ -39,7 +39,7 @@ func init() {
 		log.Fatalln("Coudn't load env file!!")
 	}
 
-	VERSION = "v1.4.1"
+	VERSION = "v1.4.2"
 	DB_HOST = os.Getenv("DB_HOST")
 	DB_NAME = os.Getenv("DB_NAME")
 	DB_PASSWORD = os.Getenv("DB_PASSWORD")
