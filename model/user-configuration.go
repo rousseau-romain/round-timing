@@ -38,7 +38,7 @@ func GetConfigurationByIdConfigurationIdUser(idLanguage, idUser, idConfiguration
 		&userConfiguration.IsEnabled,
 	)
 
-	if err.Error() != "sql: no rows in result set" {
+	if err != nil && err.Error() != "sql: no rows in result set" {
 		return userConfiguration, err
 	}
 
