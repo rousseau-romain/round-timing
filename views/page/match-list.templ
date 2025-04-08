@@ -64,7 +64,7 @@ templ MatchTable(matchs []model.Match) {
 }
 
 templ matchPage(user model.User, popinMessages components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string, match []model.Match) {
-	@components.Layout(i18n.T(ctx, "page.match.title"), popinMessages, user, navItems, languages, pageSlug) {
+	@components.Layout(i18n.T(ctx, "page.match-list.title"), popinMessages, user, navItems, languages, pageSlug) {
 		<div class="container mx-auto">
 			<h1>{ i18n.T(ctx, "page.match-list.h1") }</h1>
 			{ children... }
