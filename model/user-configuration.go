@@ -38,7 +38,11 @@ func GetConfigurationByIdConfigurationIdUser(idLanguage, idUser, idConfiguration
 		&userConfiguration.IsEnabled,
 	)
 
-	return userConfiguration, err
+	if err.Error() != "sql: no rows in result set" {
+		return userConfiguration, err
+	}
+
+	return userConfiguration, nil
 }
 
 func GetAllConfigurationByIdUser(idLanguage, idUser int) ([]UserConfiguration, error) {
