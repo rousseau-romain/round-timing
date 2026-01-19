@@ -44,8 +44,6 @@ install:
 	@echo 'add "go.goroot:"$$GOROOT" to settings.json VsCode'
 	@echo 'after run "make db_init' 
 
-
-
 # DB commands
 db/encrypt:
 	tar -czvf database/migration/database.tar.gz database/migration
@@ -56,7 +54,6 @@ db/decrypt:
 	gpg database/migration/database.tar.gz.gpg
 	tar -xzvf database/migration/database.tar.gz
 	shred -u database/migration/database.tar.gz.gpg database/migration/database.tar.gz
-
 
 db/combine/script:
 	cd database/migration/ && cat $$(ls | grep .up.sql)| grep -v '^--' | grep -v '^START TRANSACTION;' | grep -v '^COMMIT;' > ../../output.sql

@@ -36,7 +36,7 @@ func init() {
 	log.SetFlags(log.Llongfile)
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalln("Coudn't load env file!!")
+		log.Println("No .env file found, using environment variables")
 	}
 
 	VERSION = "v1.4.3"
