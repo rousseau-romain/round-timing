@@ -18,7 +18,7 @@ live/go:
 		--misc.clean_on_exit true
 
 live/templ:
-	@templ generate -watch -proxy="http://127.0.0.1:2468" --open-browser=false
+	@go tool templ generate -watch -proxy="http://127.0.0.1:2468" --open-browser=false
 
 live/tailwind:
 	@npx tailwindcss -i input.css -o public/tailwind.css --watch
@@ -31,15 +31,14 @@ build/tailwind:
 	npx tailwindcss -i input.css -o public/tailwind.css --minify
 
 build/templ:
-	templ generate
+	go tool templ generate
 
 build/commit-id:
 	echo "{\"commit_id\": \"$(Arguments)\"}" > config/commit-id.json
 
 install:
 	brew install golang-migrate gnupg
-	go install github.com/air-verse/air@v1.64.0
-	go install github.com/a-h/templ/cmd/templ@v0.3.977
+	go mod tidy
 	npm install
 
 	@echo 'add "go.goroot:"$$GOROOT" to settings.json VsCode'
