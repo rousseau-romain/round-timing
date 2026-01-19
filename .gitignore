@@ -11,3 +11,4 @@ database/migration/database.tar.gz
 vendor
 node_modules
 **/*.DS_Store
+.mcp.json
