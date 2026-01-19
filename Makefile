@@ -11,7 +11,7 @@ Command := $(firstword $(MAKECMDGOALS))
 
 live/go:
 	@go run github.com/air-verse/air@v1.64.0 \
-		--build.cmd "go build -o tmp/main" --build.bin "tmp/main" --build.delay "1000" \
+		--build.cmd "go build -o tmp/main" --build.entrypoint "tmp/main" --build.delay "1000" \
 		--build.exclude_dir "node_modules,tmp,vendor" \
 		--build.include_ext "go,yaml" \
 		--build.stop_on_error "false" \
