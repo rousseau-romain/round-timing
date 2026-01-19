@@ -5,7 +5,7 @@ You nedd to have:
 - brew
 - docker v27.3.1
 - docker-compose v2.30.3
-- go v1.22.9 (gvm is better)
+- go v1.25.5 (brew install go)
 - node v23.2.0 (nvm is better)
 - npm 10.9.0
 
@@ -21,9 +21,9 @@ Run these commands first(you need the key for the ecryption):
 
 ```bash
 make db/decrypt
+make db_start
 make db_init
 make db/encrypt
-make db_start
 make install
 make live
 ```

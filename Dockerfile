@@ -1,4 +1,4 @@
-FROM golang:1.22.9
+FROM golang:1.25.5
 
 ARG COMMIT_ID
 

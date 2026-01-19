@@ -8,7 +8,7 @@ RoundTiming is a server-side rendered Go web application that tracks game round 
 
 | Layer | Technology |
 | ------- | ------------ |
-| Language | Go 1.22 |
+| Language | Go 1.25 |
 | Router | Gorilla Mux |
 | Templates | Templ (type-safe HTML) |
 | Styling | TailwindCSS |

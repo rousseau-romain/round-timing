@@ -6,7 +6,7 @@ RoundTiming is a Go web application for tracking game rounds/timing (likely for 
 
 ## Tech Stack
 
-- **Go 1.22** with Gorilla Mux router
+- **Go 1.25** with Gorilla Mux router
 - **Templ** for HTML templating (`.templ` files compile to `_templ.go`)
 - **TailwindCSS** for styling
 - **MySQL** database via Docker

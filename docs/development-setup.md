@@ -9,13 +9,12 @@ Install the following tools:
 | Homebrew | latest | [brew.sh](https://brew.sh) |
 | Docker | v27.3.1+ | `brew install docker` |
 | Docker Compose | v2.30.3+ | Included with Docker |
-| Go | v1.22.9 | `gvm install go1.22.9` (recommended) |
+| Go | v1.25.5 | `brew install go` |
 | Node.js | v23.2.0 | `nvm install 23.2.0` (recommended) |
 | npm | v10.9.0 | Included with Node.js |
 
 ### Recommended: Version Managers
 
-- **Go**: Use [gvm](https://github.com/moovweb/gvm) for Go version management
 - **Node**: Use [nvm](https://github.com/nvm-sh/nvm) for Node version management
 
 ## Initial Setup
