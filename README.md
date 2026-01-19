@@ -5,7 +5,7 @@ You nedd to have:
 - brew
 - docker v27.3.1
 - docker-compose v2.30.3
-- go v1.25.5 (brew install go)
+- go v1.25.6 (brew install go)
 - node v23.2.0 (nvm is better)
 - npm 10.9.0
 

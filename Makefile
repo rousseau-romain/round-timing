@@ -10,7 +10,7 @@ Command := $(firstword $(MAKECMDGOALS))
 	@true
 
 live/go:
-	@go run github.com/air-verse/air@v1.52.3 \
+	@go run github.com/air-verse/air@v1.64.0 \
 		--build.cmd "go build -o tmp/main" --build.bin "tmp/main" --build.delay "1000" \
 		--build.exclude_dir "node_modules,tmp,vendor" \
 		--build.include_ext "go,yaml" \
@@ -38,8 +38,8 @@ build/commit-id:
 
 install:
 	brew install golang-migrate gnupg
-	go install github.com/air-verse/air@v1.52.3
-	go install github.com/a-h/templ/cmd/templ@v0.2.793
+	go install github.com/air-verse/air@v1.64.0
+	go install github.com/a-h/templ/cmd/templ@v0.3.977
 	npm install
 
 	@echo 'add "go.goroot:"$$GOROOT" to settings.json VsCode'

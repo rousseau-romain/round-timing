@@ -1,6 +1,10 @@
 package auth
 
-import "github.com/gorilla/sessions"
+import (
+	"net/http"
+
+	"github.com/gorilla/sessions"
+)
 
 const (
 	SessionName = "sessionRoundTiming"
@@ -20,6 +24,7 @@ func NewCookieStore(opts SessionOptions) *sessions.CookieStore {
 	store.Options.Path = "/"
 	store.Options.HttpOnly = opts.HttpOnly
 	store.Options.Secure = opts.Secure
+	store.Options.SameSite = http.SameSiteLaxMode
 
 	return store
 }
