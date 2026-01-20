@@ -13,6 +13,7 @@ import (
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/shared/components"
 	"github.com/rousseau-romain/round-timing/views/page"
+	"github.com/rousseau-romain/round-timing/views/page/legal"
 
 	"io"
 )
@@ -129,7 +130,7 @@ func (h *Handler) HandlerCGU(w http.ResponseWriter, r *http.Request) {
 	if user.Id != 0 {
 		h.Slog = h.Slog.With("userId", user.Id)
 	}
-	page.CGU(h.error, h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path).Render(r.Context(), w)
+	legal.CGU(h.error, h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerPrivacy(w http.ResponseWriter, r *http.Request) {
@@ -137,5 +138,5 @@ func (h *Handler) HandlerPrivacy(w http.ResponseWriter, r *http.Request) {
 	if user.Id != 0 {
 		h.Slog = h.Slog.With("userId", user.Id)
 	}
-	page.Privacy(h.error, h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path).Render(r.Context(), w)
+	legal.Privacy(h.error, h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path).Render(r.Context(), w)
 }

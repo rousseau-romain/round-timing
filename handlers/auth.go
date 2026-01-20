@@ -14,20 +14,20 @@ import (
 	"github.com/rousseau-romain/round-timing/helper"
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/service/auth"
-	"github.com/rousseau-romain/round-timing/views/page"
+	authPage "github.com/rousseau-romain/round-timing/views/page/auth"
 
 	"github.com/markbates/goth/gothic"
 )
 
 func (h *Handler) HandleLogin(w http.ResponseWriter, r *http.Request) {
-	page.SigninPage(GetPageNavDefault(r), h.languages, r.URL.Path, h.error).Render(r.Context(), w)
+	authPage.SigninPage(GetPageNavDefault(r), h.languages, r.URL.Path, h.error).Render(r.Context(), w)
 }
 
 func (h *Handler) HandleProviderLogin(w http.ResponseWriter, r *http.Request) {
 	// try to get the user without re-authenticating
 	if u, err := gothic.CompleteUserAuth(w, r); err == nil {
 		h.Slog.Info("User already authenticated", "goticUserId", u.UserID)
-		page.SigninPage(GetPageNavDefault(r), h.languages, r.URL.Path, h.error).Render(r.Context(), w)
+		authPage.SigninPage(GetPageNavDefault(r), h.languages, r.URL.Path, h.error).Render(r.Context(), w)
 	} else {
 		gothic.BeginAuthHandler(w, r)
 	}
@@ -104,7 +104,7 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 }
 
 func (h *Handler) HandleSignupEmail(w http.ResponseWriter, r *http.Request) {
-	page.SignupPage(GetPageNavDefault(r), h.languages, r.URL.Path, h.error).Render(r.Context(), w)
+	authPage.SignupPage(GetPageNavDefault(r), h.languages, r.URL.Path, h.error).Render(r.Context(), w)
 }
 
 func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {

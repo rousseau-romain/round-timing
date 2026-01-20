@@ -8,7 +8,7 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/helper"
 	"github.com/rousseau-romain/round-timing/model"
-	"github.com/rousseau-romain/round-timing/views/page"
+	pageMatch "github.com/rousseau-romain/round-timing/views/page/match"
 
 	"github.com/gorilla/mux"
 )
@@ -120,7 +120,7 @@ func (h *Handler) HandlersCreatePlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page.TeamPlayer(player, match).Render(r.Context(), w)
+	pageMatch.TeamPlayer(player, match).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersDeletePlayer(w http.ResponseWriter, r *http.Request) {

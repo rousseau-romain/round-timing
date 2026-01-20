@@ -1,4 +1,4 @@
-package page
+package match
 
 import (
 	"fmt"
@@ -6,6 +6,22 @@ import (
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/shared/components"
 )
+
+script initPerformAnimation() {
+	window.performAnimation = () => {
+		const tbody = document.querySelector("tbody");
+		const divTableButton = document.getElementById("div-table-button");
+
+		if (tbody.children.length > 0) {
+			divTableButton.classList.add("flex");
+			divTableButton.classList.remove("hidden");
+		} else {
+			divTableButton.classList.remove("flex");
+			divTableButton.classList.add("hidden");
+		}
+	};
+	performAnimation();
+}
 
 templ TeamPlayer(p model.Player, m model.Match) {
 	<tr class={ "bg-" + p.Team.Color + "-200" }>
@@ -23,7 +39,7 @@ templ TeamPlayer(p model.Player, m model.Match) {
 			/>
 		</td>
 		<td class="whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">
-			<img onclick="handleClickImage(this)" alt={ p.Class.Name } src={ p.Class.UrlImage + "F.svg" } class="h-8 m-auto img-class"/>
+			@components.ImgClassToggle(templ.Attributes{"title": p.Name, "alt": p.Class.Name, "src": p.Class.UrlImage + "F.svg"})
 		</td>
 		<td class="text-center whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">
 			{ p.Team.Name }
@@ -44,15 +60,6 @@ templ TeamPlayerTable(players []model.Player, match model.Match) {
 	<div class="bg-red-200 border-red-200"></div>
 	<div class="bg-indigo-200 border-indigo-200"></div>
 	// SHITY WORKAROUND
-	<script>
-		function handleClickImage(img) {
-			if (img.src.includes("F")) {
-				img.src = img.src.replace("F", "M");
-			} else {
-				img.src = img.src.replace("M", "F");
-			}
-		}
-	</script>
 	<div id="div-table-button" class="overflow-x-auto mb-5 flex-col items-center hidden">
 		<table
 			class="mb-2 min-w-full divide-y-2 divide-gray-200 bg-white text-sm dark:divide-gray-700 dark:bg-gray-900"
@@ -127,7 +134,7 @@ templ TeamPlayerListPage(user model.User, popinMessages components.PopinMessages
 							if it == 0 {
 								hx-swap="afterbegin"
 							} else {
-								hx-swap="afterend"
+								hx-swap="beforeend"
 							}
 							hx-target="next tbody"
 							hx-on::after-request="performAnimation()"
@@ -140,22 +147,7 @@ templ TeamPlayerListPage(user model.User, popinMessages components.PopinMessages
 			}
 		}
 		@TeamPlayerTable(players, match)
-		<script>
-				function performAnimation() {
-					const tbody = document.querySelector("tbody");
-					const divTableButton = document.getElementById("div-table-button");
-
-					if (tbody.children.length > 0) {
-						divTableButton.classList.add("flex");
-						divTableButton.classList.remove("hidden");
-					}
-					else {
-						divTableButton.classList.remove("flex");
-						divTableButton.classList.add("hidden");
-					}
-				}
-				performAnimation()
-            </script>
+		@initPerformAnimation()
 	}
 }
 

@@ -10,6 +10,7 @@ import (
 	"github.com/rousseau-romain/round-timing/helper"
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/views/page"
+	pageMatch "github.com/rousseau-romain/round-timing/views/page/match"
 
 	"github.com/gorilla/mux"
 )
@@ -27,7 +28,7 @@ func (h *Handler) HandlersListMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page.MatchListPage(user, h.error, GetPageNavDefault(r), h.languages, r.URL.Path, matchs).Render(r.Context(), w)
+	pageMatch.MatchListPage(user, h.error, GetPageNavDefault(r), h.languages, r.URL.Path, matchs).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
@@ -108,7 +109,7 @@ func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page.Match(match).Render(r.Context(), w)
+	pageMatch.Match(match).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersDeleteMatch(w http.ResponseWriter, r *http.Request) {
@@ -178,7 +179,7 @@ func (h *Handler) HandlersMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page.TeamPlayerListPage(user, h.error, h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, match, teams, classes, players).Render(r.Context(), w)
+	pageMatch.TeamPlayerListPage(user, h.error, h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, match, teams, classes, players).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) {
@@ -286,7 +287,7 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	page.StartMatchPage(user, h.error, h.GetPageNavCustom(r, user, match), h.languages, r.URL.Path, match, players, spellsPlayer, false).Render(r.Context(), w)
+	pageMatch.StartMatchPage(user, h.error, h.GetPageNavCustom(r, user, match), h.languages, r.URL.Path, match, players, spellsPlayer, false).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerResetMatchPage(w http.ResponseWriter, r *http.Request) {
@@ -347,7 +348,7 @@ func (h *Handler) HandlerToggleMatchMastery(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	page.MatchPageTable(user, h.error, h.GetPageNavCustom(r, user, match), h.languages, r.URL.Path, match, players, spellsPlayers, false).Render(r.Context(), w)
+	pageMatch.MatchPageTable(user, h.error, h.GetPageNavCustom(r, user, match), h.languages, r.URL.Path, match, players, spellsPlayers, false).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerMatchNextRound(w http.ResponseWriter, r *http.Request) {
@@ -368,7 +369,7 @@ func (h *Handler) HandlerMatchNextRound(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	match, err := model.GetMatch(matchId)
+	m, err := model.GetMatch(matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -393,7 +394,7 @@ func (h *Handler) HandlerMatchNextRound(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	page.PlayerTable(match, players, spellsPlayers, false).Render(r.Context(), w)
+	pageMatch.PlayerTable(m, players, spellsPlayers, false).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerUsePlayerSpell(w http.ResponseWriter, r *http.Request) {
@@ -416,7 +417,7 @@ func (h *Handler) HandlerUsePlayerSpell(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	page.Spell(spellPlayer, false).Render(r.Context(), w)
+	pageMatch.Spell(spellPlayer, false).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerRemoveRoundRecoveryPlayerSpell(w http.ResponseWriter, r *http.Request) {
@@ -439,5 +440,5 @@ func (h *Handler) HandlerRemoveRoundRecoveryPlayerSpell(w http.ResponseWriter, r
 		return
 	}
 
-	page.Spell(spellPlayer, false).Render(r.Context(), w)
+	pageMatch.Spell(spellPlayer, false).Render(r.Context(), w)
 }

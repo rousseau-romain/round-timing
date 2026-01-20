@@ -6,9 +6,43 @@ import (
 	"github.com/rousseau-romain/round-timing/model"
 	"strconv"
 	"time"
+
+	"github.com/rousseau-romain/round-timing/config"
 )
 
 var isDebug = false
+
+script initPopinMessage() {
+	window.closeMessage = () => {
+		document.querySelector(".popin-message").remove();
+		const url = new URL(window.location);
+		if (url.searchParams.has("errorTitle") || url.searchParams.has("errorMessages")) {
+			url.searchParams.delete("errorTitle");
+			url.searchParams.delete("errorMessages");
+			window.history.replaceState({}, document.title, url);
+			location.reload();
+		}
+	};
+	document.querySelector(".popin-message").addEventListener("click", closeMessage);
+	document.querySelector(".popin-message .close").addEventListener("click", closeMessage);
+	document.querySelector(".popin-message div").addEventListener("click", (e) => e.stopPropagation());
+}
+
+script initPopinLanguage() {
+	document.querySelector("#header-select-language").addEventListener("click", () => {
+		document.querySelector("#popin-language").classList.toggle("hidden");
+	});
+	document.querySelector("#popin-language").addEventListener("click", () => {
+		document.querySelector("#popin-language").classList.toggle("hidden");
+	});
+	document.querySelector("#popin-language section").addEventListener("click", (e) => e.stopPropagation());
+}
+
+script initBurgerMenu() {
+	document.querySelector("#button-burger-menu").addEventListener("click", () => {
+		document.querySelector("#menu-mobile").classList.toggle("hidden");
+	});
+}
 
 type PopinMessages struct {
 	Title    string
@@ -24,13 +58,15 @@ templ Layout(title string, popinMessages PopinMessages, user model.User, navItem
 			<link rel="stylesheet" type="text/css" href={ fmt.Sprintf("/public/tailwind.css?build=%s", strconv.FormatInt(time.Now().Unix(), 10)) }/>
 		</head>
 		<body>
-			<script src="/public/script/htmx2.0.4.js"></script>
-			<script src="/public/script/htmx2.0.4-response-targets.js"></script>
-			<script src="/public/script/htmx2.0.4-ws.js"></script>
-			if isDebug {
-				<script src="/public/script/htmx1.9.11-debug.js"></script>
+			if config.ENV == "development" || config.ENV == "staging" {
+				<script src="/public/script/htmx-2.0.8/htmx.js"></script>
+			} else {
+				<script src="/public/script/htmx-2.0.8/htmx.min.js"></script>
 			}
-			if isDebug {
+			<script src="/public/script/htmx-2.0.8/ext/response-targets.js"></script>
+			<script src="/public/script/htmx-2.0.8/ext/ws.js"></script>
+			if config.ENV == "development" || config.ENV == "staging" {
+				<script src="/public/script/htmx-2.0.8/ext/debug.js"></script>
 				<button class="border border-red-600 bg-red-300 text-red-600 top-0 right-0 absolute">Debug MOD</button>
 			}
 			@Nav(user, navItems, languages, pageSlug)
@@ -96,16 +132,7 @@ templ Nav(user model.User, navItems []NavItem, languages []model.Language, pageS
 							</a>
 							<img alt="flag" id="header-select-language" class="cursor-pointer w-10 h-8" src={ "/public/img/flag/" + strconv.Itoa(user.IdLanguage) + ".svg" }/>
 							@PopinSelectLanguage(user, languages)
-							<script>
-								document.querySelector("#header-select-language").addEventListener("click", () => {
-									document.querySelector("#popin-language").classList.toggle("hidden");
-								});
-								document.querySelector("#popin-language").addEventListener("click", () => {
-									document.querySelector("#popin-language").classList.toggle("hidden");
-									e.stopPropagation();
-								});
-								document.querySelector("#popin-language div").addEventListener("click", (e) => e.stopPropagation());
-							</script>
+							@initPopinLanguage()
 						} else {
 							if pageSlug != "/signin" && pageSlug != "/signup" {
 								<a
@@ -144,11 +171,7 @@ templ Nav(user model.User, navItems []NavItem, languages []model.Language, pageS
 	<div class="absolute right-0 w-fit bg-white border">
 		@MobileMenu(user, navItems)
 	</div>
-	<script>
-		document.querySelector("#button-burger-menu").addEventListener("click", () => {
-			document.querySelector("#menu-mobile").classList.toggle("hidden");
-		});
-	</script>
+	@initBurgerMenu()
 }
 
 templ MobileMenu(user model.User, navItems []NavItem) {
@@ -217,21 +240,7 @@ templ PopinMessage(popinMessages PopinMessages) {
 					}
 				}
 			</div>
-			<script>
-			function closeMessage() {
-				document.querySelector(".popin-message").remove()
-				const url = new URL(window.location);
-				if (url.searchParams.has("errorTitle") || url.searchParams.has("errorMessages")) {
-					url.searchParams.delete("errorTitle");
-					url.searchParams.delete("errorMessages");
-					window.history.replaceState({}, document.title, url);
-					location.reload();
-				}
-			}
-			document.querySelector(".popin-message").addEventListener("click", closeMessage)
-			document.querySelector(".popin-message .close").addEventListener("click", closeMessage)
-			document.querySelector(".popin-message div").addEventListener("click", (e) => e.stopPropagation())
-			</script>
+			@initPopinMessage()
 		</div>
 	}
 }
@@ -249,7 +258,7 @@ templ PopinSelectLanguage(user model.User, languages []model.Language) {
 								class="inline-block w-full rounded-lg bg-transparent sm:w-auto border"
 								hx-patch={ fmt.Sprintf("/user/%d/locale/%s", user.Id, l.Locale) }
 							>
-								<img alt="flag" id="header-select-language" class="cursor-pointer w-20" src={ fmt.Sprintf("/public/img/flag/%d.svg", l.Id) }/>
+								<img alt="flag" id="header-select-language" class="cursor-pointer w-20 transition-all hover:scale-105" src={ fmt.Sprintf("/public/img/flag/%d.svg", l.Id) }/>
 							</button>
 						</li>
 					}

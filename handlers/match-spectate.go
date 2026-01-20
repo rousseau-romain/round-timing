@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/rousseau-romain/round-timing/config"
 	"github.com/rousseau-romain/round-timing/model"
-	"github.com/rousseau-romain/round-timing/views/page"
+	pageMatch "github.com/rousseau-romain/round-timing/views/page/match"
 )
 
 var upgrader = websocket.Upgrader{
@@ -68,7 +68,7 @@ func (h *Handler) HandlerSpectateMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page.SpectateMatchPage(user, h.error, h.GetPageNavCustom(r, user, matchFromUser), h.languages, r.URL.Path, match, players, spellsPlayers, true).Render(r.Context(), w)
+	pageMatch.SpectateMatchPage(user, h.error, h.GetPageNavCustom(r, user, matchFromUser), h.languages, r.URL.Path, match, players, spellsPlayers, true).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerMatchTableLive(w http.ResponseWriter, r *http.Request) {
@@ -120,7 +120,7 @@ func (h *Handler) HandlerMatchTableLive(w http.ResponseWriter, r *http.Request) 
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		message, _ := templ.ToGoHTML(r.Context(), page.PlayerTable(match, players, spellsPlayers, true))
+		message, _ := templ.ToGoHTML(r.Context(), pageMatch.PlayerTable(match, players, spellsPlayers, true))
 		for client := range clients {
 			c := clients[userMatchUniqueString]
 			err := c.WriteMessage(websocket.TextMessage, []byte(message))

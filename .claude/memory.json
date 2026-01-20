@@ -1,0 +1,6 @@
+{
+  "development": {
+    "templ": "Uses watch mode - no need to manually run templ generate",
+    "build": "Uses watch mode for automatic rebuilds"
+  }
+}

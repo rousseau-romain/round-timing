@@ -1,10 +1,26 @@
 package components
 
+script copyText() {
+	const button = event.currentTarget;
+	const container = button.parentElement;
+	const input = container.querySelector("input");
+	const divCopy = button.querySelector("div:first-child");
+	const divValidate = button.querySelector("div:nth-child(2)");
+	input.select();
+	navigator.clipboard.writeText(input.value);
+	divCopy.classList.toggle("hidden");
+	divValidate.classList.toggle("hidden");
+	setTimeout(() => {
+		divCopy.classList.toggle("hidden");
+		divValidate.classList.toggle("hidden");
+	}, 2000);
+}
+
 templ ButtonCopy(textToCopy string) {
 	<div class="text-center flex content-center h-8 rounded-sm overflow-hidden">
 		<input class="w-48 bg-gray-300 rounded-none" type="text" value={ textToCopy } readonly/>
 		<button
-			onclick="copyText(this)"
+			onclick={ copyText() }
 			class="p-1 text-gray-800 bg-transparent border-2 border-gray-300 hover:text-white hover:bg-gray-600 active:bg-gray-700"
 		>
 			<div>
@@ -20,19 +36,4 @@ templ ButtonCopy(textToCopy string) {
 			</div>
 		</button>
 	</div>
-	<script>
-        function copyText(button) {
-            const input = button.previousElementSibling
-            const divCopy = button.querySelector("div:first-child")
-            const divValidate = button.querySelector("div:nth-child(2)")
-            input.select()
-            document.execCommand("copy")
-            divCopy.classList.toggle("hidden")
-            divValidate.classList.toggle("hidden")
-            setTimeout(() => {
-                divCopy.classList.toggle("hidden")
-                divValidate.classList.toggle("hidden")
-            }, 2000);
-        }
-    </script>
 }

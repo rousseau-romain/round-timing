@@ -1,4 +1,4 @@
-package page
+package match
 
 import (
 	"fmt"
@@ -47,15 +47,6 @@ templ MatchPageTable(user model.User, popinMessages components.PopinMessages, na
 		@components.ButtonCopy(fmt.Sprintf("%s/match/%d/spectate", config.PUBLIC_HOST_PORT, match.Id))
 	</div>
 	<div class="overflow-x-auto">
-		<script>
-			function handleClickImage(img) {
-				if (img.src.includes("F")) {
-					img.src = img.src.replace("F", "M");
-				} else {
-					img.src = img.src.replace("M", "F");
-				}
-			}
-		</script>
 		@DivPlayerTable(match, players, playersSpells, isSpectator)
 	</div>
 }
@@ -126,7 +117,7 @@ templ Player(p model.Player, playersSpells []model.MatchPlayerSpell, isSpectator
 		}
 	>
 		<td class="whitespace-nowrap px-4 py-2">
-			<img onclick="handleClickImage(this)" alt={ p.Class.Name } title={ p.Name } src={ p.Class.UrlImage + "F.svg" } class="h-8 img-class  cursor-pointer transition-all hover:scale-110 m-auto"/>
+			@components.ImgClassToggle(templ.Attributes{"title": p.Name, "alt": p.Class.Name, "src": p.Class.UrlImage + "F.svg"})
 		</td>
 		<td class="whitespace-nowrap px-4 py-2">{ p.Name }</td>
 		<td class="whitespace-nowrap px-4 py-2">
