@@ -90,10 +90,13 @@ en:
       title: "Profile"
       h1: "Profile"
       p-user-id: "Your ID is:"
+      h2-spectators: "Spectator users:"
       h2-spells-favorites: "Favorite spells:"
       h2-configuration: "Configuration:"
       logout: "Log out"
       no-spectate: "You have no spectators, add one through the form below."
+      button:
+        add-spectator: "Add a spectator"
       errors:
         user-spectate:
           already-exist: "The user spectate (%{userSpectateId}) already listed"

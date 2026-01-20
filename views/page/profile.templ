@@ -17,7 +17,7 @@ templ ProfilePage(user model.User, popinMessages components.PopinMessages, navIt
 					@components.ButtonCopy(user.IdShare)
 				</div>
 			</div>
-			<h2 class="font-semibold">Utilisateurs spectateurs:</h2>
+			<h2 class="font-semibold">{ i18n.T(ctx, "page.profile.h2-spectators") }</h2>
 			<div class="mb-2">
 				if len(idUserShares) == 0 {
 					<p class="text-gray-500">{ i18n.T(ctx, "page.profile.no-spectate") }</p>
@@ -39,7 +39,7 @@ templ ProfilePage(user model.User, popinMessages components.PopinMessages, navIt
 						type="submit"
 						class="inline-block rounded-md bg-sky-600 px-5 py-2.5 text-sm font-medium text-white shadow hover:bg-sky-500"
 					>
-						Ajouter un spectateur
+						{ i18n.T(ctx, "page.profile.button.add-spectator") }
 					</button>
 				</form>
 			</div>

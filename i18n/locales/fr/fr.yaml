@@ -90,10 +90,13 @@ fr:
       title: "Profile"
       h1: "Profile:"
       p-user-id: "Votre identifiant est:"
+      h2-spectators: "Utilisateurs spectateurs:"
       h2-spells-favorites: "Sorts favoris:"
       h2-configuration: "Configuration:"
       logout: "Deconnexion"
       no-spectate: "Vous n'avez aucun spectateur, ajouter en via le formulaire ci-dessous."
+      button:
+        add-spectator: "Ajouter un spectateur"
       errors:
         user-spectate:
           already-exist: "Le spectateur (%{userSpectateId}) est déjà répertorié"

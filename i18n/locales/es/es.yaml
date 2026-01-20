@@ -90,10 +90,13 @@ es:
       title: "Perfil"
       h1: "Perfil"
       p-user-id: "Tu ID es:"
+      h2-spectators: "Usuarios espectadores:"
       h2-spells-favorites: "Hechizos favoritos:"
       h2-configuration: "Configuración:"
       logout: "Cerrar sesión"
       no-spectate: "No tienes ningúno espectador, agrege uno mediante el formulario de abajo."
+      button:
+        add-spectator: "Agregar un espectador"
       errors:
         user-spectate:
           already-exist: "El espectador del usuario (%{userSpectateId}) ya existe"

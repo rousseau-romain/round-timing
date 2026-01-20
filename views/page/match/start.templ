@@ -10,7 +10,7 @@ import (
 )
 
 templ StartMatchPage(user model.User, popinMessages components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell, isSpectator bool) {
-	@components.Layout("Start match", popinMessages, user, navItems, languages, pageSlug) {
+	@components.Layout(i18n.T(ctx, "page.start-match.title"), popinMessages, user, navItems, languages, pageSlug) {
 		@MatchPageTable(user, popinMessages, navItems, languages, pageSlug, match, players, playersSpells, isSpectator)
 	}
 }
