@@ -30,7 +30,7 @@ templ ProfilePage(user model.User, popinMessages components.PopinMessages, navIt
 				>
 					<input
 						class="mb-2 w-1/2 block rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-						placeholder="id user example: 1"
+						placeholder={ i18n.T(ctx, "page.profile.input.placeholder-user-id") }
 						required
 						type="text"
 						name="idUserShare"
@@ -97,7 +97,7 @@ templ TableUserSpectate(idUserShares []string) {
 	<table class="table-auto mb-2">
 		<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
 			<tr>
-				<th>id user spectate</th>
+				<th>{ i18n.T(ctx, "page.profile.table.id-user-spectate") }</th>
 				<th></th>
 			</tr>
 		</thead>
@@ -121,7 +121,7 @@ templ UserSpectate(idUserShare string) {
 				hx-delete="/profile/user-spectate"
 				hx-vals={ fmt.Sprintf(`{"idUserShare": "%s"}`, idUserShare) }
 			>
-				Delete
+				{ i18n.T(ctx, "global.buttons.delete") }
 			</button>
 		</td>
 	</tr>
