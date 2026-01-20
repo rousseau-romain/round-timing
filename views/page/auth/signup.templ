@@ -16,48 +16,9 @@ templ SignupPage(navItems []components.NavItem, languages []model.Language, page
 					hx-target-error="#popinMessages"
 					class="mt-8 grid grid-cols-6 gap-6"
 				>
-					<div class="col-span-6">
-						<label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-200">
-							{ i18n.T(ctx, "global.email") }
-						</label>
-						<input
-							type="email"
-							id="email"
-							name="email"
-							required
-							class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-xs dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
-						/>
-					</div>
-					<div class="col-span-6 sm:col-span-3">
-						<label
-							for="password"
-							class="block text-sm font-medium text-gray-700 dark:text-gray-200"
-						>
-							{ i18n.T(ctx, "global.password") }
-						</label>
-						<input
-							type="password"
-							id="password"
-							name="password"
-							required
-							class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-xs dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
-						/>
-					</div>
-					<div class="col-span-6 sm:col-span-3">
-						<label
-							for="password-confirmation"
-							class="block text-sm font-medium text-gray-700 dark:text-gray-200"
-						>
-							{ i18n.T(ctx, "page.signup.password-confirmation") }
-						</label>
-						<input
-							type="password"
-							id="password-confirmation"
-							name="password-confirmation"
-							required
-							class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-xs dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
-						/>
-					</div>
+					@components.FormInput("email", "email", "email", "global.email", true)
+					@components.FormInputHalfWidth("password", "password", "password", "global.password", true)
+					@components.FormInputHalfWidth("password", "password-confirmation", "password-confirmation", "page.signup.password-confirmation", true)
 					<div class="col-span-6">
 						<p class="text-sm text-gray-500 dark:text-gray-400">
 							{ i18n.T(ctx, "page.signup.p-agree-terms.1") }
@@ -69,11 +30,7 @@ templ SignupPage(navItems []components.NavItem, languages []model.Language, page
 						</p>
 					</div>
 					<div class="col-span-6 sm:flex sm:items-center sm:gap-4">
-						<button
-							class="inline-block shrink-0 rounded-md border border-blue-600 bg-blue-600 px-12 py-3 text-sm font-medium text-white transition hover:bg-transparent hover:text-blue-600 focus:ring-3 focus:outline-hidden dark:hover:bg-blue-700 dark:hover:text-white"
-						>
-							{ i18n.T(ctx, "page.signup.signup-button") }
-						</button>
+						@components.ButtonSubmit(i18n.T(ctx, "page.signup.signup-button"))
 						<p class="mt-4 text-sm text-gray-500 sm:mt-0 dark:text-gray-400">
 							{ i18n.T(ctx, "page.signup.p-already-account") }
 							<a href="/signin" class="text-gray-700 underline dark:text-gray-200">{ i18n.T(ctx, "global.signin") }</a>.

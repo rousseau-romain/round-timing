@@ -97,6 +97,10 @@ fr:
       no-spectate: "Vous n'avez aucun spectateur, ajouter en via le formulaire ci-dessous."
       button:
         add-spectator: "Ajouter un spectateur"
+      input:
+        placeholder-user-id: "Id utilisateur exemple: 1"
+      table:
+        id-user-spectate: "Id utilisateur spectateur"
       errors:
         user-spectate:
           already-exist: "Le spectateur (%{userSpectateId}) est déjà répertorié"

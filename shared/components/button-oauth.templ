@@ -1,0 +1,12 @@
+package components
+
+import "github.com/invopop/ctxi18n/i18n"
+
+templ ButtonOAuth(href string, provider string) {
+	<a
+		href={ templ.SafeURL(href) }
+		class="block w-full rounded-lg bg-indigo-600 px-5 py-3 text-sm font-medium text-white text-center"
+	>
+		{ i18n.T(ctx, "page.signin.signin-button", i18n.M{"provider": provider}) }
+	</a>
+}

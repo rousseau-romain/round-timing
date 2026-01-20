@@ -1,0 +1,40 @@
+package components
+
+import "github.com/invopop/ctxi18n/i18n"
+
+templ FormInput(inputType string, id string, name string, labelKey string, required bool) {
+	<div class="col-span-6">
+		<label for={ id } class="block text-sm font-medium text-gray-700 dark:text-gray-200">
+			{ i18n.T(ctx, labelKey) }
+		</label>
+		<input
+			type={ inputType }
+			id={ id }
+			name={ name }
+			if required {
+				required
+			}
+			class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-xs dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+		/>
+	</div>
+}
+
+templ FormInputHalfWidth(inputType string, id string, name string, labelKey string, required bool) {
+	<div class="col-span-6 sm:col-span-3">
+		<label
+			for={ id }
+			class="block text-sm font-medium text-gray-700 dark:text-gray-200"
+		>
+			{ i18n.T(ctx, labelKey) }
+		</label>
+		<input
+			type={ inputType }
+			id={ id }
+			name={ name }
+			if required {
+				required
+			}
+			class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-xs dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+		/>
+	</div>
+}

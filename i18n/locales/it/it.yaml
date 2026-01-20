@@ -97,6 +97,10 @@ it:
       no-spectate: "Non hai nessun osservatore, aggiungi uno tramite il form qui sotto."
       button:
         add-spectator: "Aggiungi uno spettatore"
+      input:
+        placeholder-user-id: "ID utente esempio: 1"
+      table:
+        id-user-spectate: "ID utente spettatore"
       errors:
         user-spectate:
           already-exist: "L'utente spectate (%{userSpectateId}) già esiste"
