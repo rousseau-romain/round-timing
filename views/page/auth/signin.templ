@@ -3,16 +3,18 @@ package auth
 import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/model"
-	"github.com/rousseau-romain/round-timing/views/components"
+	"github.com/rousseau-romain/round-timing/views/components/forms"
+	"github.com/rousseau-romain/round-timing/views/components/layout"
+	"github.com/rousseau-romain/round-timing/views/components/ui"
 )
 
-templ SigninPage(navItems []components.NavItem, languages []model.Language, pageSlug string, popinMessages components.PopinMessages) {
-	@components.Layout(i18n.T(ctx, "page.signin.title"), popinMessages, model.User{}, navItems, languages, pageSlug) {
+templ SigninPage(navItems []layout.NavItem, languages []model.Language, pageSlug string, popinMessages layout.PopinMessages) {
+	@layout.Layout(i18n.T(ctx, "page.signin.title"), popinMessages, model.User{}, navItems, languages, pageSlug) {
 		<div class="mx-auto max-w-screen-xl px-4 py-16 sm:px-6 lg:px-8">
 			<div class="mb-4 mx-auto max-w-lg flex flex-col space-y-4">
 				<h1 class="text-center text-2xl font-bold text-indigo-600 sm:text-3xl">{ i18n.T(ctx, "page.signin.h1") }</h1>
-				@components.ButtonOAuth("/auth/discord", "Discord")
-				@components.ButtonOAuth("/auth/google", "Google")
+				@ui.ButtonOAuth("/auth/discord", "Discord")
+				@ui.ButtonOAuth("/auth/google", "Google")
 			</div>
 			<h1 class="text-center text-lg font-medium">{ i18n.T(ctx, "page.signin.connect-with-email") }</h1>
 			<div class="mx-auto max-w-lg flex flex-col space-y-4">
@@ -21,10 +23,10 @@ templ SigninPage(navItems []components.NavItem, languages []model.Language, page
 					hx-target-error="#popinMessages"
 					class="mt-8 grid grid-cols-6 gap-6"
 				>
-					@components.FormInput("email", "Email", "email", "global.email", true)
-					@components.FormInput("password", "Password", "password", "global.password", true)
+					@forms.Input("email", "Email", "email", "global.email", true)
+					@forms.Input("password", "Password", "password", "global.password", true)
 					<div class="col-span-6 sm:flex sm:items-center sm:gap-4">
-						@components.ButtonSubmit(i18n.T(ctx, "page.signin.signin-button", i18n.M{"provider": i18n.T(ctx, "global.email")}))
+						@ui.ButtonSubmit(i18n.T(ctx, "page.signin.signin-button", i18n.M{"provider": i18n.T(ctx, "global.email")}))
 						<p class="mt-4 text-sm text-gray-500 sm:mt-0 dark:text-gray-400">
 							{ i18n.T(ctx, "page.signin.no-account") }
 							<a href="signup" class="text-gray-700 underline dark:text-gray-200">{ i18n.T(ctx, "page.signin.create-account") }</a>.

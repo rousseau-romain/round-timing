@@ -1,9 +1,10 @@
-package components
+package layout
 
 import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/views/components/icons"
 	"strconv"
 	"time"
 
@@ -94,7 +95,7 @@ templ Nav(user model.User, navItems []NavItem, languages []model.Language, pageS
 						if user.Email != "" {
 							<a href="/profile">
 								<div class="w-10 h-10 p-1 rounded-full bg-gray-200">
-									@SVGUser("currentColor", 32, 32)
+									@icons.User("currentColor", 32, 32)
 								</div>
 							</a>
 							<div x-data="{ open: false }">

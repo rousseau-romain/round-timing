@@ -11,15 +11,15 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/config"
 	"github.com/rousseau-romain/round-timing/model"
-	"github.com/rousseau-romain/round-timing/views/components"
+	"github.com/rousseau-romain/round-timing/views/components/layout"
 	"github.com/rousseau-romain/round-timing/views/page"
 	"github.com/rousseau-romain/round-timing/views/page/legal"
 
 	"io"
 )
 
-func GetPageNavDefault(r *http.Request) []components.NavItem {
-	return []components.NavItem{
+func GetPageNavDefault(r *http.Request) []layout.NavItem {
+	return []layout.NavItem{
 		{
 			Name: i18n.T(r.Context(), "page.match-list.title"),
 			Url:  "match",
@@ -27,11 +27,11 @@ func GetPageNavDefault(r *http.Request) []components.NavItem {
 	}
 }
 
-func (h *Handler) GetPageNavCustom(r *http.Request, user model.User, match model.Match) []components.NavItem {
+func (h *Handler) GetPageNavCustom(r *http.Request, user model.User, match model.Match) []layout.NavItem {
 	var pageNav = GetPageNavDefault(r)
 	if user.Id != 0 {
 		if match.Id != 0 {
-			pageNav = append(pageNav, components.NavItem{
+			pageNav = append(pageNav, layout.NavItem{
 				Name: fmt.Sprintf("Match %s (%d)", match.Name, match.Id),
 				Url:  fmt.Sprintf("match/%d", match.Id),
 			})
@@ -42,7 +42,7 @@ func (h *Handler) GetPageNavCustom(r *http.Request, user model.User, match model
 				return pageNav
 			}
 			if lastMatch.Id != 0 {
-				pageNav = append(pageNav, components.NavItem{
+				pageNav = append(pageNav, layout.NavItem{
 					Name: i18n.T(r.Context(), "global.header.last-match", i18n.M{"name": lastMatch.Name, "id": lastMatch.Id}),
 					Url:  fmt.Sprintf("match/%d", lastMatch.Id),
 				})
@@ -50,7 +50,7 @@ func (h *Handler) GetPageNavCustom(r *http.Request, user model.User, match model
 		}
 	}
 	if user.IsAdmin {
-		pageNav = append(pageNav, components.NavItem{
+		pageNav = append(pageNav, layout.NavItem{
 			Name: "Admin list users",
 			Url:  "admin/user",
 		})
@@ -111,7 +111,7 @@ func (h *Handler) HandlersHome(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	pageNav := GetPageNavDefault(r)
 
-	h.error = components.PopinMessages{
+	h.error = layout.PopinMessages{
 		Title:    r.URL.Query().Get("errorTitle"),
 		Messages: strings.Split(r.URL.Query().Get("errorMessages"), ","),
 	}

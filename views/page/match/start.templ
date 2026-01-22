@@ -5,17 +5,18 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/config"
 	"github.com/rousseau-romain/round-timing/model"
-	"github.com/rousseau-romain/round-timing/views/components"
+	"github.com/rousseau-romain/round-timing/views/components/layout"
+	"github.com/rousseau-romain/round-timing/views/components/ui"
 	"strconv"
 )
 
-templ StartMatchPage(user model.User, popinMessages components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell, isSpectator bool) {
-	@components.Layout(i18n.T(ctx, "page.start-match.title"), popinMessages, user, navItems, languages, pageSlug) {
+templ StartMatchPage(user model.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []model.Language, pageSlug string, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell, isSpectator bool) {
+	@layout.Layout(i18n.T(ctx, "page.start-match.title"), popinMessages, user, navItems, languages, pageSlug) {
 		@MatchPageTable(user, popinMessages, navItems, languages, pageSlug, match, players, playersSpells, isSpectator)
 	}
 }
 
-templ MatchPageTable(user model.User, popinMessages components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell, isSpectator bool) {
+templ MatchPageTable(user model.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []model.Language, pageSlug string, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell, isSpectator bool) {
 	<div class="flex flex-wrap justify-center gap-2">
 		<button
 			type="submit"
@@ -44,7 +45,7 @@ templ MatchPageTable(user model.User, popinMessages components.PopinMessages, na
 		>
 			{ i18n.T(ctx, "page.start-match.button.toggle-multiple-mastery") }
 		</button>
-		@components.ButtonCopy(fmt.Sprintf("%s/match/%d/spectate", config.PUBLIC_HOST_PORT, match.Id))
+		@ui.ButtonCopy(fmt.Sprintf("%s/match/%d/spectate", config.PUBLIC_HOST_PORT, match.Id))
 	</div>
 	<div class="overflow-x-auto">
 		@DivPlayerTable(match, players, playersSpells, isSpectator)
@@ -82,7 +83,7 @@ templ Spell(mps model.MatchPlayerSpell, isSpectator bool) {
 				templ.KV("border-cyan-500", mps.RoundBeforeRecovery >= 3),
 			}
 		>
-			<span class="tooltip rounded shadow-lg p-1 bg-gray-100 text-black -top-3/4 -left-full">
+			<span class="tooltip rounded shadow-lg p-1 bg-gray-100 text-black top-full -left-1/2 pointer-events-none">
 				<ul>
 					<li class="font-bold">{ mps.Spell.Name }</li>
 					<li>{ i18n.T(ctx, "page.start-match.delay-between-use") } : <span class="font-bold">{ strconv.Itoa(mps.Spell.Delay) }</span></li>
@@ -123,7 +124,7 @@ templ Player(p model.Player, playersSpells []model.MatchPlayerSpell, isSpectator
 		<td class="px-4 py-2" colspan="3">
 			<div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
 				<div class="flex items-center gap-2 justify-center">
-					@components.ImgClassToggle(templ.Attributes{"title": p.Name, "alt": p.Class.Name, "src": p.Class.UrlImage + "F.svg"})
+					@ui.AvatarToggle(templ.Attributes{"title": p.Name, "alt": p.Class.Name, "src": p.Class.UrlImage + "F.svg"})
 					<span class="font-medium whitespace-nowrap">{ p.Name }</span>
 				</div>
 				<div class="flex gap-4 flex-wrap">

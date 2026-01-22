@@ -1,17 +1,17 @@
-package page 
+package page
 
 import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/model"
-	"github.com/rousseau-romain/round-timing/views/components"
+	"github.com/rousseau-romain/round-timing/views/components/layout"
 )
 
 type Pages struct {
 	Name, Slug string
 }
 
-templ HomePage(user model.User, popinMessage components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string) {
-	@components.Layout(i18n.T(ctx, "page.home.title"), popinMessage, user, navItems, languages, pageSlug) {
+templ HomePage(user model.User, popinMessage layout.PopinMessages, navItems []layout.NavItem, languages []model.Language, pageSlug string) {
+	@layout.Layout(i18n.T(ctx, "page.home.title"), popinMessage, user, navItems, languages, pageSlug) {
 		<div class="container mx-auto p-4">
 			<div class="rounded-lg bg-white p-6">
 				<h1 class="mb-4 text-3xl font-bold">Round Timing</h1>

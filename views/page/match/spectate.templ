@@ -3,11 +3,11 @@ package match
 import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/model"
-	"github.com/rousseau-romain/round-timing/views/components"
+	"github.com/rousseau-romain/round-timing/views/components/layout"
 )
 
-templ SpectateMatchPage(user model.User, popinMessages components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell, isSpectator bool) {
-	@components.Layout(i18n.T(ctx, "page.start-match.title"), popinMessages, user, navItems, languages, pageSlug) {
+templ SpectateMatchPage(user model.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []model.Language, pageSlug string, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell, isSpectator bool) {
+	@layout.Layout(i18n.T(ctx, "page.start-match.title"), popinMessages, user, navItems, languages, pageSlug) {
 		@DivPlayerTable(match, players, playersSpells, isSpectator)
 	}
 }

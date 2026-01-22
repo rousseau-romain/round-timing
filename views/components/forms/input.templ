@@ -1,8 +1,9 @@
-package components
+package forms
 
 import "github.com/invopop/ctxi18n/i18n"
 
-templ FormInput(inputType string, id string, name string, labelKey string, required bool) {
+// Input renders a full-width form input with label
+templ Input(inputType string, id string, name string, labelKey string, required bool) {
 	<div class="col-span-6">
 		<label for={ id } class="block text-sm font-medium text-gray-700 dark:text-gray-200">
 			{ i18n.T(ctx, labelKey) }
@@ -19,7 +20,8 @@ templ FormInput(inputType string, id string, name string, labelKey string, requi
 	</div>
 }
 
-templ FormInputHalfWidth(inputType string, id string, name string, labelKey string, required bool) {
+// InputHalf renders a half-width form input (for 2-column layouts)
+templ InputHalf(inputType string, id string, name string, labelKey string, required bool) {
 	<div class="col-span-6 sm:col-span-3">
 		<label
 			for={ id }

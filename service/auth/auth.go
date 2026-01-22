@@ -14,7 +14,7 @@ import (
 	"github.com/rousseau-romain/round-timing/config"
 	"github.com/rousseau-romain/round-timing/helper"
 	"github.com/rousseau-romain/round-timing/model"
-	"github.com/rousseau-romain/round-timing/views/components"
+	"github.com/rousseau-romain/round-timing/views/components/layout"
 	"github.com/rousseau-romain/round-timing/views/page"
 
 	"github.com/gorilla/mux"
@@ -281,7 +281,7 @@ func RequireAuthAndSpectateOfUserMatch(handlerFunc http.HandlerFunc, auth *AuthS
 			errorMessage := i18n.T(r.Context(), "page.match.errors.match-not-found", i18n.M{"matchId": matchId})
 			slog.Error("Match not found", "matchId", matchId)
 			w.WriteHeader(http.StatusNotFound)
-			page.NotFoundPage(errorMessage, []components.NavItem{}, languages, r.URL.Path, user).Render(r.Context(), w)
+			page.NotFoundPage(errorMessage, []layout.NavItem{}, languages, r.URL.Path, user).Render(r.Context(), w)
 			return
 		}
 
@@ -305,7 +305,7 @@ func RequireAuthAndSpectateOfUserMatch(handlerFunc http.HandlerFunc, auth *AuthS
 			slog.Info("User is not spectator for match", "userId", user.Id, "userMatchId", userMatch.Id, "matchId", matchId)
 			w.WriteHeader(http.StatusForbidden)
 			languages, _ := model.GetLanguages()
-			page.ForbidenPage(errorMessage, []components.NavItem{}, languages, r.URL.Path, user).Render(r.Context(), w)
+			page.ForbidenPage(errorMessage, []layout.NavItem{}, languages, r.URL.Path, user).Render(r.Context(), w)
 			return
 		}
 
@@ -336,7 +336,7 @@ func RequireAuthAndHisMatch(handlerFunc http.HandlerFunc, auth *AuthService, slo
 			errorMessage := i18n.T(r.Context(), "page.match.errors.match-not-found", i18n.M{"matchId": matchId})
 			slog.Error("Match not found", "matchId", matchId)
 			w.WriteHeader(http.StatusNotFound)
-			page.NotFoundPage(errorMessage, []components.NavItem{}, languages, r.URL.Path, user).Render(r.Context(), w)
+			page.NotFoundPage(errorMessage, []layout.NavItem{}, languages, r.URL.Path, user).Render(r.Context(), w)
 			return
 		}
 
@@ -352,7 +352,7 @@ func RequireAuthAndHisMatch(handlerFunc http.HandlerFunc, auth *AuthService, slo
 			errorMessage := i18n.T(r.Context(), "page.match.errors.match-unauthorized", i18n.M{"matchId": matchId})
 			slog.Info("User is not the owner of the match", "userId", user.Id, "userMatchId", userMatch.Id)
 			w.WriteHeader(http.StatusUnauthorized)
-			page.ForbidenPage(errorMessage, []components.NavItem{}, languages, r.URL.Path, user).Render(r.Context(), w)
+			page.ForbidenPage(errorMessage, []layout.NavItem{}, languages, r.URL.Path, user).Render(r.Context(), w)
 			return
 		}
 

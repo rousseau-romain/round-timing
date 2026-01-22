@@ -4,17 +4,19 @@ import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/model"
-	"github.com/rousseau-romain/round-timing/views/components"
+	"github.com/rousseau-romain/round-timing/views/components/icons"
+	"github.com/rousseau-romain/round-timing/views/components/layout"
+	"github.com/rousseau-romain/round-timing/views/components/ui"
 )
 
-templ ProfilePage(user model.User, popinMessages components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string, idUserShares []string, classes []model.Class, spells []model.SpellByClass, userConfigurations []model.UserConfiguration) {
-	@components.Layout(i18n.T(ctx, "page.profile.title"), popinMessages, user, navItems, languages, pageSlug) {
+templ ProfilePage(user model.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []model.Language, pageSlug string, idUserShares []string, classes []model.Class, spells []model.SpellByClass, userConfigurations []model.UserConfiguration) {
+	@layout.Layout(i18n.T(ctx, "page.profile.title"), popinMessages, user, navItems, languages, pageSlug) {
 		<div class="mx-auto container">
 			<h1 class="text-2xl font-semibold">{ i18n.T(ctx, "page.profile.h1") }</h1>
 			<div class="mb-2">
 				<div class="flex gap-2">
 					<p class="text-gray-500">{ i18n.T(ctx, "page.profile.p-user-id") }</p>
-					@components.ButtonCopy(user.IdShare)
+					@ui.ButtonCopy(user.IdShare)
 				</div>
 			</div>
 			<h2 class="font-semibold">{ i18n.T(ctx, "page.profile.h2-spectators") }</h2>
@@ -85,7 +87,7 @@ templ TableUserConfiguration(userConfigurations []model.UserConfiguration) {
 }
 
 templ UserConfiguration(uc model.UserConfiguration) {
-	@components.ButtonEnableDisable(
+	@ui.ButtonToggle(
 		i18n.T(ctx, "global.table.enabled"),
 		i18n.T(ctx, "global.table.disabled"),
 		fmt.Sprintf("/profile/configuration/%d/toggle-configuration", uc.IdConfiguration),
@@ -161,7 +163,7 @@ templ SpellFavorite(s model.SpellByClass) {
 			class="h-12 img-class"
 		/>
 		<div class="absolute -top-[7px] -left-[7px] cursor-pointer transition-all group-hover:scale-110">
-			@components.SVGHeart(s.IsFavorite, "red", 20, 20)
+			@icons.Heart(s.IsFavorite, "red", 20, 20)
 		</div>
 	</div>
 }

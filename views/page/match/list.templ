@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/model"
-	"github.com/rousseau-romain/round-timing/views/components"
+	"github.com/rousseau-romain/round-timing/views/components/layout"
 	"time"
 )
 
@@ -63,8 +63,8 @@ templ MatchTable(matchs []model.Match) {
 	</div>
 }
 
-templ matchPage(user model.User, popinMessages components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string, match []model.Match) {
-	@components.Layout(i18n.T(ctx, "page.match-list.title"), popinMessages, user, navItems, languages, pageSlug) {
+templ matchPage(user model.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []model.Language, pageSlug string, match []model.Match) {
+	@layout.Layout(i18n.T(ctx, "page.match-list.title"), popinMessages, user, navItems, languages, pageSlug) {
 		<div class="container mx-auto">
 			<h1>{ i18n.T(ctx, "page.match-list.h1") }</h1>
 			{ children... }
@@ -72,7 +72,7 @@ templ matchPage(user model.User, popinMessages components.PopinMessages, navItem
 	}
 }
 
-templ MatchListPage(user model.User, popinMessages components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string, matchs []model.Match) {
+templ MatchListPage(user model.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []model.Language, pageSlug string, matchs []model.Match) {
 	@matchPage(user, popinMessages, navItems, languages, pageSlug, matchs) {
 		<form
 			class="space-y-4"
