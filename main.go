@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/rousseau-romain/round-timing/config"
 	"github.com/rousseau-romain/round-timing/handlers"
@@ -18,6 +19,14 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/invopop/ctxi18n"
 )
+
+func init() {
+	loc, err := time.LoadLocation("Europe/Paris")
+	if err != nil {
+		panic("failed to load Europe/Paris timezone: " + err.Error())
+	}
+	time.Local = loc
+}
 
 func main() {
 	if err := run(); err != nil {
