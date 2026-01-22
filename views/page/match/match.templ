@@ -7,22 +7,6 @@ import (
 	"github.com/rousseau-romain/round-timing/shared/components"
 )
 
-script initPerformAnimation() {
-	window.performAnimation = () => {
-		const tbody = document.querySelector("tbody");
-		const divTableButton = document.getElementById("div-table-button");
-
-		if (tbody.children.length > 0) {
-			divTableButton.classList.add("flex");
-			divTableButton.classList.remove("hidden");
-		} else {
-			divTableButton.classList.remove("flex");
-			divTableButton.classList.add("hidden");
-		}
-	};
-	performAnimation();
-}
-
 templ TeamPlayer(p model.Player, m model.Match) {
 	<tr class={ "bg-" + p.Team.Color + "-200" }>
 		<td
@@ -47,7 +31,6 @@ templ TeamPlayer(p model.Player, m model.Match) {
 		<td class="whitespace-nowrap px-4 py-2">
 			<button
 				hx-delete={ fmt.Sprintf("/match/%d/player/%d", m.Id, p.Id) }
-				hx-on::after-request="setTimeout(performAnimation, 250)"
 				class="inline-block rounded bg-red-600 px-4 py-2 text-xs font-medium text-white hover:bg-red-700"
 			>
 				{ i18n.T(ctx, "global.buttons.delete") }
@@ -60,7 +43,15 @@ templ TeamPlayerTable(players []model.Player, match model.Match) {
 	<div class="bg-red-200 border-red-200"></div>
 	<div class="bg-indigo-200 border-indigo-200"></div>
 	// SHITY WORKAROUND
-	<div id="div-table-button" class="overflow-x-auto mb-5 flex-col items-center hidden">
+	<div
+		id="div-table-button"
+		x-data="{ hasPlayers: false }"
+		x-init="hasPlayers = $el.querySelector('tbody').children.length > 0"
+		@htmx:after-request.window="setTimeout(() => hasPlayers = $el.querySelector('tbody').children.length > 0, 100)"
+		x-show="hasPlayers"
+		x-cloak
+		class="mb-5 flex-col items-center flex"
+	>
 		<table
 			class="mb-2 min-w-full divide-y-2 divide-gray-200 bg-white text-sm dark:divide-gray-700 dark:bg-gray-900"
 		>
@@ -137,7 +128,6 @@ templ TeamPlayerListPage(user model.User, popinMessages components.PopinMessages
 								hx-swap="beforeend"
 							}
 							hx-target="next tbody"
-							hx-on::after-request="performAnimation()"
 							hx-target-error="#popinMessages"
 						>
 							<img class="img-class lg:h-12 md:h-9 h-6 w-max mx-auto" alt={ class.Name } src={ class.UrlImage + "F.svg" }/>
@@ -147,7 +137,6 @@ templ TeamPlayerListPage(user model.User, popinMessages components.PopinMessages
 			}
 		}
 		@TeamPlayerTable(players, match)
-		@initPerformAnimation()
 	}
 }
 
