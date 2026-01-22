@@ -10,34 +10,6 @@ import (
 	"github.com/rousseau-romain/round-timing/config"
 )
 
-var isDebug = false
-
-script initPopinMessage() {
-	window.closeMessage = () => {
-		document.querySelector(".popin-message").remove();
-		const url = new URL(window.location);
-		if (url.searchParams.has("errorTitle") || url.searchParams.has("errorMessages")) {
-			url.searchParams.delete("errorTitle");
-			url.searchParams.delete("errorMessages");
-			window.history.replaceState({}, document.title, url);
-			location.reload();
-		}
-	};
-	document.querySelector(".popin-message").addEventListener("click", closeMessage);
-	document.querySelector(".popin-message .close").addEventListener("click", closeMessage);
-	document.querySelector(".popin-message div").addEventListener("click", (e) => e.stopPropagation());
-}
-
-script initPopinLanguage() {
-	document.querySelector("#header-select-language").addEventListener("click", () => {
-		document.querySelector("#popin-language").classList.toggle("hidden");
-	});
-	document.querySelector("#popin-language").addEventListener("click", () => {
-		document.querySelector("#popin-language").classList.toggle("hidden");
-	});
-	document.querySelector("#popin-language section").addEventListener("click", (e) => e.stopPropagation());
-}
-
 script initBurgerMenu() {
 	document.querySelector("#button-burger-menu").addEventListener("click", () => {
 		document.querySelector("#menu-mobile").classList.toggle("hidden");
@@ -56,19 +28,20 @@ templ Layout(title string, popinMessages PopinMessages, user model.User, navItem
 			<title>Round Timing - { title }</title>
 			<link rel="icon" type="image/svg+xml" href="/public/img/favicon.svg"/>
 			<link rel="stylesheet" type="text/css" href={ fmt.Sprintf("/public/tailwind.css?build=%s", strconv.FormatInt(time.Now().Unix(), 10)) }/>
+			<style>[x-cloak] { display: none !important; }</style>
 		</head>
 		<body>
 			if config.ENV == "development" || config.ENV == "staging" {
 				<script src="/public/script/htmx-2.0.8/htmx.js"></script>
+				<script defer src="/public/script/alpine-3.15.4.js"></script>
+				<script src="/public/script/htmx-2.0.8/ext/debug.js"></script>
+				<button class="border border-red-600 bg-red-300 text-red-600 top-0 right-0 absolute">Debug MOD</button>
 			} else {
 				<script src="/public/script/htmx-2.0.8/htmx.min.js"></script>
+				<script defer src="/public/script/alpine-3.15.4.min.js"></script>
 			}
 			<script src="/public/script/htmx-2.0.8/ext/response-targets.js"></script>
 			<script src="/public/script/htmx-2.0.8/ext/ws.js"></script>
-			if config.ENV == "development" || config.ENV == "staging" {
-				<script src="/public/script/htmx-2.0.8/ext/debug.js"></script>
-				<button class="border border-red-600 bg-red-300 text-red-600 top-0 right-0 absolute">Debug MOD</button>
-			}
 			@Nav(user, navItems, languages, pageSlug)
 			<div class="min-h-screen" id="content" hx-ext="response-targets">
 				<div id="popinMessages">
@@ -130,9 +103,16 @@ templ Nav(user model.User, navItems []NavItem, languages []model.Language, pageS
 									@SVGUser("currentColor", 32, 32)
 								</div>
 							</a>
-							<img alt="flag" id="header-select-language" class="cursor-pointer w-10 h-8" src={ "/public/img/flag/" + strconv.Itoa(user.IdLanguage) + ".svg" }/>
-							@PopinSelectLanguage(user, languages)
-							@initPopinLanguage()
+							<div x-data="{ open: false }">
+								<img
+									alt="flag"
+									id="header-select-language"
+									class="cursor-pointer w-10 h-8"
+									src={ "/public/img/flag/" + strconv.Itoa(user.IdLanguage) + ".svg" }
+									@click="open = !open"
+								/>
+								@PopinSelectLanguage(user, languages)
+							</div>
 						} else {
 							if pageSlug != "/signin" && pageSlug != "/signup" {
 								<a
@@ -171,7 +151,6 @@ templ Nav(user model.User, navItems []NavItem, languages []model.Language, pageS
 	<div class="absolute right-0 w-fit bg-white border">
 		@MobileMenu(user, navItems)
 	</div>
-	@initBurgerMenu()
 }
 
 templ MobileMenu(user model.User, navItems []NavItem) {
@@ -182,13 +161,33 @@ templ MobileMenu(user model.User, navItems []NavItem) {
 			</li>
 		}
 	</ul>
+	@initBurgerMenu()
 }
 
 templ PopinMessage(popinMessages PopinMessages) {
 	if len(popinMessages.Messages) > 0 {
-		<div class="popin-message w-screen h-screen absolute top-0 right-0 bg-gray-800 bg-opacity-40 cursor-pointer place-items-center justify-center flex">
+		<div
+			x-data="{
+				open: true,
+				close() {
+					this.open = false;
+					const url = new URL(window.location);
+					if (url.searchParams.has('errorTitle') || url.searchParams.has('errorMessages')) {
+						url.searchParams.delete('errorTitle');
+						url.searchParams.delete('errorMessages');
+						window.history.replaceState({}, document.title, url);
+						location.reload();
+					}
+				}
+			}"
+			x-show="open"
+			x-cloak
+			@click="close()"
+			class="popin-message w-screen h-screen absolute top-0 right-0 bg-gray-800 bg-opacity-40 cursor-pointer place-items-center justify-center flex"
+		>
 			<div
 				role="alert"
+				@click.stop
 				class={
 					"z-50 pr-10 relative mr-4 ml-4 w-fit rounded border-s-4 p-4",
 					"border-gray-500 bg-gray-50 text-gray-700 dark:bg-gray-900 dark:border-gray-600",
@@ -198,7 +197,7 @@ templ PopinMessage(popinMessages PopinMessages) {
 					templ.KV("border-sky-500 bg-sky-50 text-sky-700 dark:bg-sky-900 dark:border-sky-600", popinMessages.Type == "info"),
 				}
 			>
-				<div class="close absolute right-2 top-2">
+				<div class="close absolute right-2 top-2 cursor-pointer" @click="close()">
 					<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 						<line x1="5" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
 						<line x1="19" y1="5" x2="5" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
@@ -240,14 +239,19 @@ templ PopinMessage(popinMessages PopinMessages) {
 					}
 				}
 			</div>
-			@initPopinMessage()
 		</div>
 	}
 }
 
 templ PopinSelectLanguage(user model.User, languages []model.Language) {
-	<div id="popin-language" class="h-screen w-screen absolute top-0 right-0 bg-gray-800 bg-opacity-40 cursor-pointer place-items-center justify-center flex hidden">
-		<section class="w-max h-max rounded-3xl shadow-2xl bg-slate-50 z-20">
+	<div
+		id="popin-language"
+		class="h-screen w-screen absolute top-0 right-0 bg-gray-800 bg-opacity-40 cursor-pointer place-items-center justify-center flex"
+		x-show="open"
+		x-cloak
+		@click="open = false"
+	>
+		<section class="w-max h-max rounded-3xl shadow-2xl bg-slate-50 z-20" @click.stop>
 			<div class="p-8 text-center">
 				<h2 class="mt-6 text-3xl font-bold">{ i18n.T(ctx, "global.header.select-language") }</h2>
 				<ul>
@@ -258,7 +262,7 @@ templ PopinSelectLanguage(user model.User, languages []model.Language) {
 								class="inline-block w-full rounded-lg bg-transparent sm:w-auto border"
 								hx-patch={ fmt.Sprintf("/user/%d/locale/%s", user.Id, l.Locale) }
 							>
-								<img alt="flag" id="header-select-language" class="cursor-pointer w-20 transition-all hover:scale-105" src={ fmt.Sprintf("/public/img/flag/%d.svg", l.Id) }/>
+								<img alt="flag" class="cursor-pointer w-20 transition-all hover:scale-105" src={ fmt.Sprintf("/public/img/flag/%d.svg", l.Id) }/>
 							</button>
 						</li>
 					}
