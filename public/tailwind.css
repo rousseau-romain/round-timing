@@ -13754,6 +13754,16 @@ tr.htmx-swapping td {
   background-color: rgb(113 63 18 / var(--tw-bg-opacity, 1));
 }
 
+.dark\:bg-green-700:is(.dark *) {
+  --tw-bg-opacity: 1;
+  background-color: rgb(21 128 61 / var(--tw-bg-opacity, 1));
+}
+
+.dark\:bg-indigo-700:is(.dark *) {
+  --tw-bg-opacity: 1;
+  background-color: rgb(67 56 202 / var(--tw-bg-opacity, 1));
+}
+
 .dark\:text-cyan-100:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(207 250 254 / var(--tw-text-opacity, 1));
@@ -13837,6 +13847,16 @@ tr.htmx-swapping td {
 .dark\:text-yellow-200:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(254 240 138 / var(--tw-text-opacity, 1));
+}
+
+.dark\:text-gray-100:is(.dark *) {
+  --tw-text-opacity: 1;
+  color: rgb(243 244 246 / var(--tw-text-opacity, 1));
+}
+
+.dark\:text-indigo-100:is(.dark *) {
+  --tw-text-opacity: 1;
+  color: rgb(224 231 255 / var(--tw-text-opacity, 1));
 }
 
 .dark\:hover\:bg-blue-700:hover:is(.dark *) {

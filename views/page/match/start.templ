@@ -101,18 +101,7 @@ templ Spell(mps model.MatchPlayerSpell, isSpectator bool) {
 					templ.KV("grayscale", mps.RoundBeforeRecovery > 0),
 				}
 			/>
-			if mps.RoundBeforeRecovery > 0 {
-				<span
-					class={
-						"absolute", "-right-1", "-bottom-1", "whitespace-nowrap", "rounded-full", "px-1.5", "text-sm",
-						templ.KV("bg-red-100 text-red-700 dark:bg-red-700 dark:text-red-100", mps.RoundBeforeRecovery == 1),
-						templ.KV("bg-yellow-100 text-yellow-700 dark:bg-yellow-700 dark:text-yellow-100", mps.RoundBeforeRecovery == 2),
-						templ.KV("bg-cyan-100 text-cyan-700 dark:bg-cyan-700 dark:text-cyan-100", mps.RoundBeforeRecovery >= 3),
-					}
-				>
-					{ strconv.Itoa(mps.RoundBeforeRecovery) }
-				</span>
-			}
+			@ui.BadgeRecovery(mps.RoundBeforeRecovery)
 		</div>
 	</div>
 }
