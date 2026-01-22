@@ -65,7 +65,11 @@ templ Spell(mps model.MatchPlayerSpell, isSpectator bool) {
 				hx-get={ fmt.Sprintf("/match/%d/player-spell/%d/use", mps.MatchId, mps.Id) }
 			} else {
 				hx-get={ fmt.Sprintf("/match/%d/player-spell/%d/remove-round-recovery", mps.MatchId, mps.Id) }
-				hx-trigger="dblclick"
+				hx-trigger="dblclick, longpress"
+				x-data="{ timer: null }"
+				@touchstart="timer = setTimeout(() => $dispatch('longpress'), 500)"
+				@touchend="clearTimeout(timer)"
+				@touchmove="clearTimeout(timer)"
 			}
 		}
 	>
@@ -88,7 +92,7 @@ templ Spell(mps model.MatchPlayerSpell, isSpectator bool) {
 				alt={ mps.Spell.Name }
 				src={ mps.Spell.UrlImage }
 				class={
-					"w-8 md:w-16 img-class",
+					"w-10 md:w-16 img-class",
 					templ.KV("cursor-pointer transition-all hover:scale-110", mps.RoundBeforeRecovery == 0 && !isSpectator),
 					templ.KV("grayscale", mps.RoundBeforeRecovery > 0),
 				}
