@@ -29,7 +29,11 @@ make build/tailwind # Build CSS
 - `handlers/` - HTTP route handlers
 - `model/` - Database models and queries
 - `views/page/` - Page templates (`.templ` files)
-- `shared/components/` - Reusable UI components
+- `views/components/` - Reusable UI components organized by type:
+  - `layout/` - Layout, Footer, Nav, PopinMessages
+  - `ui/` - Buttons, AvatarToggle, ErrorPageContent
+  - `icons/` - SVG icon components (Heart, User)
+  - `forms/` - Form input components
 - `service/` - Business logic
 - `config/` - Configuration loading
 - `i18n/` - Internationalization
@@ -41,6 +45,23 @@ make build/tailwind # Build CSS
 - Template files use `.templ` extension
 - Run `templ generate` after modifying `.templ` files (or use `make live`)
 - Generated files are `*_templ.go` - do not edit these directly
+- Import components by package:
+  ```go
+  import "github.com/rousseau-romain/round-timing/views/components/layout"
+  import "github.com/rousseau-romain/round-timing/views/components/ui"
+  ```
+
+### Styling with TailwindCSS
+
+- Configuration: `tailwind.config.js`
+- Input CSS: `input.css` (organized with section comments)
+- Dynamic classes for team colors use safelist patterns in config
+- CSS organization:
+  - Typography (h1-h3)
+  - Form elements (inputs, selects, checkboxes)
+  - Links (content, breadcrumbs, footer)
+  - Utility classes (tooltip)
+  - HTMX integration (swap animations)
 
 ### Database
 
