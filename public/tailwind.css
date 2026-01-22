@@ -1280,10 +1280,6 @@ footer a:hover {
   align-items: center;
 }
 
-.justify-start {
-  justify-content: flex-start;
-}
-
 .justify-center {
   justify-content: center;
 }
@@ -1306,10 +1302,6 @@ footer a:hover {
 
 .gap-8 {
   gap: 2rem;
-}
-
-.gap-1 {
-  gap: 0.25rem;
 }
 
 .space-y-1 > :not([hidden]) ~ :not([hidden]) {
@@ -1464,11 +1456,6 @@ footer a:hover {
 .border-yellow-500 {
   --tw-border-opacity: 1;
   border-color: rgb(234 179 8 / var(--tw-border-opacity, 1));
-}
-
-.border-yellow-600 {
-  --tw-border-opacity: 1;
-  border-color: rgb(202 138 4 / var(--tw-border-opacity, 1));
 }
 
 .bg-black {

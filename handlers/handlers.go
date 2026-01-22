@@ -6,7 +6,7 @@ import (
 
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/service/auth"
-	"github.com/rousseau-romain/round-timing/shared/components"
+	"github.com/rousseau-romain/round-timing/views/components"
 )
 
 type Handler struct {

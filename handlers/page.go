@@ -11,7 +11,7 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/config"
 	"github.com/rousseau-romain/round-timing/model"
-	"github.com/rousseau-romain/round-timing/shared/components"
+	"github.com/rousseau-romain/round-timing/views/components"
 	"github.com/rousseau-romain/round-timing/views/page"
 	"github.com/rousseau-romain/round-timing/views/page/legal"
 
