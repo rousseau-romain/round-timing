@@ -749,24 +749,6 @@ select {
   outline: 1px auto -webkit-focus-ring-color;
 }
 
-:root {
-  /* Primary colors */
-  --color-primary: #0284c7;
-  --color-primary-hover: #0369a1;
-  /* Semantic colors */
-  --color-success: #22c55e;
-  --color-success-hover: #16a34a;
-  --color-error: #ef4444;
-  --color-error-hover: #dc2626;
-  --color-warning: #eab308;
-  --color-info: #0ea5e9;
-  /* Focus ring */
-  --color-focus: #fb923c;
-  /* Links */
-  --color-link: #22c55e;
-  --color-link-hover: #15803d;
-}
-
 h1 {
   font-size: 1.5rem;
   line-height: 2rem;
@@ -968,10 +950,6 @@ footer a:hover {
   }
 }
 
-/* Button base - used with .btn class */
-
-/* Card container */
-
 .sr-only {
   position: absolute;
   width: 1px;
@@ -1004,20 +982,16 @@ footer a:hover {
   left: -0.25rem;
 }
 
+.-left-1\/2 {
+  left: -50%;
+}
+
 .-left-\[7px\] {
   left: -7px;
 }
 
-.-left-full {
-  left: -100%;
-}
-
 .-right-1 {
   right: -0.25rem;
-}
-
-.-top-3\/4 {
-  top: -75%;
 }
 
 .-top-\[7px\] {
@@ -1040,24 +1014,8 @@ footer a:hover {
   top: 0.5rem;
 }
 
-.-bottom-3\/4 {
-  bottom: -75%;
-}
-
-.-bottom-1\/2 {
-  bottom: -50%;
-}
-
-.bottom-full {
-  bottom: 100%;
-}
-
 .top-full {
   top: 100%;
-}
-
-.-left-1\/2 {
-  left: -50%;
 }
 
 .z-20 {
@@ -13435,10 +13393,6 @@ footer a:hover {
 }
 
 /* ==========================================================================
-   Design Tokens
-   ========================================================================== */
-
-/* ==========================================================================
    Typography
    ========================================================================== */
 
@@ -13448,10 +13402,6 @@ footer a:hover {
 
 /* ==========================================================================
    Links
-   ========================================================================== */
-
-/* ==========================================================================
-   Component Classes
    ========================================================================== */
 
 /* ==========================================================================

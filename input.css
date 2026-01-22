@@ -3,33 +3,6 @@
 @tailwind utilities;
 
 /* ==========================================================================
-   Design Tokens
-   ========================================================================== */
-
-@layer base {
-  :root {
-    /* Primary colors */
-    --color-primary: theme('colors.sky.600');
-    --color-primary-hover: theme('colors.sky.700');
-
-    /* Semantic colors */
-    --color-success: theme('colors.green.500');
-    --color-success-hover: theme('colors.green.600');
-    --color-error: theme('colors.red.500');
-    --color-error-hover: theme('colors.red.600');
-    --color-warning: theme('colors.yellow.500');
-    --color-info: theme('colors.sky.500');
-
-    /* Focus ring */
-    --color-focus: theme('colors.orange.400');
-
-    /* Links */
-    --color-link: theme('colors.green.500');
-    --color-link-hover: theme('colors.green.700');
-  }
-}
-
-/* ==========================================================================
    Typography
    ========================================================================== */
 
@@ -87,25 +60,6 @@
   }
   footer a {
     @apply text-gray-500 hover:text-gray-700 font-bold;
-  }
-}
-
-/* ==========================================================================
-   Component Classes
-   ========================================================================== */
-
-@layer components {
-  /* Button base - used with .btn class */
-  .btn {
-    @apply inline-flex justify-center py-2 px-4 mr-1 rounded-md whitespace-nowrap
-      bg-green-400 hover:bg-green-500
-      text-sm text-white font-bold
-      focus:outline-none focus:ring-2 focus:ring-green-800;
-  }
-
-  /* Card container */
-  .card {
-    @apply bg-white dark:bg-gray-800 rounded-lg shadow-md p-4;
   }
 }
 

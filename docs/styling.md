@@ -89,23 +89,6 @@ Custom base styles in `input.css`:
 
 ## Custom Classes
 
-### Button
-
-```css
-.btn {
-  @apply inline-flex justify-center py-2 px-4 mr-1 rounded-md whitespace-nowrap
-    bg-green-400 hover:bg-green-500
-    text-sm text-white font-bold
-    focus:outline-none focus:ring-2 focus:ring-green-800;
-}
-```
-
-Usage in templ:
-
-```go
-<button class="btn">Click me</button>
-```
-
 ### Tooltip
 
 ```css
