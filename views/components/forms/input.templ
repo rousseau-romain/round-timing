@@ -1,6 +1,9 @@
 package forms
 
-import "github.com/invopop/ctxi18n/i18n"
+import (
+	"github.com/invopop/ctxi18n/i18n"
+	"strconv"
+)
 
 // Input renders a full-width form input with label
 templ Input(inputType string, id string, name string, labelKey string, required bool) {
@@ -18,6 +21,24 @@ templ Input(inputType string, id string, name string, labelKey string, required 
 			class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-xs dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
 		/>
 	</div>
+}
+
+// InputAction renders a flexible input with custom attributes.
+// Use this for inputs that need HTMX attributes, placeholders, or custom styling.
+// Pass empty string for labelKey to hide the label.
+templ InputAction(inputType string, name string, labelName string, attrs templ.Attributes) {
+	if labelName != "" {
+		<label for={ name } class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+			{ labelName }
+		</label>
+	}
+	<input
+		type={ inputType }
+		name={ name }
+		id={ name }
+		class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
+		{ attrs... }
+	/>
 }
 
 // InputHalf renders a half-width form input (for 2-column layouts)
@@ -39,4 +60,138 @@ templ InputHalf(inputType string, id string, name string, labelKey string, requi
 			class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-xs dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
 		/>
 	</div>
+}
+
+// SelectOption represents an option in a select dropdown
+type SelectOption struct {
+	Value    string
+	Label    string
+	Selected bool
+}
+
+// Select renders a full-width select dropdown with label
+templ Select(id string, name string, labelKey string, options []SelectOption, required bool) {
+	<div class="col-span-6">
+		<label for={ id } class="block text-sm font-medium text-gray-700 dark:text-gray-200">
+			{ i18n.T(ctx, labelKey) }
+		</label>
+		<select
+			id={ id }
+			name={ name }
+			if required {
+				required
+			}
+			class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-xs dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+		>
+			for _, opt := range options {
+				<option value={ opt.Value } selected?={ opt.Selected }>{ opt.Label }</option>
+			}
+		</select>
+	</div>
+}
+
+// SelectHalf renders a half-width select dropdown (for 2-column layouts)
+templ SelectHalf(id string, name string, labelKey string, options []SelectOption, required bool) {
+	<div class="col-span-6 sm:col-span-3">
+		<label for={ id } class="block text-sm font-medium text-gray-700 dark:text-gray-200">
+			{ i18n.T(ctx, labelKey) }
+		</label>
+		<select
+			id={ id }
+			name={ name }
+			if required {
+				required
+			}
+			class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-xs dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+		>
+			for _, opt := range options {
+				<option value={ opt.Value } selected?={ opt.Selected }>{ opt.Label }</option>
+			}
+		</select>
+	</div>
+}
+
+// Textarea renders a full-width textarea with label
+templ Textarea(id string, name string, labelKey string, rows int, required bool) {
+	<div class="col-span-6">
+		<label for={ id } class="block text-sm font-medium text-gray-700 dark:text-gray-200">
+			{ i18n.T(ctx, labelKey) }
+		</label>
+		<textarea
+			id={ id }
+			name={ name }
+			rows={ strconv.Itoa(rows) }
+			if required {
+				required
+			}
+			class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-xs dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+		></textarea>
+	</div>
+}
+
+// Checkbox renders a checkbox with label
+templ Checkbox(id string, name string, labelKey string, checked bool) {
+	<div class="col-span-6">
+		<label for={ id } class="flex items-center gap-2 cursor-pointer">
+			<input
+				type="checkbox"
+				id={ id }
+				name={ name }
+				checked?={ checked }
+				class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800"
+			/>
+			<span class="text-sm font-medium text-gray-700 dark:text-gray-200">
+				{ i18n.T(ctx, labelKey) }
+			</span>
+		</label>
+	</div>
+}
+
+// CheckboxGroup renders multiple checkboxes in a group
+templ CheckboxGroup(legendKey string, options []SelectOption, name string) {
+	<fieldset class="col-span-6">
+		<legend class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+			{ i18n.T(ctx, legendKey) }
+		</legend>
+		<div class="space-y-2">
+			for _, opt := range options {
+				<label class="flex items-center gap-2 cursor-pointer">
+					<input
+						type="checkbox"
+						name={ name }
+						value={ opt.Value }
+						checked?={ opt.Selected }
+						class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800"
+					/>
+					<span class="text-sm text-gray-700 dark:text-gray-200">{ opt.Label }</span>
+				</label>
+			}
+		</div>
+	</fieldset>
+}
+
+// Radio renders a radio button group
+templ Radio(legendKey string, options []SelectOption, name string, required bool) {
+	<fieldset class="col-span-6">
+		<legend class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+			{ i18n.T(ctx, legendKey) }
+		</legend>
+		<div class="space-y-2">
+			for _, opt := range options {
+				<label class="flex items-center gap-2 cursor-pointer">
+					<input
+						type="radio"
+						name={ name }
+						value={ opt.Value }
+						checked?={ opt.Selected }
+						if required {
+							required
+						}
+						class="border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800"
+					/>
+					<span class="text-sm text-gray-700 dark:text-gray-200">{ opt.Label }</span>
+				</label>
+			}
+		</div>
+	</fieldset>
 }

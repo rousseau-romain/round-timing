@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/views/components/forms"
 	"github.com/rousseau-romain/round-timing/views/components/icons"
 	"github.com/rousseau-romain/round-timing/views/components/layout"
 	"github.com/rousseau-romain/round-timing/views/components/ui"
@@ -30,19 +31,14 @@ templ ProfilePage(user model.User, popinMessages layout.PopinMessages, navItems 
 					hx-target="tbody"
 					hx-target-error="#popinMessages"
 				>
-					<input
-						class="mb-2 w-1/2 block rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-						placeholder={ i18n.T(ctx, "page.profile.input.placeholder-user-id") }
-						required
-						type="text"
-						name="idUserShare"
-					/>
-					<button
-						type="submit"
-						class="inline-block rounded-md bg-sky-600 px-5 py-2.5 text-sm font-medium text-white shadow hover:bg-sky-500"
-					>
+					@forms.InputAction("text", "idUserShare", i18n.T(ctx, "page.profile.h2-spectators"), templ.Attributes{
+						"placeholder": i18n.T(ctx, "page.profile.input.placeholder-user-id"),
+						"required":    true,
+						"class":       "mb-2 w-1/2 block",
+					})
+					@ui.ButtonAction("primary", "md", templ.Attributes{"type": "submit"}) {
 						{ i18n.T(ctx, "page.profile.button.add-spectator") }
-					</button>
+					}
 				</form>
 			</div>
 			@TableUserSpectate(idUserShares)
@@ -118,13 +114,12 @@ templ UserSpectate(idUserShare string) {
 	<tr>
 		<td>{ idUserShare }</td>
 		<td>
-			<button
-				class="inline-block rounded bg-red-600 px-4 py-2 text-xs font-medium text-white hover:bg-red-700"
-				hx-delete="/profile/user-spectate"
-				hx-vals={ fmt.Sprintf(`{"idUserShare": "%s"}`, idUserShare) }
-			>
+			@ui.ButtonAction("danger", "sm", templ.Attributes{
+				"hx-delete": "/profile/user-spectate",
+				"hx-vals":   fmt.Sprintf(`{"idUserShare": "%s"}`, idUserShare),
+			}) {
 				{ i18n.T(ctx, "global.buttons.delete") }
-			</button>
+			}
 		</td>
 	</tr>
 }

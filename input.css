@@ -3,6 +3,46 @@
 @tailwind utilities;
 
 /* ==========================================================================
+   CSS Variables (Design Tokens)
+   ========================================================================== */
+
+:root {
+  /* Brand Colors */
+  --color-accent: theme('colors.orange.400');
+  --color-success: theme('colors.green.500');
+  --color-danger: theme('colors.red.500');
+  --color-primary: theme('colors.indigo.600');
+
+  /* Background */
+  --color-bg-primary: theme('colors.white');
+  --color-bg-secondary: theme('colors.gray.50');
+
+  /* Text */
+  --color-text-primary: theme('colors.gray.900');
+  --color-text-secondary: theme('colors.gray.700');
+  --color-text-muted: theme('colors.gray.500');
+
+  /* Borders */
+  --color-border: theme('colors.gray.300');
+  --color-border-light: theme('colors.gray.200');
+}
+
+.dark {
+  /* Background */
+  --color-bg-primary: theme('colors.gray.900');
+  --color-bg-secondary: theme('colors.gray.800');
+
+  /* Text */
+  --color-text-primary: theme('colors.white');
+  --color-text-secondary: theme('colors.gray.200');
+  --color-text-muted: theme('colors.gray.400');
+
+  /* Borders */
+  --color-border: theme('colors.gray.600');
+  --color-border-light: theme('colors.gray.700');
+}
+
+/* ==========================================================================
    Typography
    ========================================================================== */
 

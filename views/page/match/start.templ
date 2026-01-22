@@ -18,33 +18,29 @@ templ StartMatchPage(user model.User, popinMessages layout.PopinMessages, navIte
 
 templ MatchPageTable(user model.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []model.Language, pageSlug string, match model.Match, players []model.Player, playersSpells []model.MatchPlayerSpell, isSpectator bool) {
 	<div class="flex flex-wrap justify-center gap-2">
-		<button
-			type="submit"
-			class="inline-block w-full rounded-lg bg-red-600 px-5 py-3 font-medium text-white sm:w-auto"
-			hx-patch={ fmt.Sprintf("/match/%d/reset", match.Id) }
-		>
+		@ui.ButtonAction("danger", "lg", templ.Attributes{
+			"type":     "submit",
+			"hx-patch": fmt.Sprintf("/match/%d/reset", match.Id),
+			"class":    "w-full sm:w-auto",
+		}) {
 			{ i18n.T(ctx, "page.start-match.button.reset-match") }
-		</button>
-		<button
-			type="submit"
-			class="inline-block w-full rounded-lg bg-green-600 px-5 py-3 font-medium text-white sm:w-auto"
-			hx-get={ fmt.Sprintf("/match/%d/increase-round", match.Id) }
-			hx-target="next table"
-		>
+		}
+		@ui.ButtonAction("success", "lg", templ.Attributes{
+			"type":      "submit",
+			"hx-get":    fmt.Sprintf("/match/%d/increase-round", match.Id),
+			"hx-target": "next table",
+			"class":     "w-full sm:w-auto",
+		}) {
 			{ i18n.T(ctx, "page.start-match.button.next-round") }
-		</button>
-		<button
-			type="submit"
-			class="inline-block w-full rounded-lg bg-blue-600 px-5 py-3 font-medium text-white sm:w-auto"
-			if match.MultipleMasteryEnabled == 1 {
-				hx-get={ fmt.Sprintf("/match/%d/toggle-mastery/0", match.Id) }
-			} else {
-				hx-get={ fmt.Sprintf("/match/%d/toggle-mastery/1", match.Id) }
-			}
-			hx-target="#content"
-		>
+		}
+		@ui.ButtonAction("primary", "lg", templ.Attributes{
+			"type":      "submit",
+			"hx-get":    toggleMasteryURL(match.Id, match.MultipleMasteryEnabled),
+			"hx-target": "#content",
+			"class":     "w-full sm:w-auto",
+		}) {
 			{ i18n.T(ctx, "page.start-match.button.toggle-multiple-mastery") }
-		</button>
+		}
 		@ui.ButtonCopy(fmt.Sprintf("%s/match/%d/spectate", config.PUBLIC_HOST_PORT, match.Id))
 	</div>
 	<div class="overflow-x-auto">
@@ -54,6 +50,13 @@ templ MatchPageTable(user model.User, popinMessages layout.PopinMessages, navIte
 
 func styleName(color, name string) string {
 	return fmt.Sprintf(`<span class="font-bold text-center" style="color: %s">%s</span>`, color, name)
+}
+
+func toggleMasteryURL(matchId int, multipleMasteryEnabled int) string {
+	if multipleMasteryEnabled == 1 {
+		return fmt.Sprintf("/match/%d/toggle-mastery/0", matchId)
+	}
+	return fmt.Sprintf("/match/%d/toggle-mastery/1", matchId)
 }
 
 templ Spell(mps model.MatchPlayerSpell, isSpectator bool) {

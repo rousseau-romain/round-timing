@@ -2,25 +2,74 @@ package ui
 
 import "github.com/invopop/ctxi18n/i18n"
 
+// buttonClasses returns the common button classes for a given variant and size.
+// Variants: "primary" (blue), "success" (green), "danger" (red), "outline" (bordered), "indigo", "black"
+// Sizes: "sm", "md" (default), "lg"
+func buttonClasses(variant, size string) string {
+	base := "inline-flex items-center justify-center rounded-md font-medium transition focus:outline-none focus:ring-2"
+
+	var variantClass string
+	switch variant {
+	case "primary":
+		variantClass = "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
+	case "success":
+		variantClass = "bg-green-600 text-white hover:bg-green-700 focus:ring-green-500"
+	case "danger":
+		variantClass = "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500"
+	case "outline":
+		variantClass = "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-gray-300 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700"
+	case "indigo":
+		variantClass = "bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500"
+	case "black":
+		variantClass = "bg-black text-white hover:bg-gray-800 focus:ring-gray-500"
+	default:
+		variantClass = "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
+	}
+
+	var sizeClass string
+	switch size {
+	case "sm":
+		sizeClass = "px-4 py-2 text-xs"
+	case "lg":
+		sizeClass = "px-5 py-3 text-base"
+	default:
+		sizeClass = "px-4 py-2 text-sm"
+	}
+
+	return base + " " + variantClass + " " + sizeClass
+}
+
 // Button renders a styled button with configurable variants and sizes.
-// Variants: "primary" (blue), "success" (green), "danger" (red), "outline" (bordered)
+// Variants: "primary" (blue), "success" (green), "danger" (red), "outline" (bordered), "indigo", "black"
 // Sizes: "sm", "md" (default), "lg"
 templ Button(variant string, size string) {
-	<button
-		class={
-			"inline-flex items-center justify-center rounded-md font-medium transition focus:outline-none focus:ring-2",
-			templ.KV("bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 dark:hover:bg-blue-500", variant == "primary"),
-			templ.KV("bg-green-500 text-white hover:bg-green-600 focus:ring-green-500", variant == "success"),
-			templ.KV("bg-red-500 text-white hover:bg-red-600 focus:ring-red-500", variant == "danger"),
-			templ.KV("border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-gray-300 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700", variant == "outline"),
-			templ.KV("bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500", variant == "indigo"),
-			templ.KV("px-3 py-1.5 text-xs", size == "sm"),
-			templ.KV("px-4 py-2 text-sm", size == "md" || size == ""),
-			templ.KV("px-6 py-3 text-base", size == "lg"),
-		}
-	>
+	<button class={ buttonClasses(variant, size) }>
 		{ children... }
 	</button>
+}
+
+// ButtonAction renders a button with HTMX and other custom attributes.
+// Use this when you need hx-* attributes or other custom attributes on the button.
+templ ButtonAction(variant string, size string, attrs templ.Attributes) {
+	<button class={ buttonClasses(variant, size) } { attrs... }>
+		{ children... }
+	</button>
+}
+
+// ButtonLink renders an anchor styled as a button.
+// Use this for navigation links that should look like buttons.
+templ ButtonLink(variant string, size string, href string) {
+	<a href={ templ.SafeURL(href) } class={ buttonClasses(variant, size) }>
+		{ children... }
+	</a>
+}
+
+// ButtonLinkAction renders an anchor styled as a button with custom attributes.
+// Use this when you need additional classes or attributes on a button link.
+templ ButtonLinkAction(variant string, size string, href string, attrs templ.Attributes) {
+	<a href={ templ.SafeURL(href) } class={ buttonClasses(variant, size) } { attrs... }>
+		{ children... }
+	</a>
 }
 
 // ButtonSubmit renders a submit-style button (primary blue)
