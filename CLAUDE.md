@@ -51,12 +51,70 @@ make build/tailwind # Build CSS
   import "github.com/rousseau-romain/round-timing/views/components/ui"
   ```
 
+### UI Components (`views/components/ui/`)
+
+**Buttons** (`button.templ`):
+```go
+// Basic button
+@ui.Button("primary", "md") { Click me }
+
+// Button with HTMX attributes
+@ui.ButtonAction("danger", "sm", templ.Attributes{
+    "hx-delete": "/item/1",
+}) { Delete }
+
+// Link styled as button
+@ui.ButtonLink("indigo", "lg", "/path") { Go }
+
+// Link with custom attributes
+@ui.ButtonLinkAction("black", "lg", "/path", templ.Attributes{
+    "class": "w-full",
+}) { Submit }
+```
+
+Variants: `primary` (blue), `success` (green), `danger` (red), `outline`, `indigo`, `black`
+Sizes: `sm`, `md`, `lg`
+
+### Form Components (`views/components/forms/`)
+
+**forms.templ**:
+```go
+// Input with label (grid layout)
+@forms.Input("email", "email", "email", "global.email", true)
+
+// Flexible input with custom attributes
+@forms.InputAction("text", "name", "Label", templ.Attributes{
+    "placeholder": "Enter name",
+    "hx-post":     "/update",
+})
+
+// Input without label (pass empty string)
+@forms.InputAction("text", "search", "", templ.Attributes{...})
+
+// Select dropdown
+@forms.Select("country", "country", "form.country", []forms.SelectOption{
+    {Value: "fr", Label: "France", Selected: true},
+    {Value: "us", Label: "USA"},
+}, true)
+
+// Textarea
+@forms.Textarea("bio", "bio", "form.bio", 4, false)
+
+// Checkbox
+@forms.Checkbox("terms", "terms", "form.accept-terms", false)
+
+// Radio group
+@forms.Radio("gender", []forms.SelectOption{...}, "gender", true)
+```
+
 ### Styling with TailwindCSS
 
 - Configuration: `tailwind.config.js`
 - Input CSS: `input.css` (organized with section comments)
 - Dynamic classes for team colors use safelist patterns in config
+- CSS variables for theming defined in `:root` and `.dark`
 - CSS organization:
+  - CSS Variables (design tokens)
   - Typography (h1-h3)
   - Form elements (inputs, selects, checkboxes)
   - Links (content, breadcrumbs, footer)
