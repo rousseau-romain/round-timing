@@ -5,6 +5,6 @@ templ ImgClassToggle(attrs templ.Attributes) {
 		{ attrs... }
 		x-data
 		@click="$el.src = $el.src.includes('F') ? $el.src.replace('F', 'M') : $el.src.replace('M', 'F')"
-		class="img-class h-8 cursor-pointer transition-all hover:scale-110 m-auto"
+		class="img-class h-8 cursor-pointer transition-all hover:scale-110"
 	/>
 }

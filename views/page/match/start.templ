@@ -88,7 +88,7 @@ templ Spell(mps model.MatchPlayerSpell, isSpectator bool) {
 				alt={ mps.Spell.Name }
 				src={ mps.Spell.UrlImage }
 				class={
-					"w-16 img-class",
+					"w-8 md:w-16 img-class",
 					templ.KV("cursor-pointer transition-all hover:scale-110", mps.RoundBeforeRecovery == 0 && !isSpectator),
 					templ.KV("grayscale", mps.RoundBeforeRecovery > 0),
 				}
@@ -116,17 +116,19 @@ templ Player(p model.Player, playersSpells []model.MatchPlayerSpell, isSpectator
 			templ.KV("bg-indigo-200", p.Team.Color == "indigo"),
 		}
 	>
-		<td class="whitespace-nowrap px-4 py-2">
-			@components.ImgClassToggle(templ.Attributes{"title": p.Name, "alt": p.Class.Name, "src": p.Class.UrlImage + "F.svg"})
-		</td>
-		<td class="whitespace-nowrap px-4 py-2">{ p.Name }</td>
-		<td class="whitespace-nowrap px-4 py-2">
-			<div class="flex gap-4 flex-wrap">
-				for _, ps := range playersSpells {
-					if ps.PlayerId == p.Id {
-						@Spell(ps, isSpectator)
+		<td class="px-4 py-2" colspan="3">
+			<div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+				<div class="flex items-center gap-2 justify-center">
+					@components.ImgClassToggle(templ.Attributes{"title": p.Name, "alt": p.Class.Name, "src": p.Class.UrlImage + "F.svg"})
+					<span class="font-medium whitespace-nowrap">{ p.Name }</span>
+				</div>
+				<div class="flex gap-4 flex-wrap">
+					for _, ps := range playersSpells {
+						if ps.PlayerId == p.Id {
+							@Spell(ps, isSpectator)
+						}
 					}
-				}
+				</div>
 			</div>
 		</td>
 	</tr>
@@ -152,9 +154,7 @@ templ PlayerTable(match model.Match, players []model.Player, spells []model.Matc
 	>
 		<thead class="ltr:text-left rtl:text-right">
 			<tr>
-				<th class="whitespace-nowrap  text-left px-4 py-2 font-medium text-gray-900 dark:text-white">{ i18n.T(ctx, "global.round") } n° { strconv.Itoa(match.Round) }</th>
-				<th class="whitespace-nowrap px-4 py-2 font-medium"></th>
-				<th class="whitespace-nowrap px-4 py-2 font-medium"></th>
+				<th class="whitespace-nowrap text-left px-4 py-2 font-medium text-gray-900 dark:text-white" colspan="3">{ i18n.T(ctx, "global.round") } n° { strconv.Itoa(match.Round) }</th>
 			</tr>
 		</thead>
 		<tbody

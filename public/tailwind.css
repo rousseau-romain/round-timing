@@ -1701,6 +1701,10 @@ footer a:hover {
   text-align: center;
 }
 
+.align-middle {
+  vertical-align: middle;
+}
+
 .text-2xl {
   font-size: 1.5rem;
   line-height: 2rem;
@@ -2404,6 +2408,10 @@ tr.htmx-swapping td {
     display: flex;
   }
 
+  .md\:table-cell {
+    display: table-cell;
+  }
+
   .md\:hidden {
     display: none;
   }
@@ -2420,12 +2428,24 @@ tr.htmx-swapping td {
     width: 3rem;
   }
 
+  .md\:w-16 {
+    width: 4rem;
+  }
+
   .md\:grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .md\:flex-row {
+    flex-direction: row;
+  }
+
   .md\:items-center {
     align-items: center;
+  }
+
+  .md\:justify-center {
+    justify-content: center;
   }
 
   .md\:gap-12 {
@@ -2434,6 +2454,10 @@ tr.htmx-swapping td {
 
   .md\:gap-8 {
     gap: 2rem;
+  }
+
+  .md\:gap-4 {
+    gap: 1rem;
   }
 }
 
