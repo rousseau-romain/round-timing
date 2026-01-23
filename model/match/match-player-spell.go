@@ -1,20 +1,21 @@
-package model
+package match
 
 import (
 	"fmt"
 
+	"github.com/rousseau-romain/round-timing/model/game"
 	"github.com/rousseau-romain/round-timing/pkg/constants"
 	"github.com/rousseau-romain/round-timing/pkg/sqlhelper"
 )
 
 type MatchPlayerSpell struct {
-	Id                  int    `json:"id"`
-	MatchId             int    `json:"match_id"`
-	PlayerId            int    `json:"player_id"`
-	Spell               Spell  `json:"spell"`
-	RoundBeforeRecovery int    `json:"round_before_recovery"`
-	CreatedAt           string `json:"created_at"`
-	UpdatedAt           string `json:"updated_at"`
+	Id                  int        `json:"id"`
+	MatchId             int        `json:"match_id"`
+	PlayerId            int        `json:"player_id"`
+	Spell               game.Spell `json:"spell"`
+	RoundBeforeRecovery int        `json:"round_before_recovery"`
+	CreatedAt           string     `json:"created_at"`
+	UpdatedAt           string     `json:"updated_at"`
 }
 
 type MatchPlayerSpellCreate struct {

@@ -2,15 +2,18 @@ package page
 
 import (
 	"fmt"
+
 	"github.com/invopop/ctxi18n/i18n"
-	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/model/game"
+	"github.com/rousseau-romain/round-timing/model/system"
+	"github.com/rousseau-romain/round-timing/model/user"
 	"github.com/rousseau-romain/round-timing/views/components/forms"
 	"github.com/rousseau-romain/round-timing/views/components/icons"
 	"github.com/rousseau-romain/round-timing/views/components/layout"
 	"github.com/rousseau-romain/round-timing/views/components/ui"
 )
 
-templ ProfilePage(user model.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []model.Language, pageSlug string, idUserShares []string, classes []model.Class, spells []model.SpellByClass, userConfigurations []model.UserConfiguration) {
+templ ProfilePage(user user.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string, idUserShares []string, classes []game.Class, spells []game.SpellByClass, userConfigurations []user.UserConfiguration) {
 	@layout.Layout(i18n.T(ctx, "page.profile.title"), popinMessages, user, navItems, languages, pageSlug) {
 		@ui.Container("default") {
 			<h1 class="text-2xl font-semibold">{ i18n.T(ctx, "page.profile.h1") }</h1>
@@ -58,7 +61,7 @@ templ ProfilePage(user model.User, popinMessages layout.PopinMessages, navItems 
 	}
 }
 
-templ TableUserConfiguration(userConfigurations []model.UserConfiguration) {
+templ TableUserConfiguration(userConfigurations []user.UserConfiguration) {
 	@ui.Table("compact") {
 		@ui.TableHead("compact") {
 			@ui.Tr() {
@@ -86,7 +89,7 @@ templ TableUserConfiguration(userConfigurations []model.UserConfiguration) {
 	}
 }
 
-templ UserConfiguration(uc model.UserConfiguration) {
+templ UserConfiguration(uc user.UserConfiguration) {
 	@ui.ButtonToggle(
 		i18n.T(ctx, "global.table.enabled"),
 		i18n.T(ctx, "global.table.disabled"),
@@ -132,7 +135,7 @@ templ UserSpectate(idUserShare string) {
 	}
 }
 
-templ ListSpellClass(classes []model.Class, spells []model.SpellByClass) {
+templ ListSpellClass(classes []game.Class, spells []game.SpellByClass) {
 	<div class="mb-4 flex gap-4 flex-col">
 		for _, class := range(classes) {
 			<div class="border p-2 flex flex-row items-center gap-4">
@@ -154,7 +157,7 @@ templ ListSpellClass(classes []model.Class, spells []model.SpellByClass) {
 	</div>
 }
 
-templ SpellFavorite(s model.SpellByClass) {
+templ SpellFavorite(s game.SpellByClass) {
 	<div
 		class="group relative cursor-pointer transition-all hover:scale-110"
 		hx-patch={ fmt.Sprintf("/profile/spell-favorite/%d/toggle-favorite", s.IdSpell) }

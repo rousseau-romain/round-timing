@@ -8,15 +8,14 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/rousseau-romain/round-timing/config"
-	"github.com/rousseau-romain/round-timing/model"
-	"github.com/rousseau-romain/round-timing/pkg/password"
-
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/discord"
 	"github.com/markbates/goth/providers/google"
+	"github.com/rousseau-romain/round-timing/config"
+	"github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/pkg/password"
 )
 
 type AuthService struct{}
@@ -117,23 +116,23 @@ func getCookieHandler(r *http.Request, name string) (http.Cookie, error) {
 	return *cookie, err
 }
 
-func (s *AuthService) GetAuthenticateUserFromRequest(r *http.Request, slog *slog.Logger) (model.User, error) {
+func (s *AuthService) GetAuthenticateUserFromRequest(r *http.Request, slog *slog.Logger) (user.User, error) {
 	session, err := gothic.Store.Get(r, SessionName)
-	var user model.User
+	var u user.User
 	if err != nil {
 		slog.Error(err.Error())
-		return user, err
+		return u, err
 	}
 
-	slog = slog.With("userEmail", user)
+	slog = slog.With("userEmail", u)
 
-	u := session.Values["user"]
+	sessionUser := session.Values["user"]
 
 	// User is not from OAuth2 verify if user is authenticated by email
-	if u == nil {
+	if sessionUser == nil {
 		cookieToken, err := getCookieHandler(r, "token")
 		if err != nil {
-			return user, errors.New("user is not authenticated")
+			return u, errors.New("user is not authenticated")
 		}
 
 		claims := Claims{}
@@ -142,24 +141,24 @@ func (s *AuthService) GetAuthenticateUserFromRequest(r *http.Request, slog *slog
 		})
 		if err != nil || !token.Valid {
 			slog.Error("Unauthorized: Invalid token", "token", cookieToken.Value)
-			return user, err
+			return u, err
 		}
 
 		// Extract claims and use them
 		if claims, ok := token.Claims.(*Claims); ok && token.Valid {
-			user, err := model.GetUserByEmail(claims.Email)
+			foundUser, err := user.GetUserByEmail(claims.Email)
 			if err != nil {
 				slog.Error("Error fetching user by email", "email", claims.Email, "error", err)
-				return user, err
+				return foundUser, err
 			}
-			return user, nil
+			return foundUser, nil
 		}
-		slog.Info("user is not authenticated", "userId", user.Id)
-		return user, errors.New("user is not authenticated")
+		slog.Info("user is not authenticated", "userId", u.Id)
+		return u, errors.New("user is not authenticated")
 	}
 
-	goticUser := u.(goth.User)
-	userDb, err := model.GetUserByOauth2Id(goticUser.UserID)
+	goticUser := sessionUser.(goth.User)
+	userDb, err := user.GetUserByOauth2Id(goticUser.UserID)
 	if err != nil {
 		slog.Error("Error fetching user", "goticUserId", goticUser.UserID, "error", err)
 		return userDb, err

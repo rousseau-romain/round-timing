@@ -9,7 +9,9 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/invopop/ctxi18n/i18n"
-	"github.com/rousseau-romain/round-timing/model"
+	matchModel "github.com/rousseau-romain/round-timing/model/match"
+	"github.com/rousseau-romain/round-timing/model/system"
+	userModel "github.com/rousseau-romain/round-timing/model/user"
 	"github.com/rousseau-romain/round-timing/pkg/constants"
 	"github.com/rousseau-romain/round-timing/service/auth"
 	"github.com/rousseau-romain/round-timing/views/components/layout"
@@ -17,9 +19,9 @@ import (
 )
 
 // enabledUserIfWhiteListed checks if user should be enabled based on whitelist.
-func enabledUserIfWhiteListed(w http.ResponseWriter, logger *slog.Logger, user model.User) bool {
-	if model.GetFeatureFlagIsEnabled("WHITE_LIST") && !user.Enabled {
-		isWhiteListed, err := model.IsEmailWhiteListed(user.Email)
+func enabledUserIfWhiteListed(w http.ResponseWriter, logger *slog.Logger, user userModel.User) bool {
+	if system.GetFeatureFlagIsEnabled("WHITE_LIST") && !user.Enabled {
+		isWhiteListed, err := userModel.IsEmailWhiteListed(user.Email)
 		if err != nil {
 			logger.Error(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -27,7 +29,7 @@ func enabledUserIfWhiteListed(w http.ResponseWriter, logger *slog.Logger, user m
 		}
 		if isWhiteListed {
 			var t = true
-			model.UpdateUser(user.Id, model.UserUpdate{Enabled: &t})
+			userModel.UpdateUser(user.Id, userModel.UserUpdate{Enabled: &t})
 			return true
 		}
 		errorTitle := "You can't acces here"
@@ -123,9 +125,9 @@ func RequireAuthAndSpectateOfUserMatch(handlerFunc http.HandlerFunc, authService
 		vars := mux.Vars(r)
 		matchId, _ := strconv.Atoi(vars["idMatch"])
 
-		_, err = model.GetMatch(matchId)
+		_, err = matchModel.GetMatch(matchId)
 		if err != nil {
-			languages, _ := model.GetLanguages()
+			languages, _ := system.GetLanguages()
 			errorMessage := i18n.T(r.Context(), "page.match.errors.match-not-found", i18n.M{"matchId": matchId})
 			logger.Error("Match not found", "matchId", matchId)
 			w.WriteHeader(http.StatusNotFound)
@@ -133,14 +135,14 @@ func RequireAuthAndSpectateOfUserMatch(handlerFunc http.HandlerFunc, authService
 			return
 		}
 
-		userMatch, err := model.GetUserIdByMatch(matchId)
+		userMatch, err := userModel.GetUserIdByMatch(matchId)
 		if err != nil {
 			logger.Error(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		isUsersSpectateByIdUser, err := model.IsUsersSpectateByIdUser(userMatch.Id, user.IdShare)
+		isUsersSpectateByIdUser, err := userModel.IsUsersSpectateByIdUser(userMatch.Id, user.IdShare)
 		if err != nil {
 			logger.Error(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -151,7 +153,7 @@ func RequireAuthAndSpectateOfUserMatch(handlerFunc http.HandlerFunc, authService
 			errorMessage := i18n.T(r.Context(), "page.match.errors.match-unauthorized-spectator", i18n.M{"matchId": matchId})
 			logger.Info("User is not spectator for match", "userId", user.Id, "userMatchId", userMatch.Id, "matchId", matchId)
 			w.WriteHeader(http.StatusForbidden)
-			languages, _ := model.GetLanguages()
+			languages, _ := system.GetLanguages()
 			page.ForbidenPage(errorMessage, []layout.NavItem{}, languages, r.URL.Path, user).Render(r.Context(), w)
 			return
 		}
@@ -177,9 +179,9 @@ func RequireAuthAndHisMatch(handlerFunc http.HandlerFunc, authService *auth.Auth
 		vars := mux.Vars(r)
 		matchId, _ := strconv.Atoi(vars["idMatch"])
 
-		_, err = model.GetMatch(matchId)
+		_, err = matchModel.GetMatch(matchId)
 		if err != nil {
-			languages, _ := model.GetLanguages()
+			languages, _ := system.GetLanguages()
 			errorMessage := i18n.T(r.Context(), "page.match.errors.match-not-found", i18n.M{"matchId": matchId})
 			logger.Error("Match not found", "matchId", matchId)
 			w.WriteHeader(http.StatusNotFound)
@@ -187,7 +189,7 @@ func RequireAuthAndHisMatch(handlerFunc http.HandlerFunc, authService *auth.Auth
 			return
 		}
 
-		userMatch, err := model.GetUserIdByMatch(matchId)
+		userMatch, err := userModel.GetUserIdByMatch(matchId)
 		if err != nil {
 			logger.Error(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -195,7 +197,7 @@ func RequireAuthAndHisMatch(handlerFunc http.HandlerFunc, authService *auth.Auth
 		}
 
 		if userMatch.Id != user.Id {
-			languages, _ := model.GetLanguages()
+			languages, _ := system.GetLanguages()
 			errorMessage := i18n.T(r.Context(), "page.match.errors.match-unauthorized", i18n.M{"matchId": matchId})
 			logger.Info("User is not the owner of the match", "userId", user.Id, "userMatchId", userMatch.Id)
 			w.WriteHeader(http.StatusUnauthorized)

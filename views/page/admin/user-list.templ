@@ -3,12 +3,13 @@ package pageAdmin
 import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
-	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/model/system"
 	"github.com/rousseau-romain/round-timing/views/components/layout"
 	"github.com/rousseau-romain/round-timing/views/components/ui"
 )
 
-templ UserEnabled(u model.User) {
+templ UserEnabled(u user.User) {
 	@ui.ButtonToggle(
 		i18n.T(ctx, "global.table.enabled"),
 		i18n.T(ctx, "global.table.disabled"),
@@ -17,7 +18,7 @@ templ UserEnabled(u model.User) {
 	)
 }
 
-templ User(u model.User) {
+templ User(u user.User) {
 	@ui.Tr() {
 		@ui.TdCenter() {
 			{ fmt.Sprintf("%d", u.Id) }
@@ -46,7 +47,7 @@ templ User(u model.User) {
 	}
 }
 
-templ UserTable(users []model.User) {
+templ UserTable(users []user.User) {
 	<div class="overflow-x-auto">
 		@ui.Table("default") {
 			@ui.TableHead("default") {
@@ -74,7 +75,7 @@ templ UserTable(users []model.User) {
 	</div>
 }
 
-templ UserListPage(user model.User, popinMessage layout.PopinMessages, navItems []layout.NavItem, languages []model.Language, pageSlug string, modelUser model.User, users []model.User) {
+templ UserListPage(user user.User, popinMessage layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string, modelUser user.User, users []user.User) {
 	@layout.Layout(i18n.T(ctx, "page.admin.title"), popinMessage, user, navItems, languages, pageSlug) {
 		@ui.Container("default") {
 			<h1>{ i18n.T(ctx, "page.admin.h1") }</h1>

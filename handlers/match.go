@@ -6,13 +6,14 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/gorilla/mux"
 	"github.com/invopop/ctxi18n/i18n"
-	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/model/game"
+	matchModel "github.com/rousseau-romain/round-timing/model/match"
+	userModel "github.com/rousseau-romain/round-timing/model/user"
 	"github.com/rousseau-romain/round-timing/pkg/constants"
 	"github.com/rousseau-romain/round-timing/views/page"
 	pageMatch "github.com/rousseau-romain/round-timing/views/page/match"
-
-	"github.com/gorilla/mux"
 )
 
 var NumberOfMatchMax = 50
@@ -21,7 +22,7 @@ func (h *Handler) HandlersListMatch(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
-	matchs, err := model.GetMatchsByIdUser(user.Id)
+	matchs, err := matchModel.GetMatchsByIdUser(user.Id)
 	if err != nil {
 		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -43,7 +44,7 @@ func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
 	}
 	name := strings.TrimSpace(r.FormValue("name"))
 
-	numberOfMatch, err := model.GetNumberOfMatchByUserId(user.Id)
+	numberOfMatch, err := matchModel.GetNumberOfMatchByUserId(user.Id)
 	if err != nil {
 		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -66,7 +67,7 @@ func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	matchId, err := model.CreateMatch(model.MatchCreate{
+	matchId, err := matchModel.CreateMatch(matchModel.MatchCreate{
 		Name:   name,
 		IdUser: user.Id,
 	})
@@ -77,7 +78,7 @@ func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	match, err := model.GetMatch(matchId)
+	match, err := matchModel.GetMatch(matchId)
 
 	if err != nil {
 		h.Slog.Error(err.Error())
@@ -85,7 +86,7 @@ func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = model.CreateTeam(model.TeamCreate{
+	_, err = matchModel.CreateTeam(matchModel.TeamCreate{
 		Name:        "Team red",
 		IdColorTeam: 1,
 		IdMatch:     matchId,
@@ -97,7 +98,7 @@ func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = model.CreateTeam(model.TeamCreate{
+	_, err = matchModel.CreateTeam(matchModel.TeamCreate{
 		Name:        "Team blue",
 		IdColorTeam: 2,
 		IdMatch:     matchId,
@@ -121,23 +122,23 @@ func (h *Handler) HandlersDeleteMatch(w http.ResponseWriter, r *http.Request) {
 
 	id, _ := strconv.Atoi(matchId)
 
-	err := model.DeleteMatchPlayersSpellsByMatchId(id)
+	err := matchModel.DeleteMatchPlayersSpellsByMatchId(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	err = model.DeletePlayersByMatchId(id)
+	err = matchModel.DeletePlayersByMatchId(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = model.DeleteTeamsByMatchId(id)
+	err = matchModel.DeleteTeamsByMatchId(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = model.DeleteMatch(id)
+	err = matchModel.DeleteMatch(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -152,34 +153,34 @@ func (h *Handler) HandlersMatch(w http.ResponseWriter, r *http.Request) {
 
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 
-	match, err := model.GetMatch(matchId)
+	match, err := matchModel.GetMatch(matchId)
 	if err != nil {
 		errorMessage := i18n.T(r.Context(), "page.match.errors.match-not-found", i18n.M{"matchId": matchId})
 		h.Slog.Error(errorMessage, "matchId", matchId)
 		w.WriteHeader(http.StatusNotFound)
-		page.NotFoundPage(errorMessage, h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, user).Render(r.Context(), w)
+		page.NotFoundPage(errorMessage, h.GetPageNavCustom(r, user, matchModel.Match{}), h.languages, r.URL.Path, user).Render(r.Context(), w)
 		return
 	}
 
-	players, err := model.GetPlayersByIdMatch(user.IdLanguage, matchId)
+	players, err := matchModel.GetPlayersByIdMatch(user.IdLanguage, matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	teams, err := model.GetTeamsByIdMatch(matchId)
+	teams, err := matchModel.GetTeamsByIdMatch(matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	classes, err := model.GetClasses(user.IdLanguage)
+	classes, err := game.GetClasses(user.IdLanguage)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	pageMatch.TeamPlayerListPage(user, h.error, h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, match, teams, classes, players).Render(r.Context(), w)
+	pageMatch.TeamPlayerListPage(user, h.error, h.GetPageNavCustom(r, user, matchModel.Match{}), h.languages, r.URL.Path, match, teams, classes, players).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) {
@@ -191,14 +192,14 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 	vars := mux.Vars(r)
 
 	matchId, _ := strconv.Atoi(vars["idMatch"])
-	match, err := model.GetMatch(matchId)
+	match, err := matchModel.GetMatch(matchId)
 	if err != nil {
 		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	players, err := model.GetPlayersByIdMatch(user.IdLanguage, matchId)
+	players, err := matchModel.GetPlayersByIdMatch(user.IdLanguage, matchId)
 	if err != nil {
 		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -216,7 +217,7 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 		for _, player := range players {
 			classeIds = append(classeIds, player.Class.Id)
 		}
-		spells, err := model.GetSpellsByIdClass(user.IdLanguage, classeIds, idSpellToExclude)
+		spells, err := game.GetSpellsByIdClass(user.IdLanguage, classeIds, idSpellToExclude)
 		if err != nil {
 			h.Slog.Error(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -227,7 +228,7 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 			idSpellToExclude = []int{}
 		}
 
-		globalSpells, err := model.GetSpellsByIdClass(user.IdLanguage, []int{idClassGlobal}, idSpellToExclude)
+		globalSpells, err := game.GetSpellsByIdClass(user.IdLanguage, []int{idClassGlobal}, idSpellToExclude)
 		if err != nil {
 			h.Slog.Error(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -235,19 +236,19 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 		}
 
 		var round = 1
-		err = model.UpdateMatch(matchId, model.MatchUpdate{Round: &round})
+		err = matchModel.UpdateMatch(matchId, matchModel.MatchUpdate{Round: &round})
 		if err != nil {
 			h.Slog.Error(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		var matchPlayerSpells []model.MatchPlayerSpellCreate
+		var matchPlayerSpells []matchModel.MatchPlayerSpellCreate
 
 		for _, player := range players {
 			for _, spell := range spells {
 				if spell.IdClass == player.Class.Id {
-					matchPlayerSpells = append(matchPlayerSpells, model.MatchPlayerSpellCreate{
+					matchPlayerSpells = append(matchPlayerSpells, matchModel.MatchPlayerSpellCreate{
 						MatchId:             matchId,
 						PlayerId:            player.Id,
 						SpellId:             spell.Id,
@@ -256,7 +257,7 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 				}
 			}
 			for _, globalSpell := range globalSpells {
-				matchPlayerSpells = append(matchPlayerSpells, model.MatchPlayerSpellCreate{
+				matchPlayerSpells = append(matchPlayerSpells, matchModel.MatchPlayerSpellCreate{
 					MatchId:             matchId,
 					PlayerId:            player.Id,
 					SpellId:             globalSpell.Id,
@@ -265,21 +266,21 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 			}
 		}
 
-		err = model.CreateMatchPlayersSpells(matchPlayerSpells)
+		err = matchModel.CreateMatchPlayersSpells(matchPlayerSpells)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	}
 
-	userConfigurationFavoriteSpells, err := model.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, 1)
+	userConfigurationFavoriteSpells, err := userModel.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, 1)
 	if err != nil {
 		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	spellsPlayer, err := model.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
+	spellsPlayer, err := matchModel.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
 
 	if err != nil {
 		h.Slog.Error(err.Error())
@@ -297,7 +298,7 @@ func (h *Handler) HandlerResetMatchPage(w http.ResponseWriter, r *http.Request) 
 	vars := mux.Vars(r)
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 
-	err := model.ResetMatch(matchId)
+	err := matchModel.ResetMatch(matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -314,7 +315,7 @@ func (h *Handler) HandlerToggleMatchMastery(w http.ResponseWriter, r *http.Reque
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 	multipleMasteryEnabled, _ := strconv.Atoi(vars["toggleBool"])
 
-	err := model.UpdateMatch(matchId, model.MatchUpdate{
+	err := matchModel.UpdateMatch(matchId, matchModel.MatchUpdate{
 		MultipleMasteryEnabled: &multipleMasteryEnabled,
 	})
 
@@ -323,26 +324,26 @@ func (h *Handler) HandlerToggleMatchMastery(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	match, err := model.GetMatch(matchId)
+	match, err := matchModel.GetMatch(matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	players, err := model.GetPlayersByIdMatch(user.IdLanguage, matchId)
+	players, err := matchModel.GetPlayersByIdMatch(user.IdLanguage, matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	userConfigurationFavoriteSpells, err := model.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, 1)
+	userConfigurationFavoriteSpells, err := userModel.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, 1)
 	if err != nil {
 		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	spellsPlayers, err := model.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
+	spellsPlayers, err := matchModel.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -358,37 +359,37 @@ func (h *Handler) HandlerMatchNextRound(w http.ResponseWriter, r *http.Request) 
 	vars := mux.Vars(r)
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 
-	err := model.IncreaseMatchRound(matchId)
+	err := matchModel.IncreaseMatchRound(matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = model.DecreasePlayersSpellsRoundBeforeRecoveryByIdMatch(matchId)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	m, err := model.GetMatch(matchId)
+	err = matchModel.DecreasePlayersSpellsRoundBeforeRecoveryByIdMatch(matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	players, err := model.GetPlayersByIdMatch(user.IdLanguage, matchId)
+	m, err := matchModel.GetMatch(matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	userConfigurationFavoriteSpells, err := model.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, 1)
+	players, err := matchModel.GetPlayersByIdMatch(user.IdLanguage, matchId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	userConfigurationFavoriteSpells, err := userModel.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, 1)
 	if err != nil {
 		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	spellsPlayers, err := model.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
+	spellsPlayers, err := matchModel.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -404,13 +405,13 @@ func (h *Handler) HandlerUsePlayerSpell(w http.ResponseWriter, r *http.Request) 
 	vars := mux.Vars(r)
 	idPlayerSpell, _ := strconv.Atoi(vars["idPlayerSpell"])
 
-	err := model.UsePlayerSpellByIdPlayerSpell(idPlayerSpell)
+	err := matchModel.UsePlayerSpellByIdPlayerSpell(idPlayerSpell)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	spellPlayer, err := model.GetSpellPlayerByIdSpellsPlayers(user.IdLanguage, idPlayerSpell)
+	spellPlayer, err := matchModel.GetSpellPlayerByIdSpellsPlayers(user.IdLanguage, idPlayerSpell)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -427,13 +428,13 @@ func (h *Handler) HandlerRemoveRoundRecoveryPlayerSpell(w http.ResponseWriter, r
 	vars := mux.Vars(r)
 	idPlayerSpell, _ := strconv.Atoi(vars["idPlayerSpell"])
 
-	err := model.RemoveRoundRecoverySpellByIdPlayerSpell(idPlayerSpell)
+	err := matchModel.RemoveRoundRecoverySpellByIdPlayerSpell(idPlayerSpell)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	spellPlayer, err := model.GetSpellPlayerByIdSpellsPlayers(user.IdLanguage, idPlayerSpell)
+	spellPlayer, err := matchModel.GetSpellPlayerByIdSpellsPlayers(user.IdLanguage, idPlayerSpell)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -1,20 +1,20 @@
-package model
+package match
 
 import (
 	"errors"
 
-	"github.com/rousseau-romain/round-timing/pkg/sqlhelper"
-
 	"github.com/huandu/go-sqlbuilder"
+	"github.com/rousseau-romain/round-timing/model/game"
+	"github.com/rousseau-romain/round-timing/pkg/sqlhelper"
 )
 
 type Player struct {
 	Id     int `json:"id"`
 	Idteam int `json:"id_team"`
 	// IdClass int    `json:"id_class"`
-	Name  string `json:"name"`
-	Class Class  `json:"class"`
-	Team  Team   `json:"team"`
+	Name  string     `json:"name"`
+	Class game.Class `json:"class"`
+	Team  Team       `json:"team"`
 }
 
 type PlayerCreate struct {

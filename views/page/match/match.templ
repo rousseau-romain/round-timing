@@ -2,14 +2,18 @@ package match
 
 import (
 	"fmt"
+
 	"github.com/invopop/ctxi18n/i18n"
-	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/model/game"
+	matchModel "github.com/rousseau-romain/round-timing/model/match"
+	"github.com/rousseau-romain/round-timing/model/system"
+	"github.com/rousseau-romain/round-timing/model/user"
 	"github.com/rousseau-romain/round-timing/views/components/forms"
 	"github.com/rousseau-romain/round-timing/views/components/layout"
 	"github.com/rousseau-romain/round-timing/views/components/ui"
 )
 
-templ TeamPlayer(p model.Player, m model.Match) {
+templ TeamPlayer(p matchModel.Player, m matchModel.Match) {
 	@ui.TrColor(p.Team.Color) {
 		<td
 			class="text-center whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white"
@@ -38,7 +42,7 @@ templ TeamPlayer(p model.Player, m model.Match) {
 	}
 }
 
-templ TeamPlayerTable(players []model.Player, match model.Match) {
+templ TeamPlayerTable(players []matchModel.Player, match matchModel.Match) {
 	<div class="bg-red-200 border-red-200"></div>
 	<div class="bg-indigo-200 border-indigo-200"></div>
 	// SHITY WORKAROUND
@@ -88,7 +92,7 @@ templ TeamPlayerTable(players []model.Player, match model.Match) {
 	</div>
 }
 
-templ teamPlayerListPageLayout(user model.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []model.Language, pageSlug string, match model.Match) {
+templ teamPlayerListPageLayout(user user.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string, match matchModel.Match) {
 	@layout.Layout(i18n.T(ctx, "page.match.title", i18n.M{"name": match.Name}), popinMessages, user, navItems, languages, pageSlug) {
 		@ui.Container("padded") {
 			{ children... }
@@ -96,7 +100,7 @@ templ teamPlayerListPageLayout(user model.User, popinMessages layout.PopinMessag
 	}
 }
 
-templ TeamPlayerListPage(user model.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []model.Language, pageSlug string, match model.Match, teams []model.Team, classes []model.Class, players []model.Player) {
+templ TeamPlayerListPage(user user.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string, match matchModel.Match, teams []matchModel.Team, classes []game.Class, players []matchModel.Player) {
 	@teamPlayerListPageLayout(user, popinMessages, navItems, languages, pageSlug, match) {
 		<h1 class="mb-2">{ i18n.T(ctx, "page.match.h1") }</h1>
 		if match.Round > 0 {
@@ -140,7 +144,7 @@ templ TeamPlayerListPage(user model.User, popinMessages layout.PopinMessages, na
 	}
 }
 
-templ TeamPlayerListPageUnAutorized(user model.User, navItems []layout.NavItem, languages []model.Language, pageSlug string, match model.Match) {
+templ TeamPlayerListPageUnAutorized(user user.User, navItems []layout.NavItem, languages []system.Language, pageSlug string, match matchModel.Match) {
 	@teamPlayerListPageLayout(user, layout.PopinMessages{}, navItems, languages, pageSlug, match) {
 		<h1 class="mb-2">{ i18n.T(ctx, "page.match.unauthorized.h1") }</h1>
 		<p>{ i18n.T(ctx, "page.match.unauthorized.p", i18n.M{"matchName": match.Name, "matchId": match.Id }) }</p>

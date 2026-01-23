@@ -3,19 +3,18 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-
+	"io"
 	"net/http"
 	"os"
 	"strings"
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/config"
-	"github.com/rousseau-romain/round-timing/model"
+	matchModel "github.com/rousseau-romain/round-timing/model/match"
+	userModel "github.com/rousseau-romain/round-timing/model/user"
 	"github.com/rousseau-romain/round-timing/views/components/layout"
 	"github.com/rousseau-romain/round-timing/views/page"
 	"github.com/rousseau-romain/round-timing/views/page/legal"
-
-	"io"
 )
 
 func GetPageNavDefault(r *http.Request) []layout.NavItem {
@@ -27,7 +26,7 @@ func GetPageNavDefault(r *http.Request) []layout.NavItem {
 	}
 }
 
-func (h *Handler) GetPageNavCustom(r *http.Request, user model.User, match model.Match) []layout.NavItem {
+func (h *Handler) GetPageNavCustom(r *http.Request, user userModel.User, match matchModel.Match) []layout.NavItem {
 	var pageNav = GetPageNavDefault(r)
 	if user.Id != 0 {
 		if match.Id != 0 {
@@ -36,7 +35,7 @@ func (h *Handler) GetPageNavCustom(r *http.Request, user model.User, match model
 				Url:  fmt.Sprintf("match/%d", match.Id),
 			})
 		} else {
-			lastMatch, err := model.GetLastMatchByUserId(user.Id)
+			lastMatch, err := matchModel.GetLastMatchByUserId(user.Id)
 			if err != nil {
 				h.Slog.Error(err.Error())
 				return pageNav
@@ -96,7 +95,7 @@ func (h *Handler) HandlersNotFound(w http.ResponseWriter, r *http.Request) {
 	if user.Id != 0 {
 		h.Slog = h.Slog.With("userId", user.Id)
 	}
-	page.NotFoundPage("", h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, user).Render(r.Context(), w)
+	page.NotFoundPage("", h.GetPageNavCustom(r, user, matchModel.Match{}), h.languages, r.URL.Path, user).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersForbidden(w http.ResponseWriter, r *http.Request) {
@@ -104,7 +103,7 @@ func (h *Handler) HandlersForbidden(w http.ResponseWriter, r *http.Request) {
 	if user.Id != 0 {
 		h.Slog = h.Slog.With("userId", user.Id)
 	}
-	page.ForbidenPage("", h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path, user).Render(r.Context(), w)
+	page.ForbidenPage("", h.GetPageNavCustom(r, user, matchModel.Match{}), h.languages, r.URL.Path, user).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlersHome(w http.ResponseWriter, r *http.Request) {
@@ -118,11 +117,11 @@ func (h *Handler) HandlersHome(w http.ResponseWriter, r *http.Request) {
 
 	if user.Id != 0 {
 		h.Slog = h.Slog.With("userId", user.Id)
-		pageNav = h.GetPageNavCustom(r, user, model.Match{})
+		pageNav = h.GetPageNavCustom(r, user, matchModel.Match{})
 		page.HomePage(user, h.error, pageNav, h.languages, r.URL.Path).Render(r.Context(), w)
 		return
 	}
-	page.HomePage(model.User{}, h.error, pageNav, h.languages, r.URL.Path).Render(r.Context(), w)
+	page.HomePage(userModel.User{}, h.error, pageNav, h.languages, r.URL.Path).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerCGU(w http.ResponseWriter, r *http.Request) {
@@ -130,7 +129,7 @@ func (h *Handler) HandlerCGU(w http.ResponseWriter, r *http.Request) {
 	if user.Id != 0 {
 		h.Slog = h.Slog.With("userId", user.Id)
 	}
-	legal.CGU(h.error, h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path).Render(r.Context(), w)
+	legal.CGU(h.error, h.GetPageNavCustom(r, user, matchModel.Match{}), h.languages, r.URL.Path).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlerPrivacy(w http.ResponseWriter, r *http.Request) {
@@ -138,5 +137,5 @@ func (h *Handler) HandlerPrivacy(w http.ResponseWriter, r *http.Request) {
 	if user.Id != 0 {
 		h.Slog = h.Slog.With("userId", user.Id)
 	}
-	legal.Privacy(h.error, h.GetPageNavCustom(r, user, model.Match{}), h.languages, r.URL.Path).Render(r.Context(), w)
+	legal.Privacy(h.error, h.GetPageNavCustom(r, user, matchModel.Match{}), h.languages, r.URL.Path).Render(r.Context(), w)
 }

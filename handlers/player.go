@@ -5,12 +5,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/gorilla/mux"
 	"github.com/invopop/ctxi18n/i18n"
-	"github.com/rousseau-romain/round-timing/model"
+	matchModel "github.com/rousseau-romain/round-timing/model/match"
+	userModel "github.com/rousseau-romain/round-timing/model/user"
 	"github.com/rousseau-romain/round-timing/pkg/lang"
 	pageMatch "github.com/rousseau-romain/round-timing/views/page/match"
-
-	"github.com/gorilla/mux"
 )
 
 var MaxPlayerByTeam = 8
@@ -29,7 +29,7 @@ func (h *Handler) HandlersUpdatePlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := model.UpdatePlayer(idPlayer, model.PlayerUpdate{
+	err := matchModel.UpdatePlayer(idPlayer, matchModel.PlayerUpdate{
 		Name: &name,
 	})
 	if err != nil {
@@ -62,7 +62,7 @@ func (h *Handler) HandlersCreatePlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	canCreatePlayerInTeam, err := model.NumberPlayerInTeamByTeamId(idTeam)
+	canCreatePlayerInTeam, err := matchModel.NumberPlayerInTeamByTeamId(idTeam)
 	if err != nil {
 		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -85,7 +85,7 @@ func (h *Handler) HandlersCreatePlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	match, err := model.GetMatch(idMatch)
+	match, err := matchModel.GetMatch(idMatch)
 
 	if err != nil {
 		h.Slog.Error(err.Error())
@@ -100,7 +100,7 @@ func (h *Handler) HandlersCreatePlayer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	idClass, _ := strconv.Atoi(r.FormValue("idClass"))
-	idPlayer, err := model.CreatePlayer(model.PlayerCreate{
+	idPlayer, err := matchModel.CreatePlayer(matchModel.PlayerCreate{
 		Name:    name,
 		IdTeam:  idTeam,
 		IdClass: idClass,
@@ -112,7 +112,7 @@ func (h *Handler) HandlersCreatePlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	player, err := model.GetPlayer(user.IdLanguage, idPlayer)
+	player, err := matchModel.GetPlayer(user.IdLanguage, idPlayer)
 
 	if err != nil {
 		h.Slog.Error(err.Error())
@@ -131,14 +131,14 @@ func (h *Handler) HandlersDeletePlayer(w http.ResponseWriter, r *http.Request) {
 
 	idPlayer, _ := strconv.Atoi(vars["idPlayer"])
 
-	err := model.DeleteMatchPlayersSpellsByPlayer(idPlayer)
+	err := matchModel.DeleteMatchPlayersSpellsByPlayer(idPlayer)
 	if err != nil {
 		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	err = model.DeletePlayer(idPlayer)
+	err = matchModel.DeletePlayer(idPlayer)
 	if err != nil {
 		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -155,11 +155,11 @@ func (h *Handler) HandlersPlayerLanguage(w http.ResponseWriter, r *http.Request)
 	code := vars["code"]
 	idLanguage := lang.SupportedLanguages[code]
 
-	userUpdate := model.UserUpdate{
+	userUpdate := userModel.UserUpdate{
 		IdLanguage: &idLanguage,
 	}
 
-	err := model.UpdateUser(user.Id, userUpdate)
+	err := userModel.UpdateUser(user.Id, userUpdate)
 	if err != nil {
 		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)

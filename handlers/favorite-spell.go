@@ -1,12 +1,11 @@
 package handlers
 
 import (
+	"net/http"
 	"strconv"
 
-	"net/http"
-
 	"github.com/gorilla/mux"
-	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/model/game"
 	"github.com/rousseau-romain/round-timing/views/page"
 )
 
@@ -17,13 +16,13 @@ func (h *Handler) HandlersToggleSpellFavorite(w http.ResponseWriter, r *http.Req
 	vars := mux.Vars(r)
 	idSpell, _ := strconv.Atoi(vars["idSpell"])
 
-	err := model.ToggleIsFavoriteSpell(user.Id, idSpell)
+	err := game.ToggleIsFavoriteSpell(user.Id, idSpell)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	spellFavorite, err := model.GetFavoriteSpellByIdUserAndIdSpell(user.IdLanguage, user.Id, idSpell)
+	spellFavorite, err := game.GetFavoriteSpellByIdUserAndIdSpell(user.IdLanguage, user.Id, idSpell)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

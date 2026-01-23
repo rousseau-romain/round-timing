@@ -10,7 +10,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/rousseau-romain/round-timing/config"
-	"github.com/rousseau-romain/round-timing/model"
+	matchModel "github.com/rousseau-romain/round-timing/model/match"
+	userModel "github.com/rousseau-romain/round-timing/model/user"
 	pageMatch "github.com/rousseau-romain/round-timing/views/page/match"
 )
 
@@ -33,35 +34,35 @@ func (h *Handler) HandlerSpectateMatch(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 
-	matchFromUser, err := model.GetLastMatchByUserId(user.Id)
+	matchFromUser, err := matchModel.GetLastMatchByUserId(user.Id)
 	if err != nil {
 		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	match, err := model.GetMatch(matchId)
+	match, err := matchModel.GetMatch(matchId)
 	if err != nil {
 		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	players, err := model.GetPlayersByIdMatch(user.IdLanguage, matchId)
+	players, err := matchModel.GetPlayersByIdMatch(user.IdLanguage, matchId)
 	if err != nil {
 		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	userConfigurationFavoriteSpells, err := model.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, 1)
+	userConfigurationFavoriteSpells, err := userModel.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, 1)
 	if err != nil {
 		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	spellsPlayers, err := model.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
+	spellsPlayers, err := matchModel.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
 	if err != nil {
 		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -96,26 +97,26 @@ func (h *Handler) HandlerMatchTableLive(w http.ResponseWriter, r *http.Request) 
 	for {
 		time.Sleep(2 * time.Second)
 
-		match, err := model.GetMatch(matchId)
+		match, err := matchModel.GetMatch(matchId)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		players, err := model.GetPlayersByIdMatch(user.IdLanguage, matchId)
+		players, err := matchModel.GetPlayersByIdMatch(user.IdLanguage, matchId)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		userConfigurationFavoriteSpells, err := model.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, 1)
+		userConfigurationFavoriteSpells, err := userModel.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, 1)
 		if err != nil {
 			h.Slog.Error(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		spellsPlayers, err := model.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
+		spellsPlayers, err := matchModel.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
