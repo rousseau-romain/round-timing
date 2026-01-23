@@ -75,6 +75,17 @@ make build/tailwind # Build CSS
 Variants: `primary` (blue), `success` (green), `danger` (red), `outline`, `indigo`, `black`
 Sizes: `sm`, `md`, `lg`
 
+**Badges** (`badge.templ`):
+```go
+// Generic badge with variant
+@ui.Badge("red", templ.Attributes{"class": "absolute -right-1 -bottom-1"}) { 3 }
+
+// Recovery badge (auto-colors based on rounds: 1=red, 2=yellow, 3+=cyan)
+@ui.BadgeRecovery(mps.RoundBeforeRecovery)
+```
+
+Variants: `red`, `yellow`, `cyan`, `green`, `indigo`, `gray`
+
 ### Form Components (`views/components/forms/`)
 
 **forms.templ**:
