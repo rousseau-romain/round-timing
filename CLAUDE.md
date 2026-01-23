@@ -86,6 +86,32 @@ Sizes: `sm`, `md`, `lg`
 
 Variants: `red`, `yellow`, `cyan`, `green`, `indigo`, `gray`
 
+**Tables** (`table.templ`):
+```go
+@ui.Table("default") {
+    @ui.TableHead("default") {
+        <tr>
+            @ui.Th() { Name }
+            @ui.ThEmpty()
+        </tr>
+    }
+    @ui.TableBody(templ.Attributes{
+        "hx-swap": "outerHTML",
+        "hx-target": "closest tr",
+    }) {
+        <tr>
+            @ui.TdPrimary() { Item name }
+            @ui.TdAction() { @ui.Button(...) }
+        </tr>
+    }
+}
+```
+
+Table variants: `default` (full-width dividers), `compact` (bordered auto-width)
+Rows: `Tr`, `TrBorder`, `TrColor(color)`
+Header cells: `Th`, `ThEmpty`, `ThCompact`
+Body cells: `Td`, `TdPrimary`, `TdCenter`, `TdAction`, `TdCompact`
+
 ### Form Components (`views/components/forms/`)
 
 **forms.templ**:

@@ -11,53 +11,46 @@ import (
 )
 
 templ Match(m model.Match) {
-	<tr>
-		<td class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">
+	@ui.Tr() {
+		@ui.TdPrimary() {
 			{ m.Name }
-		</td>
-		// <td class="whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">{ m.CreatedAt }</td>
-		// <td class="whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">{ m.UpdatedAt }</td>
-		<td class="whitespace-nowrap px-4 py-2">
+		}
+		@ui.TdAction() {
 			@ui.ButtonLink("indigo", "sm", "/match/"+fmt.Sprintf("%d", m.Id)) {
 				{ i18n.T(ctx, "global.buttons.see") }
 			}
-		</td>
-		<td class="whitespace-nowrap px-4 py-2">
+		}
+		@ui.TdAction() {
 			@ui.ButtonAction("danger", "sm", templ.Attributes{
 				"hx-delete": "/match/" + fmt.Sprintf("%d", m.Id),
 			}) {
 				{ i18n.T(ctx, "global.buttons.delete") }
 			}
-		</td>
-	</tr>
+		}
+	}
 }
 
 templ MatchTable(matchs []model.Match) {
 	<div class="overflow-x-auto">
-		<table
-			class="min-w-full divide-y-2 divide-gray-200 bg-white text-sm dark:divide-gray-700 dark:bg-gray-900"
-		>
-			<thead class="ltr:text-left rtl:text-right">
-				<tr>
-					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">{ i18n.T(ctx, "global.table.name") }</th>
-					// <th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">
-					// 	{ i18n.T(ctx, "global.table.created-at") }
-					// </th>
-					// <th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">{ i18n.T(ctx, "global.table.updated-at") }</th>
-					<th class="px-4 py-2"></th>
-					<th class="px-4 py-2"></th>
-				</tr>
-			</thead>
-			<tbody
-				hx-swap="outerHTML swap:0.5s"
-				hx-target="closest tr"
-				class="divide-y divide-gray-200 dark:divide-gray-700"
-			>
+		@ui.Table("default") {
+			@ui.TableHead("default") {
+				@ui.Tr() {
+					@ui.Th() {
+						{ i18n.T(ctx, "global.table.name") }
+					}
+					@ui.ThEmpty()
+					@ui.ThEmpty()
+				}
+			}
+			@ui.TableBody(templ.Attributes{
+				"hx-swap":   "outerHTML swap:0.5s",
+				"hx-target": "closest tr",
+			}) {
 				for _, match := range matchs {
 					@Match(match)
 				}
-			</tbody>
-		</table>
+			}
+		}
 	</div>
 }
 

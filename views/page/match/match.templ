@@ -10,7 +10,7 @@ import (
 )
 
 templ TeamPlayer(p model.Player, m model.Match) {
-	<tr class={ "bg-" + p.Team.Color + "-200" }>
+	@ui.TrColor(p.Team.Color) {
 		<td
 			class="text-center whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white"
 		>
@@ -35,7 +35,7 @@ templ TeamPlayer(p model.Player, m model.Match) {
 				{ i18n.T(ctx, "global.buttons.delete") }
 			}
 		</td>
-	</tr>
+	}
 }
 
 templ TeamPlayerTable(players []model.Player, match model.Match) {
@@ -51,27 +51,29 @@ templ TeamPlayerTable(players []model.Player, match model.Match) {
 		x-cloak
 		class="mb-5 flex-col items-center flex"
 	>
-		<table
-			class="mb-2 min-w-full divide-y-2 divide-gray-200 bg-white text-sm dark:divide-gray-700 dark:bg-gray-900"
-		>
-			<thead class="ltr:text-left rtl:text-right">
-				<tr>
-					for _, th := range []string{i18n.T(ctx, "global.table.name"), i18n.T(ctx, "global.table.class"), i18n.T(ctx, "global.table.team"), ""} {
-						<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">
-							{ th }
-						</th>
+		<table class="mb-2 min-w-full divide-y-2 divide-gray-200 bg-white text-sm dark:divide-gray-700 dark:bg-gray-900">
+			@ui.TableHead("default") {
+				@ui.Tr() {
+					@ui.Th() {
+						{ i18n.T(ctx, "global.table.name") }
 					}
-				</tr>
-			</thead>
-			<tbody
-				hx-swap="outerHTML swap:0.1s"
-				hx-target="closest tr"
-				class="divide-y divide-gray-200 dark:divide-gray-700"
-			>
+					@ui.Th() {
+						{ i18n.T(ctx, "global.table.class") }
+					}
+					@ui.Th() {
+						{ i18n.T(ctx, "global.table.team") }
+					}
+					@ui.ThEmpty()
+				}
+			}
+			@ui.TableBody(templ.Attributes{
+				"hx-swap":   "outerHTML swap:0.1s",
+				"hx-target": "closest tr",
+			}) {
 				for _, player := range players {
 					@TeamPlayer(player, match)
 				}
-			</tbody>
+			}
 		</table>
 		@ui.ButtonLinkAction("black", "lg", fmt.Sprintf("/match/%d/start", match.Id), templ.Attributes{
 			"id":    "link-start-match-body",

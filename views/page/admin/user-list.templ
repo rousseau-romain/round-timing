@@ -18,13 +18,17 @@ templ UserEnabled(u model.User) {
 }
 
 templ User(u model.User) {
-	<tr>
-		<td class="text-center whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">{ fmt.Sprintf("%d", u.Id) }</td>
-		<td class="text-center whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">{ u.Email }</td>
-		<td class="text-center whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">
+	@ui.Tr() {
+		@ui.TdCenter() {
+			{ fmt.Sprintf("%d", u.Id) }
+		}
+		@ui.TdCenter() {
+			{ u.Email }
+		}
+		@ui.TdCenter() {
 			@UserEnabled(u)
-		</td>
-		<td class="text-center whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">
+		}
+		@ui.TdCenter() {
 			<span
 				class={
 					"items-center p-2 rounded font-medium",
@@ -38,29 +42,35 @@ templ User(u model.User) {
 					{ i18n.T(ctx, "global.table.role-user") }
 				}
 			</span>
-		</td>
-	</tr>
+		}
+	}
 }
 
 templ UserTable(users []model.User) {
 	<div class="overflow-x-auto">
-		<table
-			class="min-w-full divide-y-2 divide-gray-200 bg-white text-sm dark:divide-gray-700 dark:bg-gray-900"
-		>
-			<thead>
-				<tr>
-					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">{ i18n.T(ctx, "global.table.id") }</th>
-					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">{ i18n.T(ctx, "global.email") }</th>
-					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">{ i18n.T(ctx, "global.table.enabled") }</th>
-					<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">{ i18n.T(ctx, "global.table.role") }</th>
-				</tr>
-			</thead>
-			<tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+		@ui.Table("default") {
+			@ui.TableHead("default") {
+				@ui.Tr() {
+					@ui.Th() {
+						{ i18n.T(ctx, "global.table.id") }
+					}
+					@ui.Th() {
+						{ i18n.T(ctx, "global.email") }
+					}
+					@ui.Th() {
+						{ i18n.T(ctx, "global.table.enabled") }
+					}
+					@ui.Th() {
+						{ i18n.T(ctx, "global.table.role") }
+					}
+				}
+			}
+			@ui.TableBody(templ.Attributes{}) {
 				for _, user := range users {
 					@User(user)
 				}
-			</tbody>
-		</table>
+			}
+		}
 	</div>
 }
 

@@ -59,27 +59,31 @@ templ ProfilePage(user model.User, popinMessages layout.PopinMessages, navItems 
 }
 
 templ TableUserConfiguration(userConfigurations []model.UserConfiguration) {
-	<table class="table-auto mb-2 border">
-		<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-			<tr>
-				<th>{ i18n.T(ctx, "global.table.name") }</th>
-				<th></th>
-			</tr>
-		</thead>
-		<tbody
-			hx-swap="outerHTML"
-			hx-target="closest tr"
-		>
-			for _, uc := range(userConfigurations) {
-				<tr class="border-b">
-					<td class="first-letter:uppercase p-2">{ uc.Name }</td>
-					<td>
-						@UserConfiguration(uc)
-					</td>
-				</tr>
+	@ui.Table("compact") {
+		@ui.TableHead("compact") {
+			@ui.Tr() {
+				@ui.ThCompact() {
+					{ i18n.T(ctx, "global.table.name") }
+				}
+				@ui.ThCompact()
 			}
-		</tbody>
-	</table>
+		}
+		@ui.TableBody(templ.Attributes{
+			"hx-swap":   "outerHTML",
+			"hx-target": "closest tr",
+		}) {
+			for _, uc := range(userConfigurations) {
+				@ui.TrBorder() {
+					@ui.TdCompact() {
+						<span class="first-letter:uppercase">{ uc.Name }</span>
+					}
+					@ui.TdCompact() {
+						@UserConfiguration(uc)
+					}
+				}
+			}
+		}
+	}
 }
 
 templ UserConfiguration(uc model.UserConfiguration) {
@@ -92,36 +96,40 @@ templ UserConfiguration(uc model.UserConfiguration) {
 }
 
 templ TableUserSpectate(idUserShares []string) {
-	<table class="table-auto mb-2">
-		<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-			<tr>
-				<th>{ i18n.T(ctx, "page.profile.table.id-user-spectate") }</th>
-				<th></th>
-			</tr>
-		</thead>
-		<tbody
-			hx-swap="outerHTML"
-			hx-target="closest tr"
-		>
+	@ui.Table("compact") {
+		@ui.TableHead("compact") {
+			@ui.Tr() {
+				@ui.ThCompact() {
+					{ i18n.T(ctx, "page.profile.table.id-user-spectate") }
+				}
+				@ui.ThCompact()
+			}
+		}
+		@ui.TableBody(templ.Attributes{
+			"hx-swap":   "outerHTML",
+			"hx-target": "closest tr",
+		}) {
 			for _, idUserShare := range(idUserShares) {
 				@UserSpectate(idUserShare)
 			}
-		</tbody>
-	</table>
+		}
+	}
 }
 
 templ UserSpectate(idUserShare string) {
-	<tr>
-		<td>{ idUserShare }</td>
-		<td>
+	@ui.Tr() {
+		@ui.TdCompact() {
+			{ idUserShare }
+		}
+		@ui.TdCompact() {
 			@ui.ButtonAction("danger", "sm", templ.Attributes{
 				"hx-delete": "/profile/user-spectate",
 				"hx-vals":   fmt.Sprintf(`{"idUserShare": "%s"}`, idUserShare),
 			}) {
 				{ i18n.T(ctx, "global.buttons.delete") }
 			}
-		</td>
-	</tr>
+		}
+	}
 }
 
 templ ListSpellClass(classes []model.Class, spells []model.SpellByClass) {
