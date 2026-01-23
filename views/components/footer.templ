@@ -1,0 +1,129 @@
+package layout
+
+import (
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/rousseau-romain/round-timing/helper"
+	"strconv"
+	"time"
+)
+
+templ Footer() {
+	<footer class="mt-4 bg-white dark:bg-gray-900 border-t border-gray-100">
+		<div class="mx-auto max-w-screen-xl px-4 pt-6 pb-6 sm:px-6 lg:px-8 lg:pt-8">
+			<div class="grid grid-cols-1 lg:grid-cols-3 md:grid-cols-2 gap-8">
+				<div class="m-auto">
+					<div class="flex justify-center text-indigo-600 sm:justify-start dark:text-indigo-300">
+						<div class="m-auto flex">
+							<svg
+								class="hover:animate-spin fill-sky-600"
+								width="30px"
+								height="30px"
+								viewBox="0 0 528.916 528.916"
+							>
+								<path
+									d="M523.859,232.329h-41.701c-5.07,0-9.715-4.073-10.59-9.067c-19.57-111.442-117-196.409-233.962-196.409
+									C106.589,26.853,0,133.441,0,264.458c0,131.018,106.589,237.605,237.606,237.605c12.675,0,22.95-10.275,22.95-22.949
+									s-10.275-22.949-22.95-22.949c-105.708,0-191.706-85.998-191.706-191.707c0-105.707,85.995-191.706,191.703-191.706
+									c91.583,0,168.325,64.569,187.208,150.564c1.086,4.951-2.359,9.012-7.426,9.012H380.66c-5.07,0-6.578,3.182-3.371,7.108
+									l69.162,84.621c3.209,3.926,8.408,3.926,11.619,0l69.162-84.621C530.439,235.511,528.928,232.329,523.859,232.329z"
+									stroke-linejoin="round"
+								></path>
+							</svg>
+							<span class="pl-2 text-2xl font-bold text-sky-600">Round Timing</span>
+						</div>
+					</div>
+					<p
+						class="mt-6 max-w-md text-center leading-relaxed text-gray-500 sm:max-w-xs sm:text-left dark:text-gray-400"
+					>
+						{ i18n.T(ctx, "global.footer.p-contact") }
+					</p>
+					<ul class="mt-8 flex justify-center gap-6 sm:justify-start md:gap-8">
+						<li>
+							<a
+								href={ templ.SafeURL("mailto:" + helper.MailContact) }
+								rel="noreferrer"
+								target="_blank"
+								class="flex text-indigo-700 transition hover:text-indigo-700/75 dark:text-indigo-500 dark:hover:text-indigo-500/75"
+							>
+								<span class="sr-only">Email</span>
+								<svg class="size-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+									<path
+										fill-rule="evenodd"
+										d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+										clip-rule="evenodd"
+									></path>
+								</svg>
+								<span class="text-gray-700 dark:text-gray-300">{ helper.MailContact }</span>
+							</a>
+						</li>
+					</ul>
+				</div>
+				<div class="text-center">
+					<p class="text-lg font-medium text-gray-900 dark:text-white">{ i18n.T(ctx, "global.footer.about-us.title") }</p>
+					<ul class="mt-8 space-y-4 text-sm">
+						<li>
+							<a
+								class="text-gray-700 transition hover:text-gray-700/75 dark:text-white dark:hover:text-white/75"
+								href="/match"
+							>
+								{ i18n.T(ctx, "global.footer.about-us.l-match") }
+							</a>
+						</li>
+						<li>
+							<a
+								class="text-gray-700 transition hover:text-gray-700/75 dark:text-white dark:hover:text-white/75"
+								href="/profile"
+							>
+								{ i18n.T(ctx, "global.footer.about-us.l-profil") }
+							</a>
+						</li>
+					</ul>
+				</div>
+				<div class="text-center">
+					<p class="text-lg font-medium text-gray-900 dark:text-white">{ i18n.T(ctx, "global.footer.other-link.title") }</p>
+					<ul class="mt-8 space-y-4 text-sm">
+						<li>
+							<a
+								class="text-gray-700 transition hover:text-gray-700/75 dark:text-white dark:hover:text-white/75"
+								href="/cgu"
+							>
+								{ i18n.T(ctx, "global.footer.other-link.l-cgu") }
+							</a>
+						</li>
+						<li>
+							<a
+								class="text-gray-700 transition hover:text-gray-700/75 dark:text-white dark:hover:text-white/75"
+								href="/privacy"
+							>
+								{ i18n.T(ctx, "global.footer.other-link.l-privacy") }
+							</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div class="border-t border-gray-100 pt-6 pb-2 px-2 dark:border-gray-800">
+			<div class="text-center sm:flex sm:justify-between">
+				<p class="text-sm text-gray-500 dark:text-gray-400">
+					<span class="block sm:inline">{ i18n.T(ctx, "global.footer.other-link.rights") }</span>
+					<a
+						class="inline-block text-indigo-600 underline transition hover:text-indigo-600/75 dark:text-indigo-500 dark:hover:text-indigo-500/75"
+						href="/cgu"
+					>
+						{ i18n.T(ctx, "global.footer.other-link.l-cgu") }
+					</a>
+					<span>&middot;</span>
+					<a
+						class="inline-block text-indigo-600 underline transition hover:text-indigo-600/75 dark:text-indigo-500 dark:hover:text-indigo-500/75"
+						href="/privacy"
+					>
+						{ i18n.T(ctx, "global.footer.other-link.l-privacy") }
+					</a>
+				</p>
+				<p class="mt-4 text-sm text-gray-500 sm:order-first sm:mt-0 dark:text-gray-400">
+					&copy;  2024 - { strconv.Itoa(time.Now().Year()) } Round Timing
+				</p>
+			</div>
+		</div>
+	</footer>
+}
