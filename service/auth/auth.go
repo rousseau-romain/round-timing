@@ -5,19 +5,13 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"net/url"
-	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/config"
 	"github.com/rousseau-romain/round-timing/helper"
 	"github.com/rousseau-romain/round-timing/model"
-	"github.com/rousseau-romain/round-timing/views/components/layout"
-	"github.com/rousseau-romain/round-timing/views/page"
 
-	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
@@ -59,29 +53,6 @@ var csrfTokens = make(map[string]string) // Store CSRF tokens
 type Claims struct {
 	Email string `json:"email"`
 	jwt.RegisteredClaims
-}
-
-func enabledUserIfWhiteListed(w http.ResponseWriter, slog *slog.Logger, user model.User) bool {
-	if model.GetFeatureFlagIsEnabled("WHITE_LIST") && !user.Enabled {
-		isWhiteListed, err := model.IsEmailWhiteListed(user.Email)
-		if err != nil {
-			slog.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return false
-		}
-		if isWhiteListed {
-			var t = true
-			model.UpdateUser(user.Id, model.UserUpdate{Enabled: &t})
-			return true
-		}
-		errorTitle := "You can't acces here"
-		errorMessage := fmt.Sprintf("Ask to be add to whitelist at email %s", helper.MailContact)
-		slog.Info("User is not white listed!", "userEmail", user.Email)
-		w.Header().Set("Location", fmt.Sprintf("/?errorTitle=%s&errorMessages=%s", url.QueryEscape(errorTitle), errorMessage))
-		w.WriteHeader(http.StatusTemporaryRedirect)
-		return false
-	}
-	return true
 }
 
 func (s *AuthService) StoreUserSession(w http.ResponseWriter, r *http.Request, slog *slog.Logger, user goth.User) error {
@@ -130,12 +101,6 @@ func (s *AuthService) RemoveUserSession(w http.ResponseWriter, r *http.Request, 
 	session.Options.MaxAge = -1
 
 	session.Save(r, w)
-}
-
-func AllowToBeAuth(handlerFunc http.HandlerFunc, auth *AuthService, slog *slog.Logger) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		handlerFunc(w, r)
-	}
 }
 
 func getCookieHandler(r *http.Request, name string) (http.Cookie, error) {
@@ -200,192 +165,6 @@ func (s *AuthService) GetAuthenticateUserFromRequest(r *http.Request, slog *slog
 		return userDb, err
 	}
 	return userDb, nil
-}
-
-func RequireAuth(handlerFunc http.HandlerFunc, auth *AuthService, slog *slog.Logger) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		user, err := auth.GetAuthenticateUserFromRequest(r, slog)
-		if err != nil {
-			slog.Error(err.Error())
-			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
-			return
-		}
-		slog = slog.With("userId", user.Id)
-
-		if !enabledUserIfWhiteListed(w, slog, user) {
-			return
-		}
-
-		handlerFunc(w, r)
-	}
-}
-
-func RequireAuthAndAdmin(handlerFunc http.HandlerFunc, auth *AuthService, slog *slog.Logger) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		user, err := auth.GetAuthenticateUserFromRequest(r, slog)
-		if err != nil {
-			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
-			return
-		}
-		slog = slog.With("userId", user.Id)
-
-		if !enabledUserIfWhiteListed(w, slog, user) {
-			return
-		}
-
-		if !user.IsAdmin {
-			errorTitle := "You can't acces here"
-			slog.Info("User is not Admin", "userId", user.Id)
-			w.Header().Set("Location", fmt.Sprintf("/?errorTitle=%s", url.QueryEscape(errorTitle)))
-			w.WriteHeader(http.StatusTemporaryRedirect)
-			return
-		}
-
-		handlerFunc(w, r)
-	}
-}
-
-func RequireNotAuth(handlerFunc http.HandlerFunc, auth *AuthService, slog *slog.Logger) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		user, _ := auth.GetAuthenticateUserFromRequest(r, slog)
-		if user.Id == 0 {
-			handlerFunc(w, r)
-			return
-		}
-		slog = slog.With("userId", user.Id)
-
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
-	}
-}
-
-func RequireAuthAndSpectateOfUserMatch(handlerFunc http.HandlerFunc, auth *AuthService, slog *slog.Logger) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		user, err := auth.GetAuthenticateUserFromRequest(r, slog)
-		if err != nil {
-			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
-			return
-		}
-		slog = slog.With("userId", user.Id)
-
-		if !enabledUserIfWhiteListed(w, slog, user) {
-			return
-		}
-
-		vars := mux.Vars(r)
-
-		matchId, _ := strconv.Atoi(vars["idMatch"])
-
-		_, err = model.GetMatch(matchId)
-		if err != nil {
-			languages, _ := model.GetLanguages()
-			errorMessage := i18n.T(r.Context(), "page.match.errors.match-not-found", i18n.M{"matchId": matchId})
-			slog.Error("Match not found", "matchId", matchId)
-			w.WriteHeader(http.StatusNotFound)
-			page.NotFoundPage(errorMessage, []layout.NavItem{}, languages, r.URL.Path, user).Render(r.Context(), w)
-			return
-		}
-
-		userMatch, err := model.GetUserIdByMatch(matchId)
-		if err != nil {
-			slog.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		isUsersSpectateByIdUser, err := model.IsUsersSpectateByIdUser(userMatch.Id, user.IdShare)
-
-		if err != nil {
-			slog.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		if !isUsersSpectateByIdUser {
-			errorMessage := i18n.T(r.Context(), "page.match.errors.match-unauthorized-spectator", i18n.M{"matchId": matchId})
-			slog.Info("User is not spectator for match", "userId", user.Id, "userMatchId", userMatch.Id, "matchId", matchId)
-			w.WriteHeader(http.StatusForbidden)
-			languages, _ := model.GetLanguages()
-			page.ForbidenPage(errorMessage, []layout.NavItem{}, languages, r.URL.Path, user).Render(r.Context(), w)
-			return
-		}
-
-		handlerFunc(w, r)
-	}
-}
-
-func RequireAuthAndHisMatch(handlerFunc http.HandlerFunc, auth *AuthService, slog *slog.Logger) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		user, err := auth.GetAuthenticateUserFromRequest(r, slog)
-		if err != nil {
-			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
-			return
-		}
-		slog = slog.With("userId", user.Id)
-
-		if !enabledUserIfWhiteListed(w, slog, user) {
-			return
-		}
-
-		vars := mux.Vars(r)
-
-		matchId, _ := strconv.Atoi(vars["idMatch"])
-
-		_, err = model.GetMatch(matchId)
-		if err != nil {
-			languages, _ := model.GetLanguages()
-			errorMessage := i18n.T(r.Context(), "page.match.errors.match-not-found", i18n.M{"matchId": matchId})
-			slog.Error("Match not found", "matchId", matchId)
-			w.WriteHeader(http.StatusNotFound)
-			page.NotFoundPage(errorMessage, []layout.NavItem{}, languages, r.URL.Path, user).Render(r.Context(), w)
-			return
-		}
-
-		userMatch, err := model.GetUserIdByMatch(matchId)
-		if err != nil {
-			slog.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		if userMatch.Id != user.Id {
-			languages, _ := model.GetLanguages()
-			errorMessage := i18n.T(r.Context(), "page.match.errors.match-unauthorized", i18n.M{"matchId": matchId})
-			slog.Info("User is not the owner of the match", "userId", user.Id, "userMatchId", userMatch.Id)
-			w.WriteHeader(http.StatusUnauthorized)
-			page.ForbidenPage(errorMessage, []layout.NavItem{}, languages, r.URL.Path, user).Render(r.Context(), w)
-			return
-		}
-
-		handlerFunc(w, r)
-	}
-}
-
-func RequireAuthAndHisAccount(handlerFunc http.HandlerFunc, auth *AuthService, slog *slog.Logger) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		user, err := auth.GetAuthenticateUserFromRequest(r, slog)
-		if err != nil {
-			slog.Error(err.Error())
-			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
-			return
-		}
-		slog = slog.With("userId", user.Id)
-
-		if !enabledUserIfWhiteListed(w, slog, user) {
-			return
-		}
-
-		vars := mux.Vars(r)
-
-		userId, _ := strconv.Atoi(vars["idUser"])
-
-		if user.Id != userId {
-			slog.Info("User is not the owner of the account", "userId", user.Id, "userId", userId)
-			http.Error(w, fmt.Sprintf("User %v is not the owner of the account %v", user.Id, userId), http.StatusUnauthorized)
-			return
-		}
-
-		handlerFunc(w, r)
-	}
 }
 
 func buildCallbackURL(provider string) string {

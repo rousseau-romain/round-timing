@@ -27,6 +27,7 @@ make build/tailwind # Build CSS
 ## Project Structure
 
 - `handlers/` - HTTP route handlers
+- `middleware/` - HTTP middleware (auth, language)
 - `model/` - Database models and queries
 - `views/page/` - Page templates (`.templ` files)
 - `views/components/` - Reusable UI components organized by type:
@@ -34,7 +35,7 @@ make build/tailwind # Build CSS
   - `ui/` - Buttons, AvatarToggle, ErrorPageContent
   - `icons/` - SVG icon components (Heart, User)
   - `forms/` - Form input components
-- `service/` - Business logic
+- `service/auth/` - Authentication service (OAuth, session management)
 - `config/` - Configuration loading
 - `i18n/` - Internationalization
 
@@ -178,6 +179,38 @@ Body cells: `Td`, `TdPrimary`, `TdCenter`, `TdAction`, `TdCompact`
   - Links (content, breadcrumbs, footer)
   - Utility classes (tooltip)
   - HTMX integration (swap animations)
+
+### Middleware (`middleware/`)
+
+**Language** (`language.go`):
+```go
+// Wraps router to set locale based on user preference or browser
+middleware.Language(router, authService, logger)
+```
+
+**Auth** (`auth.go`):
+```go
+// Allow both authenticated and unauthenticated users
+middleware.AllowToBeAuth(handler, authService, logger)
+
+// Require authentication
+middleware.RequireAuth(handler, authService, logger)
+
+// Require authentication + admin role
+middleware.RequireAuthAndAdmin(handler, authService, logger)
+
+// Require user to NOT be authenticated (signin/signup pages)
+middleware.RequireNotAuth(handler, authService, logger)
+
+// Require authentication + ownership of match
+middleware.RequireAuthAndHisMatch(handler, authService, logger)
+
+// Require authentication + spectator access to match
+middleware.RequireAuthAndSpectateOfUserMatch(handler, authService, logger)
+
+// Require authentication + ownership of account
+middleware.RequireAuthAndHisAccount(handler, authService, logger)
+```
 
 ### Database
 
