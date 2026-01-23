@@ -1,13 +1,14 @@
-package page 
+package page
 
 import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/model"
-	"github.com/rousseau-romain/round-timing/views/components"
+	"github.com/rousseau-romain/round-timing/views/components/layout"
+	"github.com/rousseau-romain/round-timing/views/components/ui"
 )
 
-templ NotFoundPage(errorMessage string, navItems []components.NavItem, languages []model.Language, pageSlug string, user model.User) {
-	@components.Layout(i18n.T(ctx, "page.404.title"), components.PopinMessages{}, user, navItems, languages, pageSlug) {
-		@components.ErrorPageContent("404", errorMessage, "page.404.p")
+templ NotFoundPage(errorMessage string, navItems []layout.NavItem, languages []model.Language, pageSlug string, user model.User) {
+	@layout.Layout(i18n.T(ctx, "page.404.title"), layout.PopinMessages{}, user, navItems, languages, pageSlug) {
+		@ui.ErrorPageContent("404", errorMessage, "page.404.p")
 	}
 }

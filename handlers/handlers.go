@@ -6,13 +6,13 @@ import (
 
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/service/auth"
-	"github.com/rousseau-romain/round-timing/views/components"
+	"github.com/rousseau-romain/round-timing/views/components/layout"
 )
 
 type Handler struct {
 	auth      *auth.AuthService
 	Slog      *slog.Logger
-	error     components.PopinMessages
+	error     layout.PopinMessages
 	languages []model.Language
 }
 
@@ -24,7 +24,7 @@ func New(auth *auth.AuthService, slog *slog.Logger) *Handler {
 	return &Handler{
 		auth: auth,
 		Slog: slog,
-		error: components.PopinMessages{
+		error: layout.PopinMessages{
 			Title:    "",
 			Messages: []string{},
 		},
@@ -34,7 +34,7 @@ func New(auth *auth.AuthService, slog *slog.Logger) *Handler {
 
 func RenderComponentError(title string, message []string, httpCode int, w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(httpCode)
-	components.PopinMessage(components.PopinMessages{
+	layout.PopinMessage(layout.PopinMessages{
 		Title:    title,
 		Messages: message,
 		Type:     "error",
@@ -43,7 +43,7 @@ func RenderComponentError(title string, message []string, httpCode int, w http.R
 
 func RenderComponentWarning(title string, message []string, httpCode int, w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(httpCode)
-	components.PopinMessage(components.PopinMessages{
+	layout.PopinMessage(layout.PopinMessages{
 		Title:    title,
 		Messages: message,
 		Type:     "warning",

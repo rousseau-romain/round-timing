@@ -3,11 +3,13 @@ package auth
 import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/model"
-	"github.com/rousseau-romain/round-timing/views/components"
+	"github.com/rousseau-romain/round-timing/views/components/forms"
+	"github.com/rousseau-romain/round-timing/views/components/layout"
+	"github.com/rousseau-romain/round-timing/views/components/ui"
 )
 
-templ SignupPage(navItems []components.NavItem, languages []model.Language, pageSlug string, popinMessage components.PopinMessages) {
-	@components.Layout(i18n.T(ctx, "page.signup.title"), popinMessage, model.User{}, navItems, languages, pageSlug) {
+templ SignupPage(navItems []layout.NavItem, languages []model.Language, pageSlug string, popinMessage layout.PopinMessages) {
+	@layout.Layout(i18n.T(ctx, "page.signup.title"), popinMessage, model.User{}, navItems, languages, pageSlug) {
 		<div class="mx-auto max-w-screen-xl px-4 py-16 sm:px-6 lg:px-8">
 			<h1 class="text-center text-lg font-medium">{ i18n.T(ctx, "page.signup.h1") }</h1>
 			<div class="mx-auto max-w-lg flex flex-col space-y-4">
@@ -16,9 +18,9 @@ templ SignupPage(navItems []components.NavItem, languages []model.Language, page
 					hx-target-error="#popinMessages"
 					class="mt-8 grid grid-cols-6 gap-6"
 				>
-					@components.FormInput("email", "email", "email", "global.email", true)
-					@components.FormInputHalfWidth("password", "password", "password", "global.password", true)
-					@components.FormInputHalfWidth("password", "password-confirmation", "password-confirmation", "page.signup.password-confirmation", true)
+					@forms.Input("email", "email", "email", "global.email", true)
+					@forms.InputHalf("password", "password", "password", "global.password", true)
+					@forms.InputHalf("password", "password-confirmation", "password-confirmation", "page.signup.password-confirmation", true)
 					<div class="col-span-6">
 						<p class="text-sm text-gray-500 dark:text-gray-400">
 							{ i18n.T(ctx, "page.signup.p-agree-terms.1") }
@@ -30,7 +32,7 @@ templ SignupPage(navItems []components.NavItem, languages []model.Language, page
 						</p>
 					</div>
 					<div class="col-span-6 sm:flex sm:items-center sm:gap-4">
-						@components.ButtonSubmit(i18n.T(ctx, "page.signup.signup-button"))
+						@ui.ButtonSubmit(i18n.T(ctx, "page.signup.signup-button"))
 						<p class="mt-4 text-sm text-gray-500 sm:mt-0 dark:text-gray-400">
 							{ i18n.T(ctx, "page.signup.p-already-account") }
 							<a href="/signin" class="text-gray-700 underline dark:text-gray-200">{ i18n.T(ctx, "global.signin") }</a>.

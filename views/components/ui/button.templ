@@ -1,0 +1,139 @@
+package ui
+
+import "github.com/invopop/ctxi18n/i18n"
+
+// buttonClasses returns the common button classes for a given variant and size.
+// Variants: "primary" (blue), "success" (green), "danger" (red), "outline" (bordered), "indigo", "black"
+// Sizes: "sm", "md" (default), "lg"
+func buttonClasses(variant, size string) string {
+	base := "inline-flex items-center justify-center rounded-md font-medium transition focus:outline-none focus:ring-2"
+
+	var variantClass string
+	switch variant {
+	case "primary":
+		variantClass = "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
+	case "success":
+		variantClass = "bg-green-600 text-white hover:bg-green-700 focus:ring-green-500"
+	case "danger":
+		variantClass = "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500"
+	case "outline":
+		variantClass = "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-gray-300 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700"
+	case "indigo":
+		variantClass = "bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500"
+	case "black":
+		variantClass = "bg-black text-white hover:bg-gray-800 focus:ring-gray-500"
+	default:
+		variantClass = "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
+	}
+
+	var sizeClass string
+	switch size {
+	case "sm":
+		sizeClass = "px-4 py-2 text-xs"
+	case "lg":
+		sizeClass = "px-5 py-3 text-base"
+	default:
+		sizeClass = "px-4 py-2 text-sm"
+	}
+
+	return base + " " + variantClass + " " + sizeClass
+}
+
+// Button renders a styled button with configurable variants and sizes.
+// Variants: "primary" (blue), "success" (green), "danger" (red), "outline" (bordered), "indigo", "black"
+// Sizes: "sm", "md" (default), "lg"
+templ Button(variant string, size string) {
+	<button class={ buttonClasses(variant, size) }>
+		{ children... }
+	</button>
+}
+
+// ButtonAction renders a button with HTMX and other custom attributes.
+// Use this when you need hx-* attributes or other custom attributes on the button.
+templ ButtonAction(variant string, size string, attrs templ.Attributes) {
+	<button class={ buttonClasses(variant, size) } { attrs... }>
+		{ children... }
+	</button>
+}
+
+// ButtonLink renders an anchor styled as a button.
+// Use this for navigation links that should look like buttons.
+templ ButtonLink(variant string, size string, href string) {
+	<a href={ templ.SafeURL(href) } class={ buttonClasses(variant, size) }>
+		{ children... }
+	</a>
+}
+
+// ButtonLinkAction renders an anchor styled as a button with custom attributes.
+// Use this when you need additional classes or attributes on a button link.
+templ ButtonLinkAction(variant string, size string, href string, attrs templ.Attributes) {
+	<a href={ templ.SafeURL(href) } class={ buttonClasses(variant, size) } { attrs... }>
+		{ children... }
+	</a>
+}
+
+// ButtonSubmit renders a submit-style button (primary blue)
+templ ButtonSubmit(text string) {
+	<button
+		class="inline-block shrink-0 rounded-md border border-blue-600 bg-blue-600 px-12 py-3 text-sm font-medium text-white transition hover:bg-transparent hover:text-blue-600 focus:ring-3 focus:outline-hidden dark:hover:bg-blue-700 dark:hover:text-white"
+	>
+		{ text }
+	</button>
+}
+
+// ButtonOAuth renders an OAuth sign-in button
+templ ButtonOAuth(href string, provider string) {
+	<a
+		href={ templ.SafeURL(href) }
+		class="block w-full rounded-lg bg-indigo-600 px-5 py-3 text-sm font-medium text-white text-center"
+	>
+		{ i18n.T(ctx, "page.signin.signin-button", i18n.M{"provider": provider}) }
+	</a>
+}
+
+// ButtonToggle renders a toggle button that switches between enabled/disabled states
+templ ButtonToggle(textEnabled, textDisabled, hxPatch string, isEnabled bool) {
+	<button
+		class={
+			"items-center p-2 rounded font-medium",
+			templ.KV("bg-green-100 text-green-800 hover:bg-green-200", isEnabled),
+			templ.KV("bg-red-100 text-red-800 hover:bg-red-200", !isEnabled),
+		}
+		hx-patch={ hxPatch }
+		hx-trigger="click"
+		hx-target="this"
+		hx-swap="outerHTML"
+	>
+		if isEnabled {
+			{ textEnabled }
+		} else {
+			{ textDisabled }
+		}
+	</button>
+}
+
+// ButtonCopy renders a copy-to-clipboard button with an input field
+templ ButtonCopy(textToCopy string) {
+	<div
+		class="text-center flex content-center h-8 rounded-sm overflow-hidden"
+		x-data="{ copied: false }"
+	>
+		<input class="w-48 bg-gray-300 rounded-none" type="text" value={ textToCopy } readonly x-ref="input"/>
+		<button
+			@click="$refs.input.select(); navigator.clipboard.writeText($refs.input.value); copied = true; setTimeout(() => copied = false, 2000)"
+			class="p-1 text-gray-800 bg-transparent border-2 border-gray-300 hover:text-white hover:bg-gray-600 active:bg-gray-700"
+		>
+			<div x-show="!copied">
+				<svg aria-hidden="true" focusable="false" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+					<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path>
+					<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+				</svg>
+			</div>
+			<div x-show="copied" x-cloak>
+				<svg width="16" height="16" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+					<polyline points="20,50 40,70 80,30" stroke="green" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"></polyline>
+				</svg>
+			</div>
+		</button>
+	</div>
+}

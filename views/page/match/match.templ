@@ -4,39 +4,38 @@ import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/model"
-	"github.com/rousseau-romain/round-timing/views/components"
+	"github.com/rousseau-romain/round-timing/views/components/forms"
+	"github.com/rousseau-romain/round-timing/views/components/layout"
+	"github.com/rousseau-romain/round-timing/views/components/ui"
 )
 
 templ TeamPlayer(p model.Player, m model.Match) {
-	<tr class={ "bg-" + p.Team.Color + "-200" }>
+	@ui.TrColor(p.Team.Color) {
 		<td
 			class="text-center whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white"
 		>
-			<input
-				class="text-center bg-transparent"
-				type="text"
-				name="name"
-				value={ p.Name }
-				hx-patch={ fmt.Sprintf("/match/%d/player/%d", m.Id, p.Id) }
-				hx-swap="none"
-				hx-trigger="input changed delay:500ms, keyup[key=='Enter']"
-			/>
+			@forms.InputAction("text", "name", "", templ.Attributes{
+				"value":      p.Name,
+				"hx-patch":   fmt.Sprintf("/match/%d/player/%d", m.Id, p.Id),
+				"hx-swap":    "none",
+				"hx-trigger": "input changed delay:500ms, keyup[key=='Enter']",
+				"class":      "text-center bg-transparent border-none shadow-none focus:ring-0",
+			})
 		</td>
 		<td class="whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">
-			@components.ImgClassToggle(templ.Attributes{"title": p.Name, "alt": p.Class.Name, "src": p.Class.UrlImage + "F.svg"})
+			@ui.AvatarToggle(templ.Attributes{"title": p.Name, "alt": p.Class.Name, "src": p.Class.UrlImage + "F.svg"})
 		</td>
 		<td class="text-center whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">
 			{ p.Team.Name }
 		</td>
 		<td class="whitespace-nowrap px-4 py-2">
-			<button
-				hx-delete={ fmt.Sprintf("/match/%d/player/%d", m.Id, p.Id) }
-				class="inline-block rounded bg-red-600 px-4 py-2 text-xs font-medium text-white hover:bg-red-700"
-			>
+			@ui.ButtonAction("danger", "sm", templ.Attributes{
+				"hx-delete": fmt.Sprintf("/match/%d/player/%d", m.Id, p.Id),
+			}) {
 				{ i18n.T(ctx, "global.buttons.delete") }
-			</button>
+			}
 		</td>
-	</tr>
+	}
 }
 
 templ TeamPlayerTable(players []model.Player, match model.Match) {
@@ -52,61 +51,62 @@ templ TeamPlayerTable(players []model.Player, match model.Match) {
 		x-cloak
 		class="mb-5 flex-col items-center flex"
 	>
-		<table
-			class="mb-2 min-w-full divide-y-2 divide-gray-200 bg-white text-sm dark:divide-gray-700 dark:bg-gray-900"
-		>
-			<thead class="ltr:text-left rtl:text-right">
-				<tr>
-					for _, th := range []string{i18n.T(ctx, "global.table.name"), i18n.T(ctx, "global.table.class"), i18n.T(ctx, "global.table.team"), ""} {
-						<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">
-							{ th }
-						</th>
+		<table class="mb-2 min-w-full divide-y-2 divide-gray-200 bg-white text-sm dark:divide-gray-700 dark:bg-gray-900">
+			@ui.TableHead("default") {
+				@ui.Tr() {
+					@ui.Th() {
+						{ i18n.T(ctx, "global.table.name") }
 					}
-				</tr>
-			</thead>
-			<tbody
-				hx-swap="outerHTML swap:0.1s"
-				hx-target="closest tr"
-				class="divide-y divide-gray-200 dark:divide-gray-700"
-			>
+					@ui.Th() {
+						{ i18n.T(ctx, "global.table.class") }
+					}
+					@ui.Th() {
+						{ i18n.T(ctx, "global.table.team") }
+					}
+					@ui.ThEmpty()
+				}
+			}
+			@ui.TableBody(templ.Attributes{
+				"hx-swap":   "outerHTML swap:0.1s",
+				"hx-target": "closest tr",
+			}) {
 				for _, player := range players {
 					@TeamPlayer(player, match)
 				}
-			</tbody>
+			}
 		</table>
-		<a
-			id="link-start-match-body"
-			href={ templ.SafeURL(fmt.Sprintf("/match/%d/start", match.Id)) }
-			class="max-w-max rounded-lg bg-black px-5 py-3 font-medium text-white sm:w-auto"
-		>
+		@ui.ButtonLinkAction("black", "lg", fmt.Sprintf("/match/%d/start", match.Id), templ.Attributes{
+			"id":    "link-start-match-body",
+			"class": "max-w-max sm:w-auto",
+		}) {
 			if match.Round > 0 {
 				{ i18n.T(ctx, "page.match.button.go-to-match") }
 			} else {
 				{ i18n.T(ctx, "page.match.button.start-match") }
 			}
-		</a>
+		}
 	</div>
 }
 
-templ teamPlayerListPageLayout(user model.User, popinMessages components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string, match model.Match) {
-	@components.Layout(i18n.T(ctx, "page.match.title", i18n.M{"name": match.Name}), popinMessages, user, navItems, languages, pageSlug) {
-		<div class="container mx-auto">
+templ teamPlayerListPageLayout(user model.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []model.Language, pageSlug string, match model.Match) {
+	@layout.Layout(i18n.T(ctx, "page.match.title", i18n.M{"name": match.Name}), popinMessages, user, navItems, languages, pageSlug) {
+		@ui.Container("padded") {
 			{ children... }
-		</div>
+		}
 	}
 }
 
-templ TeamPlayerListPage(user model.User, popinMessages components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string, match model.Match, teams []model.Team, classes []model.Class, players []model.Player) {
+templ TeamPlayerListPage(user model.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []model.Language, pageSlug string, match model.Match, teams []model.Team, classes []model.Class, players []model.Player) {
 	@teamPlayerListPageLayout(user, popinMessages, navItems, languages, pageSlug, match) {
 		<h1 class="mb-2">{ i18n.T(ctx, "page.match.h1") }</h1>
 		if match.Round > 0 {
-			<button
-				type="submit"
-				class="inline-block w-full rounded-lg bg-red-600 px-5 py-3 font-medium text-white sm:w-auto"
-				hx-patch={ fmt.Sprintf("/match/%d/reset", match.Id) }
-			>
+			@ui.ButtonAction("danger", "lg", templ.Attributes{
+				"type":     "submit",
+				"hx-patch": fmt.Sprintf("/match/%d/reset", match.Id),
+				"class":    "w-full sm:w-auto",
+			}) {
 				{ i18n.T(ctx, "page.match.button.reset-match") }
-			</button>
+			}
 		} else {
 			for it, team := range teams {
 				<div
@@ -140,15 +140,12 @@ templ TeamPlayerListPage(user model.User, popinMessages components.PopinMessages
 	}
 }
 
-templ TeamPlayerListPageUnAutorized(user model.User, navItems []components.NavItem, languages []model.Language, pageSlug string, match model.Match) {
-	@teamPlayerListPageLayout(user, components.PopinMessages{}, navItems, languages, pageSlug, match) {
+templ TeamPlayerListPageUnAutorized(user model.User, navItems []layout.NavItem, languages []model.Language, pageSlug string, match model.Match) {
+	@teamPlayerListPageLayout(user, layout.PopinMessages{}, navItems, languages, pageSlug, match) {
 		<h1 class="mb-2">{ i18n.T(ctx, "page.match.unauthorized.h1") }</h1>
 		<p>{ i18n.T(ctx, "page.match.unauthorized.p", i18n.M{"matchName": match.Name, "matchId": match.Id }) }</p>
-		<a
-			class="inline-block w-full rounded-lg bg-black px-5 py-3 font-medium text-white sm:w-auto"
-			href="/match"
-		>
+		@ui.ButtonLinkAction("black", "lg", "/match", templ.Attributes{"class": "w-full sm:w-auto"}) {
 			{ i18n.T(ctx, "page.match.unauthorized.button.go-back-list") }
-		</a>
+		}
 	}
 }
