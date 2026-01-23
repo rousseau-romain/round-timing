@@ -1,4 +1,4 @@
-package model
+package user
 
 func IsEmailWhiteListed(email string) (bool, error) {
 	var count int

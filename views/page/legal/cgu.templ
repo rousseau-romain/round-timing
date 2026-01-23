@@ -2,12 +2,13 @@ package legal
 
 import (
 	"github.com/invopop/ctxi18n/i18n"
-	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/model/system"
 	"github.com/rousseau-romain/round-timing/views/components/layout"
 )
 
-templ CGU(popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []model.Language, pageSlug string) {
-	@layout.Layout(i18n.T(ctx, "page.cgu.title"), popinMessages, model.User{}, navItems, languages, pageSlug) {
+templ CGU(popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string) {
+	@layout.Layout(i18n.T(ctx, "page.cgu.title"), popinMessages, user.User{}, navItems, languages, pageSlug) {
 		<div class="grid place-content-center bg-white px-4 dark:bg-gray-900">
 			<h1 class="text-center text-2xl font-bold text-indigo-600 sm:text-3xl">{ i18n.T(ctx, "page.cgu.h1") }</h1>
 			<h2 class="text-lg font-semibold">1. Présentation des CGU </h2>

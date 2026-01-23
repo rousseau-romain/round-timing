@@ -1,4 +1,4 @@
-package model
+package system
 
 type Language struct {
 	Id     int    `json:"id"`

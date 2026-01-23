@@ -1,7 +1,7 @@
-package model
+package game
 
 import (
-	"github.com/rousseau-romain/round-timing/helper"
+	"github.com/rousseau-romain/round-timing/pkg/sqlhelper"
 )
 
 type Class struct {
@@ -15,7 +15,7 @@ func GetClasses(idLanguage int) ([]Class, error) {
 		SELECT
 			c.id,
 			cn.name,
-			` + helper.GetUrlImageClassClause("c.id") + ` AS url_image
+			` + sqlhelper.URLImageClassClause("c.id") + ` AS url_image
 		FROM class c
 		JOIN class_translation cn ON cn.id_class = c.id AND cn.id_language = ?
 		WHERE c.id != 13

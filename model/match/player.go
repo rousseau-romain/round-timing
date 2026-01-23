@@ -1,20 +1,20 @@
-package model
+package match
 
 import (
 	"errors"
 
-	"github.com/rousseau-romain/round-timing/helper"
-
 	"github.com/huandu/go-sqlbuilder"
+	"github.com/rousseau-romain/round-timing/model/game"
+	"github.com/rousseau-romain/round-timing/pkg/sqlhelper"
 )
 
 type Player struct {
 	Id     int `json:"id"`
 	Idteam int `json:"id_team"`
 	// IdClass int    `json:"id_class"`
-	Name  string `json:"name"`
-	Class Class  `json:"class"`
-	Team  Team   `json:"team"`
+	Name  string     `json:"name"`
+	Class game.Class `json:"class"`
+	Team  Team       `json:"team"`
 }
 
 type PlayerCreate struct {
@@ -36,7 +36,7 @@ func GetPlayersByIdMatch(idTranslation int, idMatch int) ([]Player, error) {
 			p.name,
 			p.id_class,
 			cn.name AS class_name,
-			` + helper.GetUrlImageClassClause("c.id") + ` AS url_image,
+			` + sqlhelper.URLImageClassClause("c.id") + ` AS url_image,
 			t.id AS id_team,
 			t.name AS team_name,
 			ct.name AS color_team
@@ -86,7 +86,7 @@ func GetPlayer(idLanguage int, idPlayer int) (Player, error) {
 			p.name,
 			p.id_class,
 			cn.name AS class_name,
-			` + helper.GetUrlImageClassClause("c.id") + ` AS url_image,
+			` + sqlhelper.URLImageClassClause("c.id") + ` AS url_image,
 			t.id AS id_team,
 			t.name AS team_name,
 			ct.name AS color_team

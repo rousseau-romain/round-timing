@@ -10,13 +10,14 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/invopop/ctxi18n/i18n"
+	"github.com/markbates/goth/gothic"
 	"github.com/rousseau-romain/round-timing/config"
-	"github.com/rousseau-romain/round-timing/helper"
-	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/model/system"
+	userModel "github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/pkg/lang"
+	"github.com/rousseau-romain/round-timing/pkg/password"
 	"github.com/rousseau-romain/round-timing/service/auth"
 	authPage "github.com/rousseau-romain/round-timing/views/page/auth"
-
-	"github.com/markbates/goth/gothic"
 )
 
 func (h *Handler) HandleLogin(w http.ResponseWriter, r *http.Request) {
@@ -41,7 +42,7 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	userAlreadyExists, err := model.UserExistsByOauth2Id(user.UserID)
+	userAlreadyExists, err := userModel.UserExistsByOauth2Id(user.UserID)
 
 	if err != nil {
 		h.Slog.Error(err.Error())
@@ -52,7 +53,7 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 	h.Slog = h.Slog.With("userOauth2Id", user.UserID)
 
 	if !userAlreadyExists {
-		providerLoginName, err := model.UserExistsByEmail(user.Email)
+		providerLoginName, err := userModel.UserExistsByEmail(user.Email)
 
 		if err != nil {
 			fmt.Fprintln(w, err)
@@ -75,14 +76,14 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 			w.WriteHeader(http.StatusTemporaryRedirect)
 			return
 		}
-		lang := helper.GetPreferredLanguage(r)
+		locale := lang.GetPreferred(r)
 
-		idLanguage, err := model.GetLanguagesIdByCode(lang)
+		idLanguage, err := system.GetLanguagesIdByCode(locale)
 		if err != nil {
 			fmt.Fprintln(w, err)
 			return
 		}
-		_, err = model.CreateUser(model.UserCreate{
+		_, err = userModel.CreateUser(userModel.UserCreate{
 			ProviderLogin: user.Provider,
 			Oauth2Id:      user.UserID,
 			Email:         user.Email,
@@ -116,8 +117,8 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	email := strings.TrimSpace(r.FormValue("email"))
-	password := strings.TrimSpace(r.FormValue("password"))
-	passwordConfirmation := strings.TrimSpace(r.FormValue("password-confirmation"))
+	pwd := strings.TrimSpace(r.FormValue("password"))
+	pwdConfirmation := strings.TrimSpace(r.FormValue("password-confirmation"))
 
 	var errMessages = []string{}
 	if _, err := mail.ParseAddress(email); err != nil {
@@ -125,12 +126,12 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	h.Slog = h.Slog.With("email", email)
 
-	passwordIsValid, errorMessages := helper.IsValidPassword(r, password)
+	passwordIsValid, errorMessages := password.Validate(r, pwd)
 	if !passwordIsValid {
 		errMessages = append(errMessages, errorMessages...)
 	}
 
-	if password != passwordConfirmation {
+	if pwd != pwdConfirmation {
 		errMessages = append(errMessages, i18n.T(r.Context(), "page.signup.error.password.confirmation"))
 	}
 
@@ -144,7 +145,7 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	provider, err := model.UserExistsByEmail(email)
+	provider, err := userModel.UserExistsByEmail(email)
 	if err != nil {
 		h.Slog.Error(err.Error())
 		http.Error(w, "can't create user", http.StatusInternalServerError)
@@ -160,31 +161,31 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	salt, err := helper.GenerateSalt()
+	salt, err := password.GenerateSalt()
 	if err != nil {
 		h.Slog.Error(err.Error())
 		http.Error(w, "can't create user", http.StatusInternalServerError)
 		return
 	}
 
-	hashedPassword := helper.HashPassword(password, salt)
+	hashedPassword := password.Hash(pwd, salt)
 
-	lang := helper.GetPreferredLanguage(r)
-	idLanguage, err := model.GetLanguagesIdByCode(lang)
+	locale := lang.GetPreferred(r)
+	idLanguage, err := system.GetLanguagesIdByCode(locale)
 	if err != nil {
 		h.Slog.Error(err.Error())
 		http.Error(w, "can't create user", http.StatusInternalServerError)
 		return
 	}
 
-	user := model.UserCreate{
+	user := userModel.UserCreate{
 		ProviderLogin: "email",
 		Email:         email,
 		Hash:          hashedPassword,
 		IdLanguage:    idLanguage,
 	}
 
-	_, err = model.CreateUser(user)
+	_, err = userModel.CreateUser(user)
 	if err != nil {
 		h.Slog.Error(err.Error())
 		http.Error(w, "can't create user", http.StatusInternalServerError)
@@ -216,11 +217,11 @@ func (h *Handler) HandleLoginEmail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	email := strings.TrimSpace(r.FormValue("email"))
-	password := strings.TrimSpace(r.FormValue("password"))
+	pwd := strings.TrimSpace(r.FormValue("password"))
 
-	user, err := model.GetUserByEmail(email)
+	user, err := userModel.GetUserByEmail(email)
 
-	if err != nil || !helper.CheckPassword(user.Hash, password) {
+	if err != nil || !password.Check(user.Hash, pwd) {
 		errMessage := i18n.T(r.Context(), "page.signin.invalid-credentials")
 		RenderComponentError(
 			errMessage,

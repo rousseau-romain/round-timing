@@ -2,13 +2,14 @@ package layout
 
 import (
 	"fmt"
-	"github.com/invopop/ctxi18n/i18n"
-	"github.com/rousseau-romain/round-timing/model"
-	"github.com/rousseau-romain/round-timing/views/components/icons"
 	"strconv"
 	"time"
 
+	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/config"
+	"github.com/rousseau-romain/round-timing/model/system"
+	"github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/views/components/icons"
 )
 
 type PopinMessages struct {
@@ -17,7 +18,7 @@ type PopinMessages struct {
 	Type     string
 }
 
-templ Layout(title string, popinMessages PopinMessages, user model.User, navItems []NavItem, languages []model.Language, pageSlug string) {
+templ Layout(title string, popinMessages PopinMessages, user user.User, navItems []NavItem, languages []system.Language, pageSlug string) {
 	<html>
 		<head>
 			<title>Round Timing - { title }</title>
@@ -55,7 +56,7 @@ type NavItem struct {
 	Name, Url string
 }
 
-templ Nav(user model.User, navItems []NavItem, languages []model.Language, pageSlug string) {
+templ Nav(user user.User, navItems []NavItem, languages []system.Language, pageSlug string) {
 	<header class="bg-white dark:bg-gray-900">
 		<div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
 			<div class="flex h-16 items-center justify-between">
@@ -149,7 +150,7 @@ templ Nav(user model.User, navItems []NavItem, languages []model.Language, pageS
 	</header>
 }
 
-templ MobileMenu(user model.User, navItems []NavItem) {
+templ MobileMenu(user user.User, navItems []NavItem) {
 	<ul class="space-y-1 border">
 		for _, nav := range navItems {
 			<li class="block">
@@ -238,7 +239,7 @@ templ PopinMessage(popinMessages PopinMessages) {
 	}
 }
 
-templ PopinSelectLanguage(user model.User, languages []model.Language) {
+templ PopinSelectLanguage(user user.User, languages []system.Language) {
 	<div
 		id="popin-language"
 		class="h-screen w-screen absolute top-0 right-0 bg-gray-800 bg-opacity-40 cursor-pointer place-items-center justify-center flex"

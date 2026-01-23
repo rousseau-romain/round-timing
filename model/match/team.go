@@ -1,4 +1,4 @@
-package model
+package match
 
 type Team struct {
 	Id          int    `json:"id"`

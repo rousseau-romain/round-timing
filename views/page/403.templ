@@ -2,12 +2,13 @@ package page
 
 import (
 	"github.com/invopop/ctxi18n/i18n"
-	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/model/system"
 	"github.com/rousseau-romain/round-timing/views/components/layout"
 	"github.com/rousseau-romain/round-timing/views/components/ui"
 )
 
-templ ForbidenPage(errorMessage string, navItems []layout.NavItem, languages []model.Language, pageSlug string, user model.User) {
+templ ForbidenPage(errorMessage string, navItems []layout.NavItem, languages []system.Language, pageSlug string, user user.User) {
 	@layout.Layout(i18n.T(ctx, "page.403.title"), layout.PopinMessages{}, user, navItems, languages, pageSlug) {
 		@ui.ErrorPageContent("403", errorMessage, "page.403.p")
 	}

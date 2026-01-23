@@ -1,4 +1,4 @@
-package model
+package system
 
 type FeatureFlag struct {
 	Id      int    `json:"id"`

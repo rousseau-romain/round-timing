@@ -2,7 +2,8 @@ package page
 
 import (
 	"github.com/invopop/ctxi18n/i18n"
-	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/model/system"
 	"github.com/rousseau-romain/round-timing/views/components/layout"
 	"github.com/rousseau-romain/round-timing/views/components/ui"
 )
@@ -11,7 +12,7 @@ type Pages struct {
 	Name, Slug string
 }
 
-templ HomePage(user model.User, popinMessage layout.PopinMessages, navItems []layout.NavItem, languages []model.Language, pageSlug string) {
+templ HomePage(user user.User, popinMessage layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string) {
 	@layout.Layout(i18n.T(ctx, "page.home.title"), popinMessage, user, navItems, languages, pageSlug) {
 		@ui.Container("padded") {
 			@ui.Card("default") {

@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/model/system"
 	"github.com/rousseau-romain/round-timing/service/auth"
 	"github.com/rousseau-romain/round-timing/views/components/layout"
 )
@@ -13,13 +13,13 @@ type Handler struct {
 	auth      *auth.AuthService
 	Slog      *slog.Logger
 	error     layout.PopinMessages
-	languages []model.Language
+	languages []system.Language
 }
 
 func New(auth *auth.AuthService, slog *slog.Logger) *Handler {
-	languages, err := model.GetLanguages()
+	languages, err := system.GetLanguages()
 	if err != nil {
-		languages = []model.Language{}
+		languages = []system.Language{}
 	}
 	return &Handler{
 		auth: auth,

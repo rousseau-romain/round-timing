@@ -2,14 +2,15 @@ package auth
 
 import (
 	"github.com/invopop/ctxi18n/i18n"
-	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/model/system"
 	"github.com/rousseau-romain/round-timing/views/components/forms"
 	"github.com/rousseau-romain/round-timing/views/components/layout"
 	"github.com/rousseau-romain/round-timing/views/components/ui"
 )
 
-templ SigninPage(navItems []layout.NavItem, languages []model.Language, pageSlug string, popinMessages layout.PopinMessages) {
-	@layout.Layout(i18n.T(ctx, "page.signin.title"), popinMessages, model.User{}, navItems, languages, pageSlug) {
+templ SigninPage(navItems []layout.NavItem, languages []system.Language, pageSlug string, popinMessages layout.PopinMessages) {
+	@layout.Layout(i18n.T(ctx, "page.signin.title"), popinMessages, user.User{}, navItems, languages, pageSlug) {
 		<div class="mx-auto max-w-screen-xl px-4 py-16 sm:px-6 lg:px-8">
 			<div class="mb-4 mx-auto max-w-lg flex flex-col space-y-4">
 				<h1 class="text-center text-2xl font-bold text-indigo-600 sm:text-3xl">{ i18n.T(ctx, "page.signin.h1") }</h1>

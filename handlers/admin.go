@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/rousseau-romain/round-timing/model"
+	userModel "github.com/rousseau-romain/round-timing/model/user"
 	pageAdmin "github.com/rousseau-romain/round-timing/views/page/admin"
 )
 
@@ -13,7 +13,7 @@ func (h *Handler) HandlersListUser(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
-	users, err := model.GetUsers()
+	users, err := userModel.GetUsers()
 	if err != nil {
 		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -31,7 +31,7 @@ func (h *Handler) HandlersUserEnabled(w http.ResponseWriter, r *http.Request) {
 
 	toggleEnabled, _ := strconv.ParseBool(vars["toggleEnabled"])
 
-	err := model.UpdateUser(idUser, model.UserUpdate{
+	err := userModel.UpdateUser(idUser, userModel.UserUpdate{
 		Enabled: &toggleEnabled,
 	})
 
@@ -41,7 +41,7 @@ func (h *Handler) HandlersUserEnabled(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userEnabled, err := model.GetUserById(idUser)
+	userEnabled, err := userModel.GetUserById(idUser)
 	if err != nil {
 		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)

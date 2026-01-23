@@ -1,4 +1,4 @@
-package model
+package user
 
 type UserSpectate struct {
 	Id          int    `json:"id"`
