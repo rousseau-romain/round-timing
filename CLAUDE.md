@@ -112,6 +112,27 @@ Rows: `Tr`, `TrBorder`, `TrColor(color)`
 Header cells: `Th`, `ThEmpty`, `ThCompact`
 Body cells: `Td`, `TdPrimary`, `TdCenter`, `TdAction`, `TdCompact`
 
+**Containers & Cards** (`container.templ`):
+```go
+// Page container (centered with max-width)
+@ui.Container("default") { ... }  // No padding
+@ui.Container("padded") { ... }   // With p-4 padding
+
+// Content card
+@ui.Card("default") { ... }       // White bg with shadow
+@ui.Card("bordered") { ... }      // With visible border
+
+// Team-colored card (for match teams)
+@ui.CardColor("red") { ... }      // border-red-200
+@ui.CardColor("indigo") { ... }   // border-indigo-200
+
+// Page section with margin
+@ui.Section() { ... }
+
+// Page title header
+@ui.PageHeader() { Page Title }
+```
+
 ### Form Components (`views/components/forms/`)
 
 **forms.templ**:

@@ -12,7 +12,7 @@ import (
 
 templ ProfilePage(user model.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []model.Language, pageSlug string, idUserShares []string, classes []model.Class, spells []model.SpellByClass, userConfigurations []model.UserConfiguration) {
 	@layout.Layout(i18n.T(ctx, "page.profile.title"), popinMessages, user, navItems, languages, pageSlug) {
-		<div class="mx-auto container">
+		@ui.Container("default") {
 			<h1 class="text-2xl font-semibold">{ i18n.T(ctx, "page.profile.h1") }</h1>
 			<div class="mb-2">
 				<div class="flex gap-2">
@@ -54,7 +54,7 @@ templ ProfilePage(user model.User, popinMessages layout.PopinMessages, navItems 
 			>
 				{ i18n.T(ctx, "page.profile.logout") }
 			</a>
-		</div>
+		}
 	}
 }
 

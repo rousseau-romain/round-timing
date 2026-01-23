@@ -1,0 +1,50 @@
+package ui
+
+// Container renders a centered container with max-width.
+// Variants: "default" (no padding), "padded" (with padding)
+templ Container(variant string) {
+	<div
+		class={
+			"container mx-auto",
+			templ.KV("p-4", variant == "padded"),
+		}
+	>
+		{ children... }
+	</div>
+}
+
+// Card renders a bordered card with rounded corners.
+// Variants: "default", "bordered" (visible border)
+templ Card(variant string) {
+	<div
+		class={
+			"rounded-md p-4",
+			templ.KV("bg-white dark:bg-gray-800 shadow-sm", variant == "default" || variant == ""),
+			templ.KV("border-2 border-gray-200 dark:border-gray-700", variant == "bordered"),
+		}
+	>
+		{ children... }
+	</div>
+}
+
+// CardColor renders a card with a colored border.
+// Used for team-colored sections.
+templ CardColor(color string) {
+	<div class={ "border-2 rounded-md p-2 mb-2", "border-" + color + "-200" }>
+		{ children... }
+	</div>
+}
+
+// Section renders a section with margin bottom.
+templ Section() {
+	<div class="mb-4">
+		{ children... }
+	</div>
+}
+
+// PageHeader renders a page title.
+templ PageHeader() {
+	<h1 class="text-2xl font-semibold mb-4">
+		{ children... }
+	</h1>
+}

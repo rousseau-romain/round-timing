@@ -4,6 +4,7 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/views/components/layout"
+	"github.com/rousseau-romain/round-timing/views/components/ui"
 )
 
 type Pages struct {
@@ -12,8 +13,8 @@ type Pages struct {
 
 templ HomePage(user model.User, popinMessage layout.PopinMessages, navItems []layout.NavItem, languages []model.Language, pageSlug string) {
 	@layout.Layout(i18n.T(ctx, "page.home.title"), popinMessage, user, navItems, languages, pageSlug) {
-		<div class="container mx-auto p-4">
-			<div class="rounded-lg bg-white p-6">
+		@ui.Container("padded") {
+			@ui.Card("default") {
 				<h1 class="mb-4 text-3xl font-bold">Round Timing</h1>
 				<p class="mb-4 text-lg">
 					@templ.Raw(i18n.T(ctx, "page.home.discover", i18n.M{"name": "<strong>Round Timing</strong>"}))
@@ -29,7 +30,7 @@ templ HomePage(user model.User, popinMessage layout.PopinMessages, navItems []la
 						</ul>
 					</li>
 				</ul>
-			</div>
-		</div>
+			}
+		}
 	}
 }

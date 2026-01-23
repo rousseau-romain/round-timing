@@ -90,9 +90,9 @@ templ TeamPlayerTable(players []model.Player, match model.Match) {
 
 templ teamPlayerListPageLayout(user model.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []model.Language, pageSlug string, match model.Match) {
 	@layout.Layout(i18n.T(ctx, "page.match.title", i18n.M{"name": match.Name}), popinMessages, user, navItems, languages, pageSlug) {
-		<div class="container mx-auto">
+		@ui.Container("padded") {
 			{ children... }
-		</div>
+		}
 	}
 }
 
