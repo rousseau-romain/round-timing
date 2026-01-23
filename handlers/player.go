@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/invopop/ctxi18n/i18n"
-	"github.com/rousseau-romain/round-timing/helper"
 	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/pkg/lang"
 	pageMatch "github.com/rousseau-romain/round-timing/views/page/match"
 
 	"github.com/gorilla/mux"
@@ -153,7 +153,7 @@ func (h *Handler) HandlersPlayerLanguage(w http.ResponseWriter, r *http.Request)
 	vars := mux.Vars(r)
 
 	code := vars["code"]
-	idLanguage := helper.SupportedLanguages[code]
+	idLanguage := lang.SupportedLanguages[code]
 
 	userUpdate := model.UserUpdate{
 		IdLanguage: &idLanguage,

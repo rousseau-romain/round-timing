@@ -9,8 +9,8 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/rousseau-romain/round-timing/config"
-	"github.com/rousseau-romain/round-timing/helper"
 	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/pkg/password"
 
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
@@ -43,7 +43,7 @@ func NewAuthService(store sessions.Store) *AuthService {
 }
 
 func GenerateCSRFToken(sessionID string) string {
-	token, _ := helper.GenerateSalt()
+	token, _ := password.GenerateSalt()
 	csrfTokens[sessionID] = token
 	return token
 }

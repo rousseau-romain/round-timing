@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/rousseau-romain/round-timing/helper"
+	"github.com/rousseau-romain/round-timing/pkg/sqlhelper"
 )
 
 type Spell struct {
@@ -31,7 +31,7 @@ func GetSpellsByIdClass(idLanguage int, idClass []int, idsToExclude []int) ([]Sp
 	sql := `
 		SELECT
 			s.id,
-			` + helper.GetUrlImageSpellClause("s.id") + ` AS url_image,
+			` + sqlhelper.URLImageSpellClause("s.id") + ` AS url_image,
 			s.id_class,
 			st.name,
 			st.short_name,

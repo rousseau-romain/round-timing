@@ -1,9 +1,8 @@
-package helper
+package password
 
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"fmt"
 	"net/http"
 	"strings"
 	"unicode"
@@ -12,44 +11,7 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-var MailContact = "roundtiming@gmail.com"
-
-// Id in database
-var SupportedLanguages = map[string]int{
-	"en": 1,
-	"fr": 2,
-	"it": 3,
-	"es": 4,
-	"pt": 5,
-}
-
-func GetPreferredLanguage(r *http.Request) string {
-	acceptLang := r.Header.Get("Accept-Language")
-	if acceptLang == "" {
-		return "en"
-	}
-
-	languages := strings.Split(acceptLang, ",")
-	for _, lang := range languages {
-		langCode := strings.TrimSpace(strings.Split(lang, ";")[0])
-		langCode = strings.Split(langCode, "-")[0]
-
-		if _, ok := SupportedLanguages[langCode]; ok {
-			return langCode
-		}
-	}
-
-	return "en"
-}
-
-var logTypeTemplate = func(e any) string {
-	fmt.Printf("Type %T\n", e)
-	return ""
-}
-
-// 139 is mastery hammer
-var MasteryIdSpells = []int{136, 137, 138, 140, 141, 142, 143}
-
+// GenerateSalt generates a random 16-byte salt encoded as base64.
 func GenerateSalt() (string, error) {
 	bytes := make([]byte, 16)
 	if _, err := rand.Read(bytes); err != nil {
@@ -58,21 +20,25 @@ func GenerateSalt() (string, error) {
 	return base64.StdEncoding.EncodeToString(bytes), nil
 }
 
-func HashPassword(password, salt string) string {
+// Hash hashes a password with the given salt using Argon2id.
+func Hash(password, salt string) string {
 	hash := argon2.IDKey([]byte(password), []byte(salt), 1, 64*1024, 4, 32)
 	return base64.StdEncoding.EncodeToString(hash) + ":" + salt
 }
 
-func CheckPassword(storedHash, password string) bool {
+// Check verifies a password against a stored hash.
+func Check(storedHash, password string) bool {
 	parts := strings.Split(storedHash, ":")
 	if len(parts) != 2 {
 		return false
 	}
-	hash := HashPassword(password, parts[1])
+	hash := Hash(password, parts[1])
 	return storedHash == hash
 }
 
-func IsValidPassword(r *http.Request, password string) (bool, []string) {
+// Validate checks if a password meets security requirements.
+// Returns true if valid, or false with a list of error messages.
+func Validate(r *http.Request, password string) (bool, []string) {
 	var errors []string
 	var hasUpper, hasLower, hasNumber, hasSpecial bool
 

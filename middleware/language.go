@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/invopop/ctxi18n"
-	"github.com/rousseau-romain/round-timing/helper"
 	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/pkg/lang"
 	"github.com/rousseau-romain/round-timing/service/auth"
 )
 
@@ -15,13 +15,13 @@ func Language(handler http.Handler, authService *auth.AuthService, logger *slog.
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user, _ := authService.GetAuthenticateUserFromRequest(r, logger)
 
-		var lang string
+		var locale string
 		var err error
 
 		if user.Id == 0 {
-			lang = helper.GetPreferredLanguage(r)
+			locale = lang.GetPreferred(r)
 		} else {
-			lang, err = model.GetLanguageLocaleById(user.IdLanguage)
+			locale, err = model.GetLanguageLocaleById(user.IdLanguage)
 			if err != nil {
 				logger.Error(err.Error())
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -29,7 +29,7 @@ func Language(handler http.Handler, authService *auth.AuthService, logger *slog.
 			}
 		}
 
-		ctx, err := ctxi18n.WithLocale(r.Context(), lang)
+		ctx, err := ctxi18n.WithLocale(r.Context(), locale)
 		if err != nil {
 			logger.Error("error setting locale", "error", err)
 			http.Error(w, "error setting locale", http.StatusBadRequest)

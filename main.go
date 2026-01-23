@@ -11,9 +11,9 @@ import (
 
 	"github.com/rousseau-romain/round-timing/config"
 	"github.com/rousseau-romain/round-timing/handlers"
-	"github.com/rousseau-romain/round-timing/helper"
 	"github.com/rousseau-romain/round-timing/i18n/locales"
 	"github.com/rousseau-romain/round-timing/middleware"
+	"github.com/rousseau-romain/round-timing/pkg/lang"
 	"github.com/rousseau-romain/round-timing/service/auth"
 
 	"github.com/gorilla/mux"
@@ -58,8 +58,8 @@ func run() error {
 
 	handler := handlers.New(authService, versionLogger)
 
-	keys := make([]string, 0, len(helper.SupportedLanguages))
-	for k := range helper.SupportedLanguages {
+	keys := make([]string, 0, len(lang.SupportedLanguages))
+	for k := range lang.SupportedLanguages {
 		keys = append(keys, k)
 	}
 	regexCode := strings.Join(keys, "|")

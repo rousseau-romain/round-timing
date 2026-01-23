@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/invopop/ctxi18n/i18n"
-	"github.com/rousseau-romain/round-timing/helper"
 	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/pkg/constants"
 	"github.com/rousseau-romain/round-timing/views/page"
 	pageMatch "github.com/rousseau-romain/round-timing/views/page/match"
 
@@ -212,7 +212,7 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 
 	if match.Round == 0 {
 		classeIds := []int{idClassGlobal}
-		idSpellToExclude := helper.MasteryIdSpells
+		idSpellToExclude := constants.MasteryIdSpells
 		for _, player := range players {
 			classeIds = append(classeIds, player.Class.Id)
 		}

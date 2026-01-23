@@ -9,8 +9,8 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/invopop/ctxi18n/i18n"
-	"github.com/rousseau-romain/round-timing/helper"
 	"github.com/rousseau-romain/round-timing/model"
+	"github.com/rousseau-romain/round-timing/pkg/constants"
 	"github.com/rousseau-romain/round-timing/service/auth"
 	"github.com/rousseau-romain/round-timing/views/components/layout"
 	"github.com/rousseau-romain/round-timing/views/page"
@@ -31,7 +31,7 @@ func enabledUserIfWhiteListed(w http.ResponseWriter, logger *slog.Logger, user m
 			return true
 		}
 		errorTitle := "You can't acces here"
-		errorMessage := fmt.Sprintf("Ask to be add to whitelist at email %s", helper.MailContact)
+		errorMessage := fmt.Sprintf("Ask to be add to whitelist at email %s", constants.MailContact)
 		logger.Info("User is not white listed!", "userEmail", user.Email)
 		w.Header().Set("Location", fmt.Sprintf("/?errorTitle=%s&errorMessages=%s", url.QueryEscape(errorTitle), errorMessage))
 		w.WriteHeader(http.StatusTemporaryRedirect)

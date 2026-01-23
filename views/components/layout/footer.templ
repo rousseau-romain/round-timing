@@ -2,7 +2,7 @@ package layout
 
 import (
 	"github.com/invopop/ctxi18n/i18n"
-	"github.com/rousseau-romain/round-timing/helper"
+	"github.com/rousseau-romain/round-timing/pkg/constants"
 	"strconv"
 	"time"
 )
@@ -40,7 +40,7 @@ templ Footer() {
 					<ul class="mt-8 flex justify-center gap-6 sm:justify-start md:gap-8">
 						<li>
 							<a
-								href={ templ.SafeURL("mailto:" + helper.MailContact) }
+								href={ templ.SafeURL("mailto:" + constants.MailContact) }
 								rel="noreferrer"
 								target="_blank"
 								class="flex text-indigo-700 transition hover:text-indigo-700/75 dark:text-indigo-500 dark:hover:text-indigo-500/75"
@@ -53,7 +53,7 @@ templ Footer() {
 										clip-rule="evenodd"
 									></path>
 								</svg>
-								<span class="text-gray-700 dark:text-gray-300">{ helper.MailContact }</span>
+								<span class="text-gray-700 dark:text-gray-300">{ constants.MailContact }</span>
 							</a>
 						</li>
 					</ul>

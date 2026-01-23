@@ -29,6 +29,11 @@ make build/tailwind # Build CSS
 - `handlers/` - HTTP route handlers
 - `middleware/` - HTTP middleware (auth, language)
 - `model/` - Database models and queries
+- `pkg/` - Reusable packages:
+  - `password/` - Password hashing and validation
+  - `lang/` - Language detection and supported languages
+  - `constants/` - Application constants
+  - `sqlhelper/` - SQL query helpers
 - `views/page/` - Page templates (`.templ` files)
 - `views/components/` - Reusable UI components organized by type:
   - `layout/` - Layout, Footer, Nav, PopinMessages
@@ -210,6 +215,34 @@ middleware.RequireAuthAndSpectateOfUserMatch(handler, authService, logger)
 
 // Require authentication + ownership of account
 middleware.RequireAuthAndHisAccount(handler, authService, logger)
+```
+
+### Packages (`pkg/`)
+
+**Password** (`pkg/password/`):
+```go
+salt, _ := password.GenerateSalt()
+hash := password.Hash(plaintext, salt)
+ok := password.Check(storedHash, plaintext)
+valid, errors := password.Validate(r, plaintext)
+```
+
+**Language** (`pkg/lang/`):
+```go
+locale := lang.GetPreferred(r)  // From Accept-Language header
+id := lang.SupportedLanguages["fr"]  // Map of locale -> DB ID
+```
+
+**Constants** (`pkg/constants/`):
+```go
+constants.MailContact      // Contact email
+constants.MasteryIdSpells  // Mastery spell IDs
+```
+
+**SQL Helper** (`pkg/sqlhelper/`):
+```go
+sqlhelper.URLImageClassClause("c.id")  // CONCAT for class images
+sqlhelper.URLImageSpellClause("s.id")  // CONCAT for spell images
 ```
 
 ### Database

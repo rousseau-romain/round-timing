@@ -3,7 +3,7 @@ package model
 import (
 	"errors"
 
-	"github.com/rousseau-romain/round-timing/helper"
+	"github.com/rousseau-romain/round-timing/pkg/sqlhelper"
 
 	"github.com/huandu/go-sqlbuilder"
 )
@@ -36,7 +36,7 @@ func GetPlayersByIdMatch(idTranslation int, idMatch int) ([]Player, error) {
 			p.name,
 			p.id_class,
 			cn.name AS class_name,
-			` + helper.GetUrlImageClassClause("c.id") + ` AS url_image,
+			` + sqlhelper.URLImageClassClause("c.id") + ` AS url_image,
 			t.id AS id_team,
 			t.name AS team_name,
 			ct.name AS color_team
@@ -86,7 +86,7 @@ func GetPlayer(idLanguage int, idPlayer int) (Player, error) {
 			p.name,
 			p.id_class,
 			cn.name AS class_name,
-			` + helper.GetUrlImageClassClause("c.id") + ` AS url_image,
+			` + sqlhelper.URLImageClassClause("c.id") + ` AS url_image,
 			t.id AS id_team,
 			t.name AS team_name,
 			ct.name AS color_team

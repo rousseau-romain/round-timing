@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/rousseau-romain/round-timing/helper"
+	"github.com/rousseau-romain/round-timing/pkg/sqlhelper"
 )
 
 type SpellByClass struct {
@@ -17,7 +17,7 @@ func GetFavoriteSpellByIdUserAndIdSpell(idLanguage, idUser, idSpell int) (SpellB
 		SELECT
 			s.id AS id_spell,
 			s.id_class AS id_class,
-			` + helper.GetUrlImageSpellClause("s.id") + ` AS spell_url_image,
+			` + sqlhelper.URLImageSpellClause("s.id") + ` AS spell_url_image,
 			st.name AS spell_name,
 			IF(fs.id_spell IS NULL , 0, 1) AS is_favorite
 		FROM spell AS s
@@ -51,7 +51,7 @@ func GetFavoriteSpellsByIdUser(idLanguage, idUser int) ([]SpellByClass, error) {
 		SELECT
 			s.id AS id_spell,
 			s.id_class AS id_class,
-			` + helper.GetUrlImageSpellClause("s.id") + ` AS spell_url_image,
+			` + sqlhelper.URLImageSpellClause("s.id") + ` AS spell_url_image,
 			st.name AS spell_name,
 			IF(fs.id_spell IS NULL , 0, 1) AS is_favorite
 		FROM spell AS s

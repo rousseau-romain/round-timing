@@ -3,7 +3,8 @@ package model
 import (
 	"fmt"
 
-	"github.com/rousseau-romain/round-timing/helper"
+	"github.com/rousseau-romain/round-timing/pkg/constants"
+	"github.com/rousseau-romain/round-timing/pkg/sqlhelper"
 )
 
 type MatchPlayerSpell struct {
@@ -40,7 +41,7 @@ func GetSpellPlayerByIdSpellsPlayers(idLanguage int, idSpellPlayer int) (MatchPl
 			st.short_name,
 			s.color,
 			s.delay,
-			` + helper.GetUrlImageSpellClause("s.id") + ` AS url_image,
+			` + sqlhelper.URLImageSpellClause("s.id") + ` AS url_image,
 			mps.round_before_recovery,
 			mps.created_at,
 			mps.updated_at
@@ -83,7 +84,7 @@ func GetSpellsPlayersByIdMatch(idLanguage, idMatch, idUser int, getOnlyFavorite 
 	}
 
 	masteryClause := "m.multiple_mastery_enabled = 0 AND (s.id NOT IN ("
-	for _, id := range helper.MasteryIdSpells {
+	for _, id := range constants.MasteryIdSpells {
 		masteryClause += fmt.Sprintf("%d, ", id)
 	}
 	masteryClause = masteryClause[:len(masteryClause)-2]
@@ -99,7 +100,7 @@ func GetSpellsPlayersByIdMatch(idLanguage, idMatch, idUser int, getOnlyFavorite 
 			st.short_name,
 			s.color,
 			s.delay,
-			` + helper.GetUrlImageSpellClause("s.id") + ` AS url_image,
+			` + sqlhelper.URLImageSpellClause("s.id") + ` AS url_image,
 			mps.round_before_recovery,
 			mps.created_at,
 			mps.updated_at
