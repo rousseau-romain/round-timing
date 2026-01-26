@@ -1,4 +1,4 @@
-package handlers
+package profile
 
 import (
 	"net/http"
@@ -10,7 +10,7 @@ import (
 )
 
 func (h *Handler) HandleToggleSpellFavorite(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)

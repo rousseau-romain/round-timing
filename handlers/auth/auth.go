@@ -1,4 +1,4 @@
-package handlers
+package auth
 
 import (
 	"fmt"
@@ -12,23 +12,28 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/markbates/goth/gothic"
 	"github.com/rousseau-romain/round-timing/config"
+	"github.com/rousseau-romain/round-timing/handlers"
 	"github.com/rousseau-romain/round-timing/model/system"
 	userModel "github.com/rousseau-romain/round-timing/model/user"
 	"github.com/rousseau-romain/round-timing/pkg/lang"
 	"github.com/rousseau-romain/round-timing/pkg/password"
-	"github.com/rousseau-romain/round-timing/service/auth"
+	serviceAuth "github.com/rousseau-romain/round-timing/service/auth"
 	authPage "github.com/rousseau-romain/round-timing/views/page/auth"
 )
 
+type Handler struct {
+	*handlers.Handler
+}
+
 func (h *Handler) HandleLogin(w http.ResponseWriter, r *http.Request) {
-	authPage.SigninPage(GetPageNavDefault(r), h.languages, r.URL.Path, h.error).Render(r.Context(), w)
+	authPage.SigninPage(handlers.GetPageNavDefault(r), h.Languages, r.URL.Path, h.Error).Render(r.Context(), w)
 }
 
 func (h *Handler) HandleProviderLogin(w http.ResponseWriter, r *http.Request) {
 	// try to get the user without re-authenticating
 	if u, err := gothic.CompleteUserAuth(w, r); err == nil {
 		h.Slog.Info("User already authenticated", "goticUserId", u.UserID)
-		authPage.SigninPage(GetPageNavDefault(r), h.languages, r.URL.Path, h.error).Render(r.Context(), w)
+		authPage.SigninPage(handlers.GetPageNavDefault(r), h.Languages, r.URL.Path, h.Error).Render(r.Context(), w)
 	} else {
 		gothic.BeginAuthHandler(w, r)
 	}
@@ -70,7 +75,7 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 				return
 			}
 
-			h.auth.RemoveUserSession(w, r, h.Slog)
+			h.Auth.RemoveUserSession(w, r, h.Slog)
 
 			w.Header().Set("Location", fmt.Sprintf("/?errorTitle=%s&errorMessages=%s", url.QueryEscape(errorTitle), url.QueryEscape(errorMessage)))
 			w.WriteHeader(http.StatusTemporaryRedirect)
@@ -95,7 +100,7 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 		}
 	}
 
-	err = h.auth.StoreUserSession(w, r, h.Slog, user)
+	err = h.Auth.StoreUserSession(w, r, h.Slog, user)
 	if err != nil {
 		fmt.Fprintln(w, err)
 		return
@@ -105,7 +110,7 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 }
 
 func (h *Handler) HandleSignupEmail(w http.ResponseWriter, r *http.Request) {
-	authPage.SignupPage(GetPageNavDefault(r), h.languages, r.URL.Path, h.error).Render(r.Context(), w)
+	authPage.SignupPage(handlers.GetPageNavDefault(r), h.Languages, r.URL.Path, h.Error).Render(r.Context(), w)
 }
 
 func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
@@ -136,7 +141,7 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(errMessages) > 0 {
-		RenderComponentError(
+		handlers.RenderComponentError(
 			i18n.T(r.Context(), "page.signup.error.title"),
 			errMessages,
 			http.StatusBadRequest, w, r,
@@ -152,7 +157,7 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if provider != "" {
-		RenderComponentError(
+		handlers.RenderComponentError(
 			i18n.T(r.Context(), "page.signup.error.email.already-exists", i18n.M{"email": email, "provider": provider}),
 			[]string{""},
 			http.StatusConflict, w, r,
@@ -198,7 +203,7 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 
 func generateToken(email string) (string, error) {
 	expirationTime := time.Now().Add(24 * time.Hour)
-	claims := &auth.Claims{
+	claims := &serviceAuth.Claims{
 		Email: email,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
@@ -223,7 +228,7 @@ func (h *Handler) HandleLoginEmail(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil || !password.Check(user.Hash, pwd) {
 		errMessage := i18n.T(r.Context(), "page.signin.invalid-credentials")
-		RenderComponentError(
+		handlers.RenderComponentError(
 			errMessage,
 			[]string{errMessage},
 			http.StatusBadRequest, w, r,
@@ -240,7 +245,7 @@ func (h *Handler) HandleLoginEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	csrfToken := auth.GenerateCSRFToken(user.Email)
+	csrfToken := serviceAuth.GenerateCSRFToken(user.Email)
 
 	http.SetCookie(w, &http.Cookie{
 		Name:     "token",
@@ -263,7 +268,7 @@ func (h *Handler) HandleLoginEmail(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleLogout(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 	err := gothic.Logout(w, r)
 	if err != nil {
@@ -271,7 +276,7 @@ func (h *Handler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.auth.RemoveUserSession(w, r, h.Slog)
+	h.Auth.RemoveUserSession(w, r, h.Slog)
 
 	w.Header().Set("Location", "/")
 	w.WriteHeader(http.StatusTemporaryRedirect)

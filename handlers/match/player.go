@@ -1,4 +1,4 @@
-package handlers
+package match
 
 import (
 	"net/http"
@@ -7,16 +7,15 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/invopop/ctxi18n/i18n"
+	"github.com/rousseau-romain/round-timing/handlers"
 	matchModel "github.com/rousseau-romain/round-timing/model/match"
-	userModel "github.com/rousseau-romain/round-timing/model/user"
-	"github.com/rousseau-romain/round-timing/pkg/lang"
 	pageMatch "github.com/rousseau-romain/round-timing/views/page/match"
 )
 
 var MaxPlayerByTeam = 8
 
 func (h *Handler) HandleUpdatePlayer(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
@@ -41,7 +40,7 @@ func (h *Handler) HandleUpdatePlayer(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleCreatePlayer(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
@@ -69,7 +68,7 @@ func (h *Handler) HandleCreatePlayer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if canCreatePlayerInTeam == MaxPlayerByTeam {
-		RenderComponentWarning(
+		handlers.RenderComponentWarning(
 			i18n.T(r.Context(), "global.error")+" "+name,
 			[]string{i18n.T(r.Context(), "page.match.max-player-by-team")},
 			http.StatusBadRequest,
@@ -124,7 +123,7 @@ func (h *Handler) HandleCreatePlayer(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleDeletePlayer(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
@@ -144,28 +143,4 @@ func (h *Handler) HandleDeletePlayer(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-}
-
-func (h *Handler) HandlePlayerLanguage(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
-	h.Slog = h.Slog.With("userId", user.Id)
-
-	vars := mux.Vars(r)
-
-	code := vars["code"]
-	idLanguage := lang.SupportedLanguages[code]
-
-	userUpdate := userModel.UserUpdate{
-		IdLanguage: &idLanguage,
-	}
-
-	err := userModel.UpdateUser(user.Id, userUpdate)
-	if err != nil {
-		h.Slog.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	w.Header().Set("HX-Refresh", "true")
-
 }

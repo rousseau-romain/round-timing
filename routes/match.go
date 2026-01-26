@@ -4,12 +4,12 @@ import (
 	"log/slog"
 
 	"github.com/gorilla/mux"
-	"github.com/rousseau-romain/round-timing/handlers"
+	handlersMatch "github.com/rousseau-romain/round-timing/handlers/match"
 	"github.com/rousseau-romain/round-timing/middleware"
 	"github.com/rousseau-romain/round-timing/service/auth"
 )
 
-func registerMatchRoutes(r *mux.Router, handler *handlers.Handler, authService *auth.AuthService, logger *slog.Logger) {
+func registerMatchRoutes(r *mux.Router, handler *handlersMatch.Handler, authService *auth.AuthService, logger *slog.Logger) {
 	r.Handle("/match", middleware.RequireAuth(handler.HandleListMatch, authService, logger)).Methods("GET")
 	r.Handle("/match", middleware.RequireAuth(handler.HandleCreateMatch, authService, logger)).Methods("POST")
 	r.Handle("/match/{idMatch:[0-9]+}", middleware.RequireAuthAndHisMatch(handler.HandleDeleteMatch, authService, logger)).Methods("DELETE")

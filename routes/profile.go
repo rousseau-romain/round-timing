@@ -6,13 +6,13 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
-	"github.com/rousseau-romain/round-timing/handlers"
+	handlersProfile "github.com/rousseau-romain/round-timing/handlers/profile"
 	"github.com/rousseau-romain/round-timing/middleware"
 	"github.com/rousseau-romain/round-timing/pkg/lang"
 	"github.com/rousseau-romain/round-timing/service/auth"
 )
 
-func registerProfileRoutes(r *mux.Router, handler *handlers.Handler, authService *auth.AuthService, logger *slog.Logger) {
+func registerProfileRoutes(r *mux.Router, handler *handlersProfile.Handler, authService *auth.AuthService, logger *slog.Logger) {
 	r.Handle("/profile", middleware.RequireAuth(handler.HandleProfile, authService, logger)).Methods("GET")
 	r.Handle("/profile/configuration/{idConfiguration:[0-9]+}/toggle-configuration", middleware.RequireAuth(handler.HandleProfileToggleUserConfiguration, authService, logger)).Methods("PATCH")
 	r.Handle("/profile/spell-favorite/{idSpell:[0-9]+}/toggle-favorite", middleware.RequireAuth(handler.HandleToggleSpellFavorite, authService, logger)).Methods("PATCH")
