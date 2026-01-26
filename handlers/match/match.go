@@ -1,4 +1,4 @@
-package handlers
+package match
 
 import (
 	"fmt"
@@ -8,6 +8,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/invopop/ctxi18n/i18n"
+	"github.com/rousseau-romain/round-timing/handlers"
 	"github.com/rousseau-romain/round-timing/model/game"
 	matchModel "github.com/rousseau-romain/round-timing/model/match"
 	userModel "github.com/rousseau-romain/round-timing/model/user"
@@ -16,10 +17,14 @@ import (
 	pageMatch "github.com/rousseau-romain/round-timing/views/page/match"
 )
 
+type Handler struct {
+	*handlers.Handler
+}
+
 var NumberOfMatchMax = 50
 
-func (h *Handler) HandlersListMatch(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+func (h *Handler) HandleListMatch(w http.ResponseWriter, r *http.Request) {
+	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	matchs, err := matchModel.GetMatchsByIdUser(user.Id)
@@ -29,11 +34,11 @@ func (h *Handler) HandlersListMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pageMatch.MatchListPage(user, h.error, GetPageNavDefault(r), h.languages, r.URL.Path, matchs).Render(r.Context(), w)
+	pageMatch.MatchListPage(user, h.Error, handlers.GetPageNavDefault(r), h.Languages, r.URL.Path, matchs).Render(r.Context(), w)
 }
 
-func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+func (h *Handler) HandleCreateMatch(w http.ResponseWriter, r *http.Request) {
+	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	err := r.ParseForm()
@@ -58,7 +63,7 @@ func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if numberOfMatch >= NumberOfMatchMax {
-		RenderComponentWarning(
+		handlers.RenderComponentWarning(
 			i18n.T(r.Context(), "global.error")+" "+name,
 			[]string{i18n.T(r.Context(), "page.match-list.max-match")},
 			http.StatusBadRequest, w, r,
@@ -113,8 +118,8 @@ func (h *Handler) HandlersCreateMatch(w http.ResponseWriter, r *http.Request) {
 	pageMatch.Match(match).Render(r.Context(), w)
 }
 
-func (h *Handler) HandlersDeleteMatch(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+func (h *Handler) HandleDeleteMatch(w http.ResponseWriter, r *http.Request) {
+	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
@@ -145,8 +150,8 @@ func (h *Handler) HandlersDeleteMatch(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) HandlersMatch(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+func (h *Handler) HandleMatch(w http.ResponseWriter, r *http.Request) {
+	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
@@ -158,7 +163,7 @@ func (h *Handler) HandlersMatch(w http.ResponseWriter, r *http.Request) {
 		errorMessage := i18n.T(r.Context(), "page.match.errors.match-not-found", i18n.M{"matchId": matchId})
 		h.Slog.Error(errorMessage, "matchId", matchId)
 		w.WriteHeader(http.StatusNotFound)
-		page.NotFoundPage(errorMessage, h.GetPageNavCustom(r, user, matchModel.Match{}), h.languages, r.URL.Path, user).Render(r.Context(), w)
+		page.NotFoundPage(errorMessage, h.GetPageNavCustom(r, user, matchModel.Match{}), h.Languages, r.URL.Path, user).Render(r.Context(), w)
 		return
 	}
 
@@ -180,13 +185,13 @@ func (h *Handler) HandlersMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pageMatch.TeamPlayerListPage(user, h.error, h.GetPageNavCustom(r, user, matchModel.Match{}), h.languages, r.URL.Path, match, teams, classes, players).Render(r.Context(), w)
+	pageMatch.TeamPlayerListPage(user, h.Error, h.GetPageNavCustom(r, user, matchModel.Match{}), h.Languages, r.URL.Path, match, teams, classes, players).Render(r.Context(), w)
 }
 
-func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleStartMatch(w http.ResponseWriter, r *http.Request) {
 	var idClassGlobal = 13
 
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
@@ -288,11 +293,11 @@ func (h *Handler) HandlerStartMatchPage(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	pageMatch.StartMatchPage(user, h.error, h.GetPageNavCustom(r, user, match), h.languages, r.URL.Path, match, players, spellsPlayer, false).Render(r.Context(), w)
+	pageMatch.StartMatchPage(user, h.Error, h.GetPageNavCustom(r, user, match), h.Languages, r.URL.Path, match, players, spellsPlayer, false).Render(r.Context(), w)
 }
 
-func (h *Handler) HandlerResetMatchPage(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+func (h *Handler) HandleResetMatch(w http.ResponseWriter, r *http.Request) {
+	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
@@ -307,8 +312,8 @@ func (h *Handler) HandlerResetMatchPage(w http.ResponseWriter, r *http.Request) 
 	w.Header().Set("HX-Redirect", fmt.Sprintf("/match/%d", matchId))
 }
 
-func (h *Handler) HandlerToggleMatchMastery(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+func (h *Handler) HandleToggleMatchMastery(w http.ResponseWriter, r *http.Request) {
+	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
@@ -349,11 +354,11 @@ func (h *Handler) HandlerToggleMatchMastery(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	pageMatch.MatchPageTable(user, h.error, h.GetPageNavCustom(r, user, match), h.languages, r.URL.Path, match, players, spellsPlayers, false).Render(r.Context(), w)
+	pageMatch.MatchPageTable(user, h.Error, h.GetPageNavCustom(r, user, match), h.Languages, r.URL.Path, match, players, spellsPlayers, false).Render(r.Context(), w)
 }
 
-func (h *Handler) HandlerMatchNextRound(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+func (h *Handler) HandleMatchNextRound(w http.ResponseWriter, r *http.Request) {
+	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
@@ -398,8 +403,8 @@ func (h *Handler) HandlerMatchNextRound(w http.ResponseWriter, r *http.Request) 
 	pageMatch.PlayerTable(m, players, spellsPlayers, false).Render(r.Context(), w)
 }
 
-func (h *Handler) HandlerUsePlayerSpell(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+func (h *Handler) HandleUsePlayerSpell(w http.ResponseWriter, r *http.Request) {
+	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
@@ -421,8 +426,8 @@ func (h *Handler) HandlerUsePlayerSpell(w http.ResponseWriter, r *http.Request) 
 	pageMatch.Spell(spellPlayer, false).Render(r.Context(), w)
 }
 
-func (h *Handler) HandlerRemoveRoundRecoveryPlayerSpell(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+func (h *Handler) HandleRemoveRoundRecoveryPlayerSpell(w http.ResponseWriter, r *http.Request) {
+	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)

@@ -4,12 +4,12 @@ import (
 	"log/slog"
 
 	"github.com/gorilla/mux"
-	"github.com/rousseau-romain/round-timing/handlers"
+	handlersAuth "github.com/rousseau-romain/round-timing/handlers/auth"
 	"github.com/rousseau-romain/round-timing/middleware"
 	"github.com/rousseau-romain/round-timing/service/auth"
 )
 
-func registerAuthRoutes(r *mux.Router, handler *handlers.Handler, authService *auth.AuthService, logger *slog.Logger) {
+func registerAuthRoutes(r *mux.Router, handler *handlersAuth.Handler, authService *auth.AuthService, logger *slog.Logger) {
 	r.Handle("/signup", middleware.RequireNotAuth(handler.HandleSignupEmail, authService, logger)).Methods("GET")
 	r.Handle("/signin", middleware.RequireNotAuth(handler.HandleLogin, authService, logger)).Methods("GET")
 

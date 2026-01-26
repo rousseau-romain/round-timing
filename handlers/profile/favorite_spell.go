@@ -1,4 +1,4 @@
-package handlers
+package profile
 
 import (
 	"net/http"
@@ -9,8 +9,8 @@ import (
 	"github.com/rousseau-romain/round-timing/views/page"
 )
 
-func (h *Handler) HandlersToggleSpellFavorite(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+func (h *Handler) HandleToggleSpellFavorite(w http.ResponseWriter, r *http.Request) {
+	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)

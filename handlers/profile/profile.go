@@ -1,4 +1,4 @@
-package handlers
+package profile
 
 import (
 	"net/http"
@@ -7,14 +7,19 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/invopop/ctxi18n/i18n"
+	"github.com/rousseau-romain/round-timing/handlers"
 	"github.com/rousseau-romain/round-timing/model/game"
 	matchModel "github.com/rousseau-romain/round-timing/model/match"
 	userModel "github.com/rousseau-romain/round-timing/model/user"
 	"github.com/rousseau-romain/round-timing/views/page"
 )
 
-func (h *Handler) HandlersProfile(w http.ResponseWriter, r *http.Request) {
-	user, err := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+type Handler struct {
+	*handlers.Handler
+}
+
+func (h *Handler) HandleProfile(w http.ResponseWriter, r *http.Request) {
+	user, err := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	if err != nil {
 		h.Slog.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -50,11 +55,11 @@ func (h *Handler) HandlersProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page.ProfilePage(user, h.error, h.GetPageNavCustom(r, user, matchModel.Match{}), h.languages, r.URL.Path, idUserShares, classes, spells, userConfigurations).Render(r.Context(), w)
+	page.ProfilePage(user, h.Error, h.GetPageNavCustom(r, user, matchModel.Match{}), h.Languages, r.URL.Path, idUserShares, classes, spells, userConfigurations).Render(r.Context(), w)
 }
 
-func (h *Handler) HandlersProfileToggleUserConfiguration(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+func (h *Handler) HandleProfileToggleUserConfiguration(w http.ResponseWriter, r *http.Request) {
+	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
@@ -77,12 +82,12 @@ func (h *Handler) HandlersProfileToggleUserConfiguration(w http.ResponseWriter, 
 	page.UserConfiguration(userConfiguration).Render(r.Context(), w)
 }
 
-func (h *Handler) HandlersProfileAddSpectate(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+func (h *Handler) HandleProfileAddSpectate(w http.ResponseWriter, r *http.Request) {
+	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	if err := uuid.Validate(r.FormValue("idUserShare")); err != nil {
-		RenderComponentError(
+		handlers.RenderComponentError(
 			i18n.T(r.Context(), "page.profile.errors.user-spectate.not-valid", i18n.M{"userSpectateId": r.FormValue("idUserShare")}),
 			[]string{""},
 			http.StatusBadRequest, w, r,
@@ -99,7 +104,7 @@ func (h *Handler) HandlersProfileAddSpectate(w http.ResponseWriter, r *http.Requ
 	}
 
 	if !userSpectateExist {
-		RenderComponentError(
+		handlers.RenderComponentError(
 			i18n.T(r.Context(), "page.profile.errors.user-spectate.does-not-exist", i18n.M{"userSpectateId": r.FormValue("idUserShare")}),
 			[]string{""},
 			http.StatusBadRequest, w, r,
@@ -117,7 +122,7 @@ func (h *Handler) HandlersProfileAddSpectate(w http.ResponseWriter, r *http.Requ
 	}
 
 	if IsAlreadyUsersSpectate {
-		RenderComponentError(
+		handlers.RenderComponentError(
 			i18n.T(r.Context(), "page.profile.errors.user-spectate.already-exist", i18n.M{"userSpectateId": r.FormValue("idUserShare")}),
 			[]string{""},
 			http.StatusBadRequest, w, r,
@@ -140,8 +145,8 @@ func (h *Handler) HandlersProfileAddSpectate(w http.ResponseWriter, r *http.Requ
 	page.UserSpectate(r.FormValue("idUserShare")).Render(r.Context(), w)
 }
 
-func (h *Handler) HandlersProfileDeleteSpectate(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
+func (h *Handler) HandleProfileDeleteSpectate(w http.ResponseWriter, r *http.Request) {
+	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	if err := uuid.Validate(r.FormValue("idUserShare")); err != nil {
