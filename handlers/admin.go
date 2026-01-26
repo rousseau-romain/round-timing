@@ -9,7 +9,7 @@ import (
 	pageAdmin "github.com/rousseau-romain/round-timing/views/page/admin"
 )
 
-func (h *Handler) HandlersListUser(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleListUser(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
@@ -22,7 +22,7 @@ func (h *Handler) HandlersListUser(w http.ResponseWriter, r *http.Request) {
 	pageAdmin.UserListPage(user, h.error, GetPageNavDefault(r), h.languages, r.URL.Path, user, users).Render(r.Context(), w)
 }
 
-func (h *Handler) HandlersUserEnabled(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleUserEnabled(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 

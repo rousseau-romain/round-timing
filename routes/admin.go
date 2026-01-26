@@ -10,6 +10,6 @@ import (
 )
 
 func registerAdminRoutes(r *mux.Router, handler *handlers.Handler, authService *auth.AuthService, logger *slog.Logger) {
-	r.Handle("/admin/user", middleware.RequireAuthAndAdmin(handler.HandlersListUser, authService, logger)).Methods("GET")
-	r.Handle("/admin/user/{idUser:[0-9]+}/toggle-enabled/{toggleEnabled:(?:true|false)}", middleware.RequireAuthAndAdmin(handler.HandlersUserEnabled, authService, logger)).Methods("PATCH")
+	r.Handle("/admin/user", middleware.RequireAuthAndAdmin(handler.HandleListUser, authService, logger)).Methods("GET")
+	r.Handle("/admin/user/{idUser:[0-9]+}/toggle-enabled/{toggleEnabled:(?:true|false)}", middleware.RequireAuthAndAdmin(handler.HandleUserEnabled, authService, logger)).Methods("PATCH")
 }

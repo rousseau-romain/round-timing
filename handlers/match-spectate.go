@@ -27,7 +27,7 @@ var upgrader = websocket.Upgrader{
 
 var clients = make(map[string]*websocket.Conn) // Maps userID to WebSocket connection
 
-func (h *Handler) HandlerSpectateMatch(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleSpectateMatch(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
@@ -72,7 +72,7 @@ func (h *Handler) HandlerSpectateMatch(w http.ResponseWriter, r *http.Request) {
 	pageMatch.SpectateMatchPage(user, h.error, h.GetPageNavCustom(r, user, matchFromUser), h.languages, r.URL.Path, match, players, spellsPlayers, true).Render(r.Context(), w)
 }
 
-func (h *Handler) HandlerMatchTableLive(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleMatchTableLive(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 

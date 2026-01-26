@@ -21,7 +21,7 @@ func Setup(handler *handlers.Handler, authService *auth.AuthService, logger *slo
 	registerAdminRoutes(r, handler, authService, logger)
 	registerErrorRoutes(r, handler, authService, logger)
 
-	r.NotFoundHandler = http.HandlerFunc(handler.HandlersNotFound)
+	r.NotFoundHandler = http.HandlerFunc(handler.HandleNotFound)
 
 	return r
 }

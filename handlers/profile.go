@@ -13,7 +13,7 @@ import (
 	"github.com/rousseau-romain/round-timing/views/page"
 )
 
-func (h *Handler) HandlersProfile(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleProfile(w http.ResponseWriter, r *http.Request) {
 	user, err := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	if err != nil {
 		h.Slog.Error(err.Error())
@@ -53,7 +53,7 @@ func (h *Handler) HandlersProfile(w http.ResponseWriter, r *http.Request) {
 	page.ProfilePage(user, h.error, h.GetPageNavCustom(r, user, matchModel.Match{}), h.languages, r.URL.Path, idUserShares, classes, spells, userConfigurations).Render(r.Context(), w)
 }
 
-func (h *Handler) HandlersProfileToggleUserConfiguration(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleProfileToggleUserConfiguration(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
@@ -77,7 +77,7 @@ func (h *Handler) HandlersProfileToggleUserConfiguration(w http.ResponseWriter, 
 	page.UserConfiguration(userConfiguration).Render(r.Context(), w)
 }
 
-func (h *Handler) HandlersProfileAddSpectate(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleProfileAddSpectate(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
@@ -140,7 +140,7 @@ func (h *Handler) HandlersProfileAddSpectate(w http.ResponseWriter, r *http.Requ
 	page.UserSpectate(r.FormValue("idUserShare")).Render(r.Context(), w)
 }
 
-func (h *Handler) HandlersProfileDeleteSpectate(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleProfileDeleteSpectate(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 

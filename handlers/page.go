@@ -56,7 +56,7 @@ func (h *Handler) GetPageNavCustom(r *http.Request, user userModel.User, match m
 	}
 	return pageNav
 }
-func (h *Handler) HandlerCommitId(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleCommitId(w http.ResponseWriter, r *http.Request) {
 	jsonFile, err := os.Open("config/commit-id.json")
 	if err != nil {
 		h.Slog.Error(err.Error())
@@ -77,7 +77,7 @@ func (h *Handler) HandlerCommitId(w http.ResponseWriter, r *http.Request) {
 	w.Write(byteValue)
 }
 
-func (h *Handler) HandlerVersion(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleVersion(w http.ResponseWriter, r *http.Request) {
 	var version struct {
 		Version string `json:"version"`
 	}
@@ -90,7 +90,7 @@ func (h *Handler) HandlerVersion(w http.ResponseWriter, r *http.Request) {
 	w.Write(byteValue)
 }
 
-func (h *Handler) HandlersNotFound(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleNotFound(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	if user.Id != 0 {
 		h.Slog = h.Slog.With("userId", user.Id)
@@ -98,7 +98,7 @@ func (h *Handler) HandlersNotFound(w http.ResponseWriter, r *http.Request) {
 	page.NotFoundPage("", h.GetPageNavCustom(r, user, matchModel.Match{}), h.languages, r.URL.Path, user).Render(r.Context(), w)
 }
 
-func (h *Handler) HandlersForbidden(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleForbidden(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	if user.Id != 0 {
 		h.Slog = h.Slog.With("userId", user.Id)
@@ -106,7 +106,7 @@ func (h *Handler) HandlersForbidden(w http.ResponseWriter, r *http.Request) {
 	page.ForbidenPage("", h.GetPageNavCustom(r, user, matchModel.Match{}), h.languages, r.URL.Path, user).Render(r.Context(), w)
 }
 
-func (h *Handler) HandlersHome(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleHome(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	pageNav := GetPageNavDefault(r)
 
@@ -124,7 +124,7 @@ func (h *Handler) HandlersHome(w http.ResponseWriter, r *http.Request) {
 	page.HomePage(userModel.User{}, h.error, pageNav, h.languages, r.URL.Path).Render(r.Context(), w)
 }
 
-func (h *Handler) HandlerCGU(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleCGU(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	if user.Id != 0 {
 		h.Slog = h.Slog.With("userId", user.Id)
@@ -132,7 +132,7 @@ func (h *Handler) HandlerCGU(w http.ResponseWriter, r *http.Request) {
 	legal.CGU(h.error, h.GetPageNavCustom(r, user, matchModel.Match{}), h.languages, r.URL.Path).Render(r.Context(), w)
 }
 
-func (h *Handler) HandlerPrivacy(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandlePrivacy(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	if user.Id != 0 {
 		h.Slog = h.Slog.With("userId", user.Id)

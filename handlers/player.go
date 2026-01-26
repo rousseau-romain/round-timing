@@ -15,7 +15,7 @@ import (
 
 var MaxPlayerByTeam = 8
 
-func (h *Handler) HandlersUpdatePlayer(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleUpdatePlayer(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
@@ -40,7 +40,7 @@ func (h *Handler) HandlersUpdatePlayer(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h *Handler) HandlersCreatePlayer(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleCreatePlayer(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
@@ -123,7 +123,7 @@ func (h *Handler) HandlersCreatePlayer(w http.ResponseWriter, r *http.Request) {
 	pageMatch.TeamPlayer(player, match).Render(r.Context(), w)
 }
 
-func (h *Handler) HandlersDeletePlayer(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleDeletePlayer(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 
@@ -146,7 +146,7 @@ func (h *Handler) HandlersDeletePlayer(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) HandlersPlayerLanguage(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandlePlayerLanguage(w http.ResponseWriter, r *http.Request) {
 	user, _ := h.auth.GetAuthenticateUserFromRequest(r, h.Slog)
 	h.Slog = h.Slog.With("userId", user.Id)
 

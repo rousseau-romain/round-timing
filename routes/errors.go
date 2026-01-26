@@ -10,6 +10,6 @@ import (
 )
 
 func registerErrorRoutes(r *mux.Router, handler *handlers.Handler, authService *auth.AuthService, logger *slog.Logger) {
-	r.Handle("/404", middleware.AllowToBeAuth(handler.HandlersNotFound, authService, logger)).Methods("GET")
-	r.Handle("/403", middleware.AllowToBeAuth(handler.HandlersForbidden, authService, logger)).Methods("GET")
+	r.Handle("/404", middleware.AllowToBeAuth(handler.HandleNotFound, authService, logger)).Methods("GET")
+	r.Handle("/403", middleware.AllowToBeAuth(handler.HandleForbidden, authService, logger)).Methods("GET")
 }
