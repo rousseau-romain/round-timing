@@ -27,8 +27,22 @@ make build/tailwind # Build CSS
 ## Project Structure
 
 - `handlers/` - HTTP route handlers
+- `routes/` - Route registration organized by domain:
+  - `routes.go` - Main `Setup()` entry point
+  - `public.go` - Static file serving
+  - `pages.go` - Public pages (/, /privacy, /cgu, etc.)
+  - `match.go` - All /match/* routes
+  - `profile.go` - /profile/* and /user/*/locale/* routes
+  - `auth.go` - /signup, /signin, /auth/* routes
+  - `admin.go` - /admin/* routes
+  - `errors.go` - /404, /403 routes
 - `middleware/` - HTTP middleware (auth, language)
-- `model/` - Database models and queries
+- `model/` - Database models and queries, organized by domain:
+  - `model/db.go` - Shared database connection (`DB` exported for subpackages)
+  - `model/user/` - User, UserSpectate, UserConfiguration, EmailWhiteListed
+  - `model/match/` - Match, Team, Player, MatchPlayerSpell
+  - `model/game/` - Class, Spell, SpellByClass (FavoriteSpell)
+  - `model/system/` - Language, FeatureFlag
 - `pkg/` - Reusable packages:
   - `password/` - Password hashing and validation
   - `lang/` - Language detection and supported languages
@@ -245,9 +259,31 @@ sqlhelper.URLImageClassClause("c.id")  // CONCAT for class images
 sqlhelper.URLImageSpellClause("s.id")  // CONCAT for spell images
 ```
 
+### Routes (`routes/`)
+
+Route registration is organized by domain in the `routes/` package. `main.go` calls `routes.Setup()` which delegates to domain-specific registration functions:
+
+```go
+// main.go
+router := routes.Setup(handler, authService, versionLogger)
+
+// Each domain file registers its own routes:
+// routes/match.go
+func registerMatchRoutes(r *mux.Router, handler *handlers.Handler, authService *auth.AuthService, logger *slog.Logger) {
+    r.Handle("/match", middleware.RequireAuth(handler.HandlersListMatch, authService, logger)).Methods("GET")
+    // ...
+}
+```
+
 ### Database
 
-- Models are in `model/` directory
+- Models are organized by domain in `model/` subdirectories (`user/`, `match/`, `game/`, `system/`)
+- Each subpackage has a `db.go` that imports the shared connection: `var db = model.DB`
+- Cross-package references: `match.Player` uses `game.Class`, `match.MatchPlayerSpell` uses `game.Spell`
+- Import aliasing required when package name conflicts (e.g., in `views/page/match/`):
+  ```go
+  import matchModel "github.com/rousseau-romain/round-timing/model/match"
+  ```
 - Uses `huandu/go-sqlbuilder` for query building
 - Migrations are in `database/migration/` (encrypted with GPG)
 
