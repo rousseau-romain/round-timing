@@ -202,7 +202,7 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func generateToken(email string) (string, error) {
-	expirationTime := time.Now().Add(24 * time.Hour)
+	expirationTime := time.Now().Add(time.Duration(config.COOKIES_AUTH_AGE_IN_SECONDS) * time.Second)
 	claims := &serviceAuth.Claims{
 		Email: email,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -251,7 +251,7 @@ func (h *Handler) HandleLoginEmail(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		Secure:   true,
 		Path:     "/",
-		Expires:  time.Now().Add(7 * 24 * time.Hour),
+		MaxAge:   config.COOKIES_AUTH_AGE_IN_SECONDS,
 	})
 
 	w.Header().Set("HX-Redirect", "/")
