@@ -6,6 +6,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/rousseau-romain/round-timing/handlers"
+	"github.com/rousseau-romain/round-timing/service/auth"
 	userModel "github.com/rousseau-romain/round-timing/model/user"
 	pageAdmin "github.com/rousseau-romain/round-timing/views/page/admin"
 )
@@ -15,7 +16,7 @@ type Handler struct {
 }
 
 func (h *Handler) HandleListUser(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	users, err := userModel.GetUsers()
@@ -28,7 +29,7 @@ func (h *Handler) HandleListUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleUserEnabled(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)

@@ -6,11 +6,12 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/rousseau-romain/round-timing/model/game"
+	"github.com/rousseau-romain/round-timing/service/auth"
 	"github.com/rousseau-romain/round-timing/views/page"
 )
 
 func (h *Handler) HandleToggleSpellFavorite(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)

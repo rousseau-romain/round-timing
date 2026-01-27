@@ -6,10 +6,11 @@ import (
 	"github.com/gorilla/mux"
 	userModel "github.com/rousseau-romain/round-timing/model/user"
 	"github.com/rousseau-romain/round-timing/pkg/lang"
+	"github.com/rousseau-romain/round-timing/service/auth"
 )
 
 func (h *Handler) HandlePlayerLanguage(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)

@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/handlers"
+	"github.com/rousseau-romain/round-timing/service/auth"
 	matchModel "github.com/rousseau-romain/round-timing/model/match"
 	pageMatch "github.com/rousseau-romain/round-timing/views/page/match"
 )
@@ -15,7 +16,7 @@ import (
 var MaxPlayerByTeam = 8
 
 func (h *Handler) HandleUpdatePlayer(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
@@ -40,7 +41,7 @@ func (h *Handler) HandleUpdatePlayer(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleCreatePlayer(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
@@ -123,7 +124,7 @@ func (h *Handler) HandleCreatePlayer(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleDeletePlayer(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)

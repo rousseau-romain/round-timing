@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/rousseau-romain/round-timing/config"
+	"github.com/rousseau-romain/round-timing/service/auth"
 	matchModel "github.com/rousseau-romain/round-timing/model/match"
 	userModel "github.com/rousseau-romain/round-timing/model/user"
 	pageMatch "github.com/rousseau-romain/round-timing/views/page/match"
@@ -28,7 +29,7 @@ var upgrader = websocket.Upgrader{
 var clients = make(map[string]*websocket.Conn) // Maps userID to WebSocket connection
 
 func (h *Handler) HandleSpectateMatch(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
@@ -73,7 +74,7 @@ func (h *Handler) HandleSpectateMatch(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleMatchTableLive(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)

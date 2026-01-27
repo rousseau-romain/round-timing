@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/handlers"
+	"github.com/rousseau-romain/round-timing/service/auth"
 	"github.com/rousseau-romain/round-timing/model/game"
 	matchModel "github.com/rousseau-romain/round-timing/model/match"
 	userModel "github.com/rousseau-romain/round-timing/model/user"
@@ -24,7 +25,7 @@ type Handler struct {
 var NumberOfMatchMax = 50
 
 func (h *Handler) HandleListMatch(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	matchs, err := matchModel.GetMatchsByIdUser(user.Id)
@@ -38,7 +39,7 @@ func (h *Handler) HandleListMatch(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleCreateMatch(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	err := r.ParseForm()
@@ -119,7 +120,7 @@ func (h *Handler) HandleCreateMatch(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleDeleteMatch(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
@@ -151,7 +152,7 @@ func (h *Handler) HandleDeleteMatch(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleMatch(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
@@ -191,7 +192,7 @@ func (h *Handler) HandleMatch(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) HandleStartMatch(w http.ResponseWriter, r *http.Request) {
 	var idClassGlobal = 13
 
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
@@ -297,7 +298,7 @@ func (h *Handler) HandleStartMatch(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleResetMatch(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
@@ -313,7 +314,7 @@ func (h *Handler) HandleResetMatch(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleToggleMatchMastery(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
@@ -358,7 +359,7 @@ func (h *Handler) HandleToggleMatchMastery(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *Handler) HandleMatchNextRound(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
@@ -404,7 +405,7 @@ func (h *Handler) HandleMatchNextRound(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleUsePlayerSpell(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
@@ -427,7 +428,7 @@ func (h *Handler) HandleUsePlayerSpell(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleRemoveRoundRecoveryPlayerSpell(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)

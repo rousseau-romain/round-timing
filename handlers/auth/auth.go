@@ -202,7 +202,7 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func generateToken(email string) (string, error) {
-	expirationTime := time.Now().Add(24 * time.Hour)
+	expirationTime := time.Now().Add(time.Duration(config.COOKIES_AUTH_AGE_IN_SECONDS) * time.Second)
 	claims := &serviceAuth.Claims{
 		Email: email,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -226,7 +226,14 @@ func (h *Handler) HandleLoginEmail(w http.ResponseWriter, r *http.Request) {
 
 	user, err := userModel.GetUserByEmail(email)
 
-	if err != nil || !password.Check(user.Hash, pwd) {
+	// Always run the hash check to prevent timing-based email enumeration.
+	// When the user is not found, check against a dummy hash so the
+	// response time is the same as for a wrong password.
+	hashToCheck := user.Hash
+	if err != nil {
+		hashToCheck = password.DummyHash
+	}
+	if err != nil || !password.Check(hashToCheck, pwd) {
 		errMessage := i18n.T(r.Context(), "page.signin.invalid-credentials")
 		handlers.RenderComponentError(
 			errMessage,
@@ -245,22 +252,13 @@ func (h *Handler) HandleLoginEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	csrfToken := serviceAuth.GenerateCSRFToken(user.Email)
-
 	http.SetCookie(w, &http.Cookie{
 		Name:     "token",
 		Value:    token,
 		HttpOnly: true,
 		Secure:   true,
 		Path:     "/",
-		Expires:  time.Now().Add(7 * 24 * time.Hour),
-	})
-
-	http.SetCookie(w, &http.Cookie{
-		Name:    "csrf_token",
-		Value:   csrfToken,
-		Path:    "/",
-		Expires: time.Now().Add(7 * 24 * time.Hour),
+		MaxAge:   config.COOKIES_AUTH_AGE_IN_SECONDS,
 	})
 
 	w.Header().Set("HX-Redirect", "/")
@@ -268,7 +266,7 @@ func (h *Handler) HandleLoginEmail(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleLogout(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := serviceAuth.UserFromRequest(r)
 	h.Slog = h.Slog.With("userId", user.Id)
 	err := gothic.Logout(w, r)
 	if err != nil {

@@ -156,22 +156,13 @@ When the `WHITE_LIST` feature flag is enabled:
 
 ## CSRF Protection
 
-CSRF tokens are generated per session:
-
-```go
-func GenerateCSRFToken(sessionID string) string {
-    token, _ := helper.GenerateSalt()
-    csrfTokens[sessionID] = token
-    return token
-}
-```
+CSRF protection is handled at the browser level via `SameSite=Lax` on session cookies. This prevents cross-origin POST requests from including cookies, which blocks CSRF attacks on state-changing endpoints. `Lax` (rather than `Strict`) is required to allow OAuth2 callback redirects to work.
 
 ## Logout
 
 Logout clears:
 
 - JWT token cookie
-- CSRF token cookie
 - Session data
 
 ```go
