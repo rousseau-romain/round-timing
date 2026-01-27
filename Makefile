@@ -18,14 +18,14 @@ live/go:
 		--misc.clean_on_exit true
 
 live/templ:
-	@go tool templ generate -watch -proxy="http://127.0.0.1:2468" --open-browser=false
+	@go tool templ generate -watch -proxy="http://127.0.0.1:2468" -cmd="go run ." --open-browser=false
 
 live/tailwind:
 	@npx tailwindcss -i input.css -o public/tailwind.css --watch
 
-live: 
+live:
 	make build/commit-id ${COMMIT_ID}
-	make -j4 live/templ live/tailwind live/go 
+	make -j3 live/templ live/tailwind
 
 build/tailwind:
 	npx tailwindcss -i input.css -o public/tailwind.css --minify
