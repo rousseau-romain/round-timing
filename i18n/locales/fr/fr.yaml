@@ -136,6 +136,7 @@ fr:
       connect-with-email: "Connectez-vous avec votre adresse email"
       already-exists-with-provider: "Un compte est déja crée avec l'email %{email} et le provider %{provider}."
       invalid-credentials: "Login ou mot de passe incorrect"
+      too-many-requests: "Trop de tentatives. Veuillez réessayer plus tard."
       no-account: "Vous n'avez pas de compte ?"
       create-account: "Créez-en un"
     start-match:
