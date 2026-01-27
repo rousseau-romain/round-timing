@@ -85,68 +85,67 @@ func (s *AuthService) RemoveUserSession(w http.ResponseWriter, r *http.Request, 
 	session.Save(r, w)
 }
 
-func getCookieHandler(r *http.Request, name string) (http.Cookie, error) {
-	// Retrieve a specific cookie by name
-	cookie, err := r.Cookie(name)
-	if err != nil {
-		// Handle error if the cookie is not found
-		if err == http.ErrNoCookie {
-			return http.Cookie{}, errors.New("cookie not found")
-		} else {
-			return http.Cookie{}, fmt.Errorf("error retrieving cookie: %v", err)
-		}
-	}
-	return *cookie, err
-}
+var errNotAuthenticated = errors.New("user is not authenticated")
 
 func (s *AuthService) GetAuthenticateUserFromRequest(r *http.Request, slog *slog.Logger) (user.User, error) {
+	// Try OAuth2 session first
+	if u, err := s.getUserFromOAuthSession(r, slog); err == nil {
+		return u, nil
+	}
+
+	// Fall back to JWT cookie (email/password login)
+	if u, err := s.getUserFromJWT(r, slog); err == nil {
+		return u, nil
+	}
+
+	return user.User{}, errNotAuthenticated
+}
+
+func (s *AuthService) getUserFromOAuthSession(r *http.Request, slog *slog.Logger) (user.User, error) {
 	session, err := gothic.Store.Get(r, SessionName)
-	var u user.User
 	if err != nil {
-		slog.Error(err.Error())
-		return u, err
+		return user.User{}, err
 	}
 
-	slog = slog.With("userEmail", u)
-
-	sessionUser := session.Values["user"]
-
-	// User is not from OAuth2 verify if user is authenticated by email
-	if sessionUser == nil {
-		cookieToken, err := getCookieHandler(r, "token")
-		if err != nil {
-			return u, errors.New("user is not authenticated")
-		}
-
-		claims := Claims{}
-		token, err := jwt.ParseWithClaims(cookieToken.Value, &claims, func(token *jwt.Token) (interface{}, error) {
-			return []byte(config.JWT_SECRET_KEY), nil
-		})
-		if err != nil || !token.Valid {
-			slog.Error("Unauthorized: Invalid token", "token", cookieToken.Value)
-			return u, err
-		}
-
-		// Extract claims and use them
-		if claims, ok := token.Claims.(*Claims); ok && token.Valid {
-			foundUser, err := user.GetUserByEmail(claims.Email)
-			if err != nil {
-				slog.Error("Error fetching user by email", "email", claims.Email, "error", err)
-				return foundUser, err
-			}
-			return foundUser, nil
-		}
-		slog.Info("user is not authenticated", "userId", u.Id)
-		return u, errors.New("user is not authenticated")
+	sessionUser, ok := session.Values["user"]
+	if !ok || sessionUser == nil {
+		return user.User{}, errNotAuthenticated
 	}
 
-	goticUser := sessionUser.(goth.User)
-	userDb, err := user.GetUserByOauth2Id(goticUser.UserID)
+	gothUser, ok := sessionUser.(goth.User)
+	if !ok || gothUser.UserID == "" {
+		return user.User{}, errNotAuthenticated
+	}
+
+	u, err := user.GetUserByOauth2Id(gothUser.UserID)
 	if err != nil {
-		slog.Error("Error fetching user", "goticUserId", goticUser.UserID, "error", err)
-		return userDb, err
+		slog.Error("Error fetching user", "goticUserId", gothUser.UserID, "error", err)
+		return user.User{}, err
 	}
-	return userDb, nil
+	return u, nil
+}
+
+func (s *AuthService) getUserFromJWT(r *http.Request, slog *slog.Logger) (user.User, error) {
+	cookie, err := r.Cookie("token")
+	if err != nil {
+		return user.User{}, errNotAuthenticated
+	}
+
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(cookie.Value, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(config.JWT_SECRET_KEY), nil
+	})
+	if err != nil || !token.Valid {
+		slog.Error("Unauthorized: Invalid token")
+		return user.User{}, errNotAuthenticated
+	}
+
+	u, err := user.GetUserByEmail(claims.Email)
+	if err != nil {
+		slog.Error("Error fetching user by email", "email", claims.Email, "error", err)
+		return user.User{}, err
+	}
+	return u, nil
 }
 
 func buildCallbackURL(provider string) string {
