@@ -15,7 +15,6 @@ import (
 	"github.com/markbates/goth/providers/google"
 	"github.com/rousseau-romain/round-timing/config"
 	"github.com/rousseau-romain/round-timing/model/user"
-	"github.com/rousseau-romain/round-timing/pkg/password"
 )
 
 type AuthService struct{}
@@ -40,14 +39,6 @@ func NewAuthService(store sessions.Store) *AuthService {
 
 	return &AuthService{}
 }
-
-func GenerateCSRFToken(sessionID string) string {
-	token, _ := password.GenerateSalt()
-	csrfTokens[sessionID] = token
-	return token
-}
-
-var csrfTokens = make(map[string]string) // Store CSRF tokens
 
 type Claims struct {
 	Email string `json:"email"`
@@ -79,14 +70,6 @@ func (s *AuthService) RemoveUserSession(w http.ResponseWriter, r *http.Request, 
 		HttpOnly: true,
 		Secure:   true,            // Ensure Secure flag is set if using HTTPS
 		Expires:  time.Unix(0, 0), // Expire the cookie immediately
-	})
-
-	// Expire the CSRF token cookie as well
-	http.SetCookie(w, &http.Cookie{
-		Name:    "csrf_token",
-		Value:   "",
-		Path:    "/",
-		Expires: time.Unix(0, 0),
 	})
 
 	session, err := gothic.Store.Get(r, SessionName)

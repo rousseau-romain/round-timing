@@ -245,8 +245,6 @@ func (h *Handler) HandleLoginEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	csrfToken := serviceAuth.GenerateCSRFToken(user.Email)
-
 	http.SetCookie(w, &http.Cookie{
 		Name:     "token",
 		Value:    token,
@@ -254,13 +252,6 @@ func (h *Handler) HandleLoginEmail(w http.ResponseWriter, r *http.Request) {
 		Secure:   true,
 		Path:     "/",
 		Expires:  time.Now().Add(7 * 24 * time.Hour),
-	})
-
-	http.SetCookie(w, &http.Cookie{
-		Name:    "csrf_token",
-		Value:   csrfToken,
-		Path:    "/",
-		Expires: time.Now().Add(7 * 24 * time.Hour),
 	})
 
 	w.Header().Set("HX-Redirect", "/")
