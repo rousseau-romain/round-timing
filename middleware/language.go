@@ -15,6 +15,10 @@ func Language(handler http.Handler, authService *auth.AuthService, logger *slog.
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user, _ := authService.GetAuthenticateUserFromRequest(r, logger)
 
+		if user.Id != 0 {
+			r = auth.RequestWithUser(r, user)
+		}
+
 		var locale string
 		var err error
 

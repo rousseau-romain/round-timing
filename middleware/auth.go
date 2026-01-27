@@ -64,7 +64,7 @@ func RequireAuth(handlerFunc http.HandlerFunc, authService *auth.AuthService, lo
 			return
 		}
 
-		handlerFunc(w, r)
+		handlerFunc(w, auth.RequestWithUser(r, user))
 	}
 }
 
@@ -90,7 +90,7 @@ func RequireAuthAndAdmin(handlerFunc http.HandlerFunc, authService *auth.AuthSer
 			return
 		}
 
-		handlerFunc(w, r)
+		handlerFunc(w, auth.RequestWithUser(r, user))
 	}
 }
 
@@ -158,7 +158,7 @@ func RequireAuthAndSpectateOfUserMatch(handlerFunc http.HandlerFunc, authService
 			return
 		}
 
-		handlerFunc(w, r)
+		handlerFunc(w, auth.RequestWithUser(r, user))
 	}
 }
 
@@ -205,7 +205,7 @@ func RequireAuthAndHisMatch(handlerFunc http.HandlerFunc, authService *auth.Auth
 			return
 		}
 
-		handlerFunc(w, r)
+		handlerFunc(w, auth.RequestWithUser(r, user))
 	}
 }
 
@@ -233,6 +233,6 @@ func RequireAuthAndHisAccount(handlerFunc http.HandlerFunc, authService *auth.Au
 			return
 		}
 
-		handlerFunc(w, r)
+		handlerFunc(w, auth.RequestWithUser(r, user))
 	}
 }

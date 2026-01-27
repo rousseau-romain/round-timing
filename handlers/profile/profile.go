@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/handlers"
+	"github.com/rousseau-romain/round-timing/service/auth"
 	"github.com/rousseau-romain/round-timing/model/game"
 	matchModel "github.com/rousseau-romain/round-timing/model/match"
 	userModel "github.com/rousseau-romain/round-timing/model/user"
@@ -19,10 +20,9 @@ type Handler struct {
 }
 
 func (h *Handler) HandleProfile(w http.ResponseWriter, r *http.Request) {
-	user, err := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
-	if err != nil {
-		h.Slog.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	user, ok := auth.UserFromRequest(r)
+	if !ok {
+		http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
 		return
 	}
 	h.Slog = h.Slog.With("userId", user.Id)
@@ -59,7 +59,7 @@ func (h *Handler) HandleProfile(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleProfileToggleUserConfiguration(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
@@ -83,7 +83,7 @@ func (h *Handler) HandleProfileToggleUserConfiguration(w http.ResponseWriter, r 
 }
 
 func (h *Handler) HandleProfileAddSpectate(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	if err := uuid.Validate(r.FormValue("idUserShare")); err != nil {
@@ -146,7 +146,7 @@ func (h *Handler) HandleProfileAddSpectate(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *Handler) HandleProfileDeleteSpectate(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	if err := uuid.Validate(r.FormValue("idUserShare")); err != nil {

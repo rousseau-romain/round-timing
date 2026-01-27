@@ -10,6 +10,7 @@ import (
 
 	"github.com/rousseau-romain/round-timing/config"
 	"github.com/rousseau-romain/round-timing/handlers"
+	"github.com/rousseau-romain/round-timing/service/auth"
 	matchModel "github.com/rousseau-romain/round-timing/model/match"
 	userModel "github.com/rousseau-romain/round-timing/model/user"
 	"github.com/rousseau-romain/round-timing/views/components/layout"
@@ -56,7 +57,7 @@ func (h *Handler) HandleVersion(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleNotFound(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	if user.Id != 0 {
 		h.Slog = h.Slog.With("userId", user.Id)
 	}
@@ -64,7 +65,7 @@ func (h *Handler) HandleNotFound(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleForbidden(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	if user.Id != 0 {
 		h.Slog = h.Slog.With("userId", user.Id)
 	}
@@ -72,7 +73,7 @@ func (h *Handler) HandleForbidden(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleHome(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	pageNav := handlers.GetPageNavDefault(r)
 
 	h.Error = layout.PopinMessages{
@@ -90,7 +91,7 @@ func (h *Handler) HandleHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleCGU(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	if user.Id != 0 {
 		h.Slog = h.Slog.With("userId", user.Id)
 	}
@@ -98,7 +99,7 @@ func (h *Handler) HandleCGU(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandlePrivacy(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := auth.UserFromRequest(r)
 	if user.Id != 0 {
 		h.Slog = h.Slog.With("userId", user.Id)
 	}

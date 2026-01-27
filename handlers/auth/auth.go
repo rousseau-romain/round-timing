@@ -259,7 +259,7 @@ func (h *Handler) HandleLoginEmail(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleLogout(w http.ResponseWriter, r *http.Request) {
-	user, _ := h.Auth.GetAuthenticateUserFromRequest(r, h.Slog)
+	user, _ := serviceAuth.UserFromRequest(r)
 	h.Slog = h.Slog.With("userId", user.Id)
 	err := gothic.Logout(w, r)
 	if err != nil {

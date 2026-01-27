@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -16,6 +17,19 @@ import (
 	"github.com/rousseau-romain/round-timing/config"
 	"github.com/rousseau-romain/round-timing/model/user"
 )
+
+type contextKey string
+
+const userContextKey contextKey = "authenticatedUser"
+
+func RequestWithUser(r *http.Request, u user.User) *http.Request {
+	return r.WithContext(context.WithValue(r.Context(), userContextKey, u))
+}
+
+func UserFromRequest(r *http.Request) (user.User, bool) {
+	u, ok := r.Context().Value(userContextKey).(user.User)
+	return u, ok && u.Id != 0
+}
 
 type AuthService struct{}
 
@@ -88,6 +102,11 @@ func (s *AuthService) RemoveUserSession(w http.ResponseWriter, r *http.Request, 
 var errNotAuthenticated = errors.New("user is not authenticated")
 
 func (s *AuthService) GetAuthenticateUserFromRequest(r *http.Request, slog *slog.Logger) (user.User, error) {
+	// Return cached user if already resolved for this request
+	if u, ok := r.Context().Value(userContextKey).(user.User); ok && u.Id != 0 {
+		return u, nil
+	}
+
 	// Try OAuth2 session first
 	if u, err := s.getUserFromOAuthSession(r, slog); err == nil {
 		return u, nil
