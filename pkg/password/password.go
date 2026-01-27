@@ -2,6 +2,7 @@ package password
 
 import (
 	"crypto/rand"
+	"crypto/subtle"
 	"encoding/base64"
 	"net/http"
 	"strings"
@@ -33,7 +34,7 @@ func Check(storedHash, password string) bool {
 		return false
 	}
 	hash := Hash(password, parts[1])
-	return storedHash == hash
+	return subtle.ConstantTimeCompare([]byte(storedHash), []byte(hash)) == 1
 }
 
 // Validate checks if a password meets security requirements.
