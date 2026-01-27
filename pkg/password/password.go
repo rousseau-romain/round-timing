@@ -12,6 +12,11 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
+// DummyHash is a pre-computed hash used to prevent timing-based user enumeration.
+// When a login attempt uses a non-existent email, we still run the hash check
+// against this value so the response time matches a real failed password check.
+var DummyHash = Hash("dummy-password", "dummy-salt-value!")
+
 // GenerateSalt generates a random 16-byte salt encoded as base64.
 func GenerateSalt() (string, error) {
 	bytes := make([]byte, 16)

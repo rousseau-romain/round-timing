@@ -226,7 +226,14 @@ func (h *Handler) HandleLoginEmail(w http.ResponseWriter, r *http.Request) {
 
 	user, err := userModel.GetUserByEmail(email)
 
-	if err != nil || !password.Check(user.Hash, pwd) {
+	// Always run the hash check to prevent timing-based email enumeration.
+	// When the user is not found, check against a dummy hash so the
+	// response time is the same as for a wrong password.
+	hashToCheck := user.Hash
+	if err != nil {
+		hashToCheck = password.DummyHash
+	}
+	if err != nil || !password.Check(hashToCheck, pwd) {
 		errMessage := i18n.T(r.Context(), "page.signin.invalid-credentials")
 		handlers.RenderComponentError(
 			errMessage,
