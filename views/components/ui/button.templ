@@ -115,13 +115,20 @@ templ ButtonToggle(textEnabled, textDisabled, hxPatch string, isEnabled bool) {
 // ButtonCopy renders a copy-to-clipboard button with an input field
 templ ButtonCopy(textToCopy string) {
 	<div
-		class="text-center flex content-center h-8 rounded-sm overflow-hidden"
+		class="inline-flex items-center rounded-lg border bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 overflow-hidden"
 		x-data="{ copied: false }"
 	>
-		<input class="w-48 bg-gray-300 rounded-none" type="text" value={ textToCopy } readonly x-ref="input"/>
+		<input
+			class="px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-mono border-none outline-none"
+			type="text"
+			value={ textToCopy }
+			readonly
+			x-ref="input"
+		/>
 		<button
 			@click="$refs.input.select(); navigator.clipboard.writeText($refs.input.value); copied = true; setTimeout(() => copied = false, 2000)"
-			class="p-1 text-gray-800 bg-transparent border-2 border-gray-300 hover:text-white hover:bg-gray-600 active:bg-gray-700"
+			class="px-3 py-2 mr-2 bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500 hover:text-gray-800 dark:hover:text-white transition-colors rounded"
+			type="button"
 		>
 			<div x-show="!copied">
 				<svg aria-hidden="true" focusable="false" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
@@ -130,8 +137,8 @@ templ ButtonCopy(textToCopy string) {
 				</svg>
 			</div>
 			<div x-show="copied" x-cloak>
-				<svg width="16" height="16" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-					<polyline points="20,50 40,70 80,30" stroke="green" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"></polyline>
+				<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M3 8.5L6.5 12L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-500"></path>
 				</svg>
 			</div>
 		</button>
