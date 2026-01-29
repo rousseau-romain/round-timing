@@ -50,16 +50,15 @@ func GetAllConfigurationByIdUser(idLanguage, idUser int) ([]UserConfiguration, e
 		SELECT
 			IFNULL(uc.id, 0) AS id,
 			IFNULL(uc.id_user, 0) AS id_user,
-			IFNULL(c.id, 0) AS id_configuration,
+			c.id AS id_configuration,
 			ct.name,
 			IF(uc.id_user IS NULL, 0, 1) AS is_enabled
-		FROM user_configuration AS uc
-		RIGHT JOIN configuration AS c ON c.id = uc.id_configuration
-		JOIN configuration_translation AS ct ON ct.id_configuration = c.id AND ct.id_language = ? 
-		WHERE uc.id_user = ? OR uc.id_user IS NULL
+		FROM configuration AS c
+		LEFT JOIN user_configuration AS uc ON uc.id_configuration = c.id AND uc.id_user = ?
+		JOIN configuration_translation AS ct ON ct.id_configuration = c.id AND ct.id_language = ?
 	`
 
-	rows, err := db.Query(sql, idLanguage, idUser)
+	rows, err := db.Query(sql, idUser, idLanguage)
 
 	if err != nil {
 		return nil, err
