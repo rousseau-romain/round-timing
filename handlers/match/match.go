@@ -9,11 +9,12 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/handlers"
-	"github.com/rousseau-romain/round-timing/service/auth"
 	"github.com/rousseau-romain/round-timing/model/game"
 	matchModel "github.com/rousseau-romain/round-timing/model/match"
 	userModel "github.com/rousseau-romain/round-timing/model/user"
 	"github.com/rousseau-romain/round-timing/pkg/constants"
+	"github.com/rousseau-romain/round-timing/pkg/notify"
+	"github.com/rousseau-romain/round-timing/service/auth"
 	"github.com/rousseau-romain/round-timing/views/page"
 	pageMatch "github.com/rousseau-romain/round-timing/views/page/match"
 )
@@ -294,6 +295,7 @@ func (h *Handler) HandleStartMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	notify.Notify(matchId)
 	pageMatch.StartMatchPage(user, h.Error, h.GetPageNavCustom(r, user, match), h.Languages, r.URL.Path, match, players, spellsPlayer, false).Render(r.Context(), w)
 }
 
@@ -310,6 +312,7 @@ func (h *Handler) HandleResetMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	notify.Notify(matchId)
 	w.Header().Set("HX-Redirect", fmt.Sprintf("/match/%d", matchId))
 }
 
@@ -355,6 +358,7 @@ func (h *Handler) HandleToggleMatchMastery(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	notify.Notify(matchId)
 	pageMatch.MatchPageTable(user, h.Error, h.GetPageNavCustom(r, user, match), h.Languages, r.URL.Path, match, players, spellsPlayers, false).Render(r.Context(), w)
 }
 
@@ -401,6 +405,7 @@ func (h *Handler) HandleMatchNextRound(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	notify.Notify(matchId)
 	pageMatch.PlayerTable(m, players, spellsPlayers, false).Render(r.Context(), w)
 }
 
@@ -409,6 +414,7 @@ func (h *Handler) HandleUsePlayerSpell(w http.ResponseWriter, r *http.Request) {
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
+	matchId, _ := strconv.Atoi(vars["idMatch"])
 	idPlayerSpell, _ := strconv.Atoi(vars["idPlayerSpell"])
 
 	err := matchModel.UsePlayerSpellByIdPlayerSpell(idPlayerSpell)
@@ -424,6 +430,7 @@ func (h *Handler) HandleUsePlayerSpell(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	notify.Notify(matchId)
 	pageMatch.Spell(spellPlayer, false).Render(r.Context(), w)
 }
 
@@ -432,6 +439,7 @@ func (h *Handler) HandleRemoveRoundRecoveryPlayerSpell(w http.ResponseWriter, r 
 	h.Slog = h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
+	matchId, _ := strconv.Atoi(vars["idMatch"])
 	idPlayerSpell, _ := strconv.Atoi(vars["idPlayerSpell"])
 
 	err := matchModel.RemoveRoundRecoverySpellByIdPlayerSpell(idPlayerSpell)
@@ -447,5 +455,6 @@ func (h *Handler) HandleRemoveRoundRecoveryPlayerSpell(w http.ResponseWriter, r 
 		return
 	}
 
+	notify.Notify(matchId)
 	pageMatch.Spell(spellPlayer, false).Render(r.Context(), w)
 }

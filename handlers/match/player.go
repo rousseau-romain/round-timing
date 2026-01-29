@@ -8,8 +8,9 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/handlers"
-	"github.com/rousseau-romain/round-timing/service/auth"
 	matchModel "github.com/rousseau-romain/round-timing/model/match"
+	"github.com/rousseau-romain/round-timing/pkg/notify"
+	"github.com/rousseau-romain/round-timing/service/auth"
 	pageMatch "github.com/rousseau-romain/round-timing/views/page/match"
 )
 
@@ -21,6 +22,7 @@ func (h *Handler) HandleUpdatePlayer(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 
+	matchId, _ := strconv.Atoi(vars["idMatch"])
 	name := strings.TrimSpace(r.FormValue("name"))
 	idPlayer, _ := strconv.Atoi(vars["idPlayer"])
 	if name == "" {
@@ -38,6 +40,7 @@ func (h *Handler) HandleUpdatePlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	notify.Notify(matchId)
 }
 
 func (h *Handler) HandleCreatePlayer(w http.ResponseWriter, r *http.Request) {
@@ -120,6 +123,7 @@ func (h *Handler) HandleCreatePlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	notify.Notify(idMatch)
 	pageMatch.TeamPlayer(player, match).Render(r.Context(), w)
 }
 
@@ -129,6 +133,7 @@ func (h *Handler) HandleDeletePlayer(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 
+	matchId, _ := strconv.Atoi(vars["idMatch"])
 	idPlayer, _ := strconv.Atoi(vars["idPlayer"])
 
 	err := matchModel.DeleteMatchPlayersSpellsByPlayer(idPlayer)
@@ -144,4 +149,6 @@ func (h *Handler) HandleDeletePlayer(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	notify.Notify(matchId)
 }
