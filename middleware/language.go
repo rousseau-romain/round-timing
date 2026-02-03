@@ -6,6 +6,7 @@ import (
 
 	"github.com/invopop/ctxi18n"
 	"github.com/rousseau-romain/round-timing/model/system"
+	userModel "github.com/rousseau-romain/round-timing/model/user"
 	"github.com/rousseau-romain/round-timing/pkg/lang"
 	"github.com/rousseau-romain/round-timing/service/auth"
 )
@@ -40,6 +41,17 @@ func Language(handler http.Handler, authService *auth.AuthService, logger *slog.
 			return
 		}
 
-		handler.ServeHTTP(w, r.WithContext(ctx))
+		r = r.WithContext(ctx)
+
+		if user.Id != 0 {
+			configs, err := userModel.GetAllConfigurationByIdUser(user.IdLanguage, user.Id)
+			if err != nil {
+				logger.Error("error fetching user configurations", "error", err)
+			} else {
+				r = auth.RequestWithUserConfigurations(r, configs)
+			}
+		}
+
+		handler.ServeHTTP(w, r)
 	})
 }

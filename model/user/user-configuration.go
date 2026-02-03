@@ -4,6 +4,7 @@ type UserConfiguration struct {
 	Id              int    `json:"id"`
 	IdUser          int    `json:"id_user"`
 	IdConfiguration int    `json:"id_configuration"`
+	Key             string `json:"key"`
 	Name            string `json:"name"`
 	IsEnabled       bool   `json:"is_enabled"`
 }
@@ -14,6 +15,7 @@ func GetConfigurationByIdConfigurationIdUser(idLanguage, idUser, idConfiguration
 			IFNULL(uc.id, 0) AS id,
 			IFNULL(uc.id_user, 0) AS id_user,
 			IFNULL(c.id, 0) AS id_configuration,
+			c.key,
 			ct.name,
 			IF(uc.id_user IS NULL, 0, 1) AS is_enabled
 		FROM configuration AS c
@@ -34,6 +36,7 @@ func GetConfigurationByIdConfigurationIdUser(idLanguage, idUser, idConfiguration
 		&userConfiguration.Id,
 		&userConfiguration.IdUser,
 		&userConfiguration.IdConfiguration,
+		&userConfiguration.Key,
 		&userConfiguration.Name,
 		&userConfiguration.IsEnabled,
 	)
@@ -51,6 +54,7 @@ func GetAllConfigurationByIdUser(idLanguage, idUser int) ([]UserConfiguration, e
 			IFNULL(uc.id, 0) AS id,
 			IFNULL(uc.id_user, 0) AS id_user,
 			c.id AS id_configuration,
+			c.` + "`key`" + `,
 			ct.name,
 			IF(uc.id_user IS NULL, 0, 1) AS is_enabled
 		FROM configuration AS c
@@ -72,6 +76,7 @@ func GetAllConfigurationByIdUser(idLanguage, idUser int) ([]UserConfiguration, e
 			&configuration.Id,
 			&configuration.IdUser,
 			&configuration.IdConfiguration,
+			&configuration.Key,
 			&configuration.Name,
 			&configuration.IsEnabled,
 		)

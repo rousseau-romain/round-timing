@@ -1,13 +1,13 @@
 package ui
 
 // Table renders a styled table container.
-// Variants: "default" (full-width with dividers), "compact" (bordered, auto-width)
-templ Table(variant string) {
+// Variants: "" or "default" (full-width with dividers), "compact" (bordered, auto-width)
+templ Table(variant ...string) {
 	<table
 		class={
 			"text-sm",
-			templ.KV("min-w-full divide-y-2 divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900", variant == "default" || variant == ""),
-			templ.KV("table-auto mb-2 border", variant == "compact"),
+			templ.KV("min-w-full divide-y-2 divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900", len(variant) == 0 || variant[0] == "default" || variant[0] == ""),
+			templ.KV("table-auto mb-2 border", len(variant) > 0 && variant[0] == "compact"),
 		}
 	>
 		{ children... }
@@ -15,12 +15,12 @@ templ Table(variant string) {
 }
 
 // TableHead renders the table header section.
-// Variants: "default" (simple), "compact" (uppercase with background)
-templ TableHead(variant string) {
+// Variants: "" or "default" (simple), "compact" (uppercase with background)
+templ TableHead(variant ...string) {
 	<thead
 		class={
-			templ.KV("ltr:text-left rtl:text-right", variant == "default" || variant == ""),
-			templ.KV("text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400", variant == "compact"),
+			templ.KV("ltr:text-left rtl:text-right", len(variant) == 0 || variant[0] == "default" || variant[0] == ""),
+			templ.KV("text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400", len(variant) > 0 && variant[0] == "compact"),
 		}
 	>
 		{ children... }

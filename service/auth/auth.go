@@ -21,6 +21,7 @@ import (
 type contextKey string
 
 const userContextKey contextKey = "authenticatedUser"
+const userConfigurationsContextKey contextKey = "userConfigurations"
 
 func RequestWithUser(r *http.Request, u user.User) *http.Request {
 	return r.WithContext(context.WithValue(r.Context(), userContextKey, u))
@@ -29,6 +30,20 @@ func RequestWithUser(r *http.Request, u user.User) *http.Request {
 func UserFromRequest(r *http.Request) (user.User, bool) {
 	u, ok := r.Context().Value(userContextKey).(user.User)
 	return u, ok && u.Id != 0
+}
+
+func RequestWithUserConfigurations(r *http.Request, configs []user.UserConfiguration) *http.Request {
+	return r.WithContext(context.WithValue(r.Context(), userConfigurationsContextKey, configs))
+}
+
+func UserConfigurationsFromRequest(r *http.Request) []user.UserConfiguration {
+	configs, _ := r.Context().Value(userConfigurationsContextKey).([]user.UserConfiguration)
+	return configs
+}
+
+func UserConfigurationsFromContext(ctx context.Context) []user.UserConfiguration {
+	configs, _ := ctx.Value(userConfigurationsContextKey).([]user.UserConfiguration)
+	return configs
 }
 
 type AuthService struct{}

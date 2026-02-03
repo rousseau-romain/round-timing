@@ -15,40 +15,66 @@ import (
 
 templ StartMatchPage(user user.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string, match matchModel.Match, players []matchModel.Player, playersSpells []matchModel.MatchPlayerSpell, isSpectator bool) {
 	@layout.Layout(i18n.T(ctx, "page.start-match.title"), popinMessages, user, navItems, languages, pageSlug) {
-		@MatchPageTable(user, popinMessages, navItems, languages, pageSlug, match, players, playersSpells, isSpectator)
+		@ui.ContainerToggleable() {
+			@MatchPageTable(user, popinMessages, navItems, languages, pageSlug, match, players, playersSpells, isSpectator)
+		}
 	}
 }
 
 templ MatchPageTable(user user.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string, match matchModel.Match, players []matchModel.Player, playersSpells []matchModel.MatchPlayerSpell, isSpectator bool) {
-	<div class="flex flex-wrap justify-center gap-2">
-		@ui.ButtonAction("danger", "lg", templ.Attributes{
-			"type":     "submit",
-			"hx-patch": fmt.Sprintf("/match/%d/reset", match.Id),
-			"class":    "w-full sm:w-auto",
-		}) {
-			{ i18n.T(ctx, "page.start-match.button.reset-match") }
-		}
-		@ui.ButtonAction("success", "lg", templ.Attributes{
-			"type":      "submit",
-			"hx-get":    fmt.Sprintf("/match/%d/increase-round", match.Id),
-			"hx-target": "next table",
-			"class":     "w-full sm:w-auto",
-		}) {
-			{ i18n.T(ctx, "page.start-match.button.next-round") }
-		}
-		@ui.ButtonAction("primary", "lg", templ.Attributes{
-			"type":      "submit",
-			"hx-get":    toggleMasteryURL(match.Id, match.MultipleMasteryEnabled),
-			"hx-target": "#content",
-			"class":     "w-full sm:w-auto",
-		}) {
-			{ i18n.T(ctx, "page.start-match.button.toggle-multiple-mastery") }
-		}
-		@ui.ButtonCopy(fmt.Sprintf("%s/match/%d/spectate", config.PUBLIC_HOST_PORT, match.Id))
+	// Header with match name and round
+	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+		<div>
+			@ui.PageHeader() {
+				{ match.Name }
+			}
+			<p class="text-gray-500 dark:text-gray-400">
+				{ i18n.T(ctx, "global.round") } n°
+				<span class="font-bold text-lg text-gray-900 dark:text-white">{ strconv.Itoa(match.Round) }</span>
+			</p>
+		</div>
+		<div class="flex items-center gap-2">
+			@ui.ButtonExpandWidth()
+			@ui.ButtonFullscreen()
+			@ui.ButtonCopy(fmt.Sprintf("%s/match/%d/spectate", config.PUBLIC_HOST_PORT, match.Id))
+		</div>
 	</div>
-	<div class="overflow-x-auto">
-		@DivPlayerTable(match, players, playersSpells, isSpectator)
-	</div>
+	// Action buttons
+	@ui.Section() {
+		<div class="flex flex-wrap justify-center gap-3">
+			@ui.ButtonAction("success", "lg", templ.Attributes{
+				"type":      "submit",
+				"hx-get":    fmt.Sprintf("/match/%d/increase-round", match.Id),
+				"hx-target": "next table",
+				"class":     "w-full sm:w-auto",
+			}) {
+				{ i18n.T(ctx, "page.start-match.button.next-round") }
+			}
+			@ui.ButtonAction("primary", "lg", templ.Attributes{
+				"type":      "submit",
+				"hx-get":    toggleMasteryURL(match.Id, match.MultipleMasteryEnabled),
+				"hx-target": "#toggleable-container",
+				"class":     "w-full sm:w-auto",
+			}) {
+				{ i18n.T(ctx, "page.start-match.button.toggle-multiple-mastery") }
+			}
+			@ui.ButtonAction("danger", "lg", templ.Attributes{
+				"type":     "submit",
+				"hx-patch": fmt.Sprintf("/match/%d/reset", match.Id),
+				"class":    "w-full sm:w-auto",
+			}) {
+				{ i18n.T(ctx, "page.start-match.button.reset-match") }
+			}
+		</div>
+	}
+	// Players table
+	@ui.Section() {
+		@ui.Card("default") {
+			<div class="overflow-x-auto">
+				@DivPlayerTable(match, players, playersSpells, isSpectator)
+			</div>
+		}
+	}
 }
 
 func styleName(color, name string) string {
@@ -145,15 +171,8 @@ templ DivPlayerTable(match matchModel.Match, players []matchModel.Player, spells
 templ PlayerTable(match matchModel.Match, players []matchModel.Player, spells []matchModel.MatchPlayerSpell, isSpectator bool) {
 	<table
 		id="ws-table-players"
-		class="min-w-full divide-y-2 divide-gray-200 bg-white text-sm dark:divide-gray-700 dark:bg-gray-900"
+		class="min-w-full text-sm"
 	>
-		@ui.TableHead("default") {
-			@ui.Tr() {
-				<th class="whitespace-nowrap text-left px-4 py-2 font-medium text-gray-900 dark:text-white" colspan="3">
-					{ i18n.T(ctx, "global.round") } n° { strconv.Itoa(match.Round) }
-				</th>
-			}
-		}
 		<tbody
 			if !isSpectator {
 				hx-swap="outerHTML swap:0.5s"

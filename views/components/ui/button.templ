@@ -3,14 +3,14 @@ package ui
 import "github.com/invopop/ctxi18n/i18n"
 
 // buttonClasses returns the common button classes for a given variant and size.
-// Variants: "primary" (blue), "success" (green), "danger" (red), "outline" (bordered), "indigo", "black"
-// Sizes: "sm", "md" (default), "lg"
+// Variants: "" or "primary" (blue, default), "success" (green), "danger" (red), "outline" (bordered), "indigo", "black"
+// Sizes: "" or "md" (default), "sm", "lg"
 func buttonClasses(variant, size string) string {
 	base := "inline-flex items-center justify-center rounded-md font-medium transition focus:outline-none focus:ring-2"
 
 	var variantClass string
 	switch variant {
-	case "primary":
+	case "primary", "":
 		variantClass = "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
 	case "success":
 		variantClass = "bg-green-600 text-white hover:bg-green-700 focus:ring-green-500"
@@ -32,6 +32,8 @@ func buttonClasses(variant, size string) string {
 		sizeClass = "px-4 py-2 text-xs"
 	case "lg":
 		sizeClass = "px-5 py-3 text-base"
+	case "md", "":
+		sizeClass = "px-4 py-2 text-sm"
 	default:
 		sizeClass = "px-4 py-2 text-sm"
 	}
@@ -40,8 +42,9 @@ func buttonClasses(variant, size string) string {
 }
 
 // Button renders a styled button with configurable variants and sizes.
-// Variants: "primary" (blue), "success" (green), "danger" (red), "outline" (bordered), "indigo", "black"
-// Sizes: "sm", "md" (default), "lg"
+// Variants: "" or "primary" (blue, default), "success" (green), "danger" (red), "outline" (bordered), "indigo", "black"
+// Sizes: "" or "md" (default), "sm", "lg"
+// Pass empty strings for defaults: @ui.Button("", "") for primary/md
 templ Button(variant string, size string) {
 	<button class={ buttonClasses(variant, size) }>
 		{ children... }
@@ -50,6 +53,7 @@ templ Button(variant string, size string) {
 
 // ButtonAction renders a button with HTMX and other custom attributes.
 // Use this when you need hx-* attributes or other custom attributes on the button.
+// Pass empty strings for defaults: @ui.ButtonAction("", "", attrs) for primary/md
 templ ButtonAction(variant string, size string, attrs templ.Attributes) {
 	<button class={ buttonClasses(variant, size) } { attrs... }>
 		{ children... }
@@ -58,6 +62,7 @@ templ ButtonAction(variant string, size string, attrs templ.Attributes) {
 
 // ButtonLink renders an anchor styled as a button.
 // Use this for navigation links that should look like buttons.
+// Pass empty strings for defaults: @ui.ButtonLink("", "", "/path") for primary/md
 templ ButtonLink(variant string, size string, href string) {
 	<a href={ templ.SafeURL(href) } class={ buttonClasses(variant, size) }>
 		{ children... }
@@ -66,6 +71,7 @@ templ ButtonLink(variant string, size string, href string) {
 
 // ButtonLinkAction renders an anchor styled as a button with custom attributes.
 // Use this when you need additional classes or attributes on a button link.
+// Pass empty strings for defaults: @ui.ButtonLinkAction("", "", "/path", attrs) for primary/md
 templ ButtonLinkAction(variant string, size string, href string, attrs templ.Attributes) {
 	<a href={ templ.SafeURL(href) } class={ buttonClasses(variant, size) } { attrs... }>
 		{ children... }
@@ -143,4 +149,44 @@ templ ButtonCopy(textToCopy string) {
 			</div>
 		</button>
 	</div>
+}
+
+// ButtonFullscreen renders a fullscreen toggle button
+templ ButtonFullscreen() {
+	<button
+		x-data="{ isFullscreen: !!document.fullscreenElement }"
+		x-init="document.addEventListener('fullscreenchange', () => isFullscreen = !!document.fullscreenElement)"
+		@click="document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()"
+		class="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-800 dark:hover:text-white transition-colors"
+		type="button"
+		title="Toggle fullscreen"
+	>
+		<svg x-show="!isFullscreen" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+		</svg>
+		<svg x-show="isFullscreen" x-cloak width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
+		</svg>
+	</button>
+}
+
+// ButtonExpandWidth renders a button to toggle between contained and full-width layout
+// Works with ContainerToggleable component via Alpine.store for shared reactive state
+templ ButtonExpandWidth() {
+	<button
+		class="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-800 dark:hover:text-white transition-colors"
+		type="button"
+		title="Toggle width"
+		x-data="{ throttled: false }"
+		@click="if (!throttled) { throttled = true; $store.config.toggleContainerExpanded(); setTimeout(() => throttled = false, 400) }"
+	>
+		<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<path
+				:d="$store.config.isContainerExpanded
+					? 'M4 12 h16 M7 8l-4 4l4  4M17 8l4  4l-4 4'
+					: 'M8 12 h7  M4 8l4  4l-4 4M19 8l-4 4l4  4'
+				"
+			></path>
+		</svg>
+	</button>
 }
