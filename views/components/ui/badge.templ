@@ -4,8 +4,8 @@ import "strconv"
 
 // Badge renders a small colored badge/pill.
 // Variants: "red", "yellow", "cyan", "green", "indigo", "gray"
-// Use position classes in attrs for absolute positioning (e.g., "absolute -right-1 -bottom-1")
-templ Badge(variant string, attrs templ.Attributes) {
+// Pass extra classes for positioning (e.g., "absolute -right-1 -bottom-1")
+templ Badge(variant string, class string) {
 	<span
 		class={
 			"whitespace-nowrap rounded-full px-1.5 text-sm",
@@ -15,26 +15,30 @@ templ Badge(variant string, attrs templ.Attributes) {
 			templ.KV("bg-green-100 text-green-700 dark:bg-green-700 dark:text-green-100", variant == "green"),
 			templ.KV("bg-indigo-100 text-indigo-700 dark:bg-indigo-700 dark:text-indigo-100", variant == "indigo"),
 			templ.KV("bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-100", variant == "gray"),
+			class,
 		}
-		{ attrs... }
 	>
 		{ children... }
 	</span>
+}
+
+func badgeRecoveryVariant(rounds int) string {
+	switch {
+	case rounds == 1:
+		return "red"
+	case rounds == 2:
+		return "yellow"
+	default:
+		return "cyan"
+	}
 }
 
 // BadgeRecovery renders a badge for spell recovery rounds.
 // Automatically selects color based on rounds remaining: 1=red, 2=yellow, 3+=cyan
 templ BadgeRecovery(rounds int) {
 	if rounds > 0 {
-		<span
-			class={
-				"absolute -right-1 -bottom-1 whitespace-nowrap rounded-full px-1.5 text-sm",
-				templ.KV("bg-red-100 text-red-700 dark:bg-red-700 dark:text-red-100", rounds == 1),
-				templ.KV("bg-yellow-100 text-yellow-700 dark:bg-yellow-700 dark:text-yellow-100", rounds == 2),
-				templ.KV("bg-cyan-100 text-cyan-700 dark:bg-cyan-700 dark:text-cyan-100", rounds >= 3),
-			}
-		>
+		@Badge(badgeRecoveryVariant(rounds), "absolute -right-1 -bottom-1") {
 			{ strconv.Itoa(rounds) }
-		</span>
+		}
 	}
 }

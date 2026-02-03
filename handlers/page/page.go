@@ -90,6 +90,23 @@ func (h *Handler) HandleHome(w http.ResponseWriter, r *http.Request) {
 	pageView.HomePage(userModel.User{}, h.Error, pageNav, h.Languages, r.URL.Path).Render(r.Context(), w)
 }
 
+func (h *Handler) HandleTestUI(w http.ResponseWriter, r *http.Request) {
+	user, _ := auth.UserFromRequest(r)
+	pageNav := handlers.GetPageNavDefault(r)
+
+	popinMessages := layout.PopinMessages{
+		Title:    r.URL.Query().Get("errorTitle"),
+		Messages: strings.Split(r.URL.Query().Get("errorMessages"), ","),
+		Type:     r.URL.Query().Get("type"),
+	}
+
+	if user.Id != 0 {
+		h.Slog = h.Slog.With("userId", user.Id)
+		pageNav = h.GetPageNavCustom(r, user, matchModel.Match{})
+	}
+	pageView.TestUIPage(user, popinMessages, pageNav, h.Languages, r.URL.Path).Render(r.Context(), w)
+}
+
 func (h *Handler) HandleCGU(w http.ResponseWriter, r *http.Request) {
 	user, _ := auth.UserFromRequest(r)
 	if user.Id != 0 {
