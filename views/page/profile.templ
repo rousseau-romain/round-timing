@@ -105,7 +105,7 @@ templ TableUserConfiguration(userConfigurations []user.UserConfiguration) {
 			for _, uc := range(userConfigurations) {
 				@ui.TrBorder() {
 					@ui.TdCompact() {
-						<span class="first-letter:uppercase">{ uc.Name }</span>
+						<span class="capitalize">{ uc.Name }</span>
 					}
 					@ui.TdCompact() {
 						@UserConfiguration(uc)
