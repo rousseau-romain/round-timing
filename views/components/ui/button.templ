@@ -3,7 +3,8 @@ package ui
 import "github.com/invopop/ctxi18n/i18n"
 
 // buttonClasses returns the common button classes for a given variant and size.
-// Variants: "" or "primary" (blue, default), "success" (green), "danger" (red), "outline" (bordered), "indigo", "black"
+// All variants support dark mode.
+// Variants: "" or "primary" (indigo, default), "success" (green), "danger" (red), "outline" (bordered)
 // Sizes: "" or "md" (default), "sm", "lg"
 func buttonClasses(variant, size string) string {
 	base := "inline-flex items-center justify-center rounded-md font-medium transition focus:outline-none focus:ring-2"
@@ -11,19 +12,15 @@ func buttonClasses(variant, size string) string {
 	var variantClass string
 	switch variant {
 	case "primary", "":
-		variantClass = "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
+		variantClass = "bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-600"
 	case "success":
-		variantClass = "bg-green-600 text-white hover:bg-green-700 focus:ring-green-500"
+		variantClass = "bg-green-600 text-white hover:bg-green-700 focus:ring-green-500 dark:bg-green-500 dark:hover:bg-green-600"
 	case "danger":
-		variantClass = "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500"
+		variantClass = "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 dark:bg-red-500 dark:hover:bg-red-600"
 	case "outline":
-		variantClass = "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-gray-300 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700"
-	case "indigo":
-		variantClass = "bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500"
-	case "black":
-		variantClass = "bg-black text-white hover:bg-gray-800 focus:ring-gray-500"
+		variantClass = "border-2 border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-gray-300 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-400 dark:hover:bg-gray-700"
 	default:
-		variantClass = "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
+		variantClass = "bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-600"
 	}
 
 	var sizeClass string
@@ -42,7 +39,7 @@ func buttonClasses(variant, size string) string {
 }
 
 // Button renders a styled button with configurable variants and sizes.
-// Variants: "" or "primary" (blue, default), "success" (green), "danger" (red), "outline" (bordered), "indigo", "black"
+// Variants: "" or "primary" (indigo, default), "success" (green), "danger" (red), "outline" (bordered)
 // Sizes: "" or "md" (default), "sm", "lg"
 // Pass empty strings for defaults: @ui.Button("", "") for primary/md
 templ Button(variant string, size string) {

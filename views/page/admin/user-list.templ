@@ -33,8 +33,8 @@ templ User(u user.User) {
 			<span
 				class={
 					"items-center p-2 rounded font-medium",
-					templ.KV("bg-yellow-100 text-yellow-800 hover:bg-yellow-200", u.IsAdmin),
-					templ.KV("bg-blue-100 text-blue-800 hover:bg-blue-200", !u.IsAdmin),
+					templ.KV("bg-yellow-100 text-yellow-800 hover:bg-yellow-200 dark:bg-yellow-900 dark:text-yellow-200 dark:hover:bg-yellow-800", u.IsAdmin),
+					templ.KV("bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800", !u.IsAdmin),
 				}
 			>
 				if u.IsAdmin {

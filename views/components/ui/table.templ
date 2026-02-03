@@ -7,7 +7,7 @@ templ Table(variant ...string) {
 		class={
 			"text-sm",
 			templ.KV("min-w-full divide-y-2 divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900", len(variant) == 0 || variant[0] == "default" || variant[0] == ""),
-			templ.KV("table-auto mb-2 border", len(variant) > 0 && variant[0] == "compact"),
+			templ.KV("table-auto mb-2 border dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200", len(variant) > 0 && variant[0] == "compact"),
 		}
 	>
 		{ children... }
@@ -108,7 +108,7 @@ templ TrBorder() {
 // TrColor renders a table row with a team color background.
 // Colors: "red", "indigo", "blue", "green", etc.
 templ TrColor(color string) {
-	<tr class={ "bg-" + color + "-200" }>
+	<tr class={ "bg-" + color + "-200 dark:bg-" + color + "-800" }>
 		{ children... }
 	</tr>
 }

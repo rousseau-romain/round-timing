@@ -43,8 +43,8 @@ templ TeamPlayer(p matchModel.Player, m matchModel.Match) {
 }
 
 templ TeamPlayerTable(players []matchModel.Player, match matchModel.Match) {
-	<div class="bg-red-200 border-red-200"></div>
-	<div class="bg-indigo-200 border-indigo-200"></div>
+	<div class="bg-red-200 border-red-200 dark:bg-red-800 dark:border-red-700"></div>
+	<div class="bg-indigo-200 border-indigo-200 dark:bg-indigo-800 dark:border-indigo-700"></div>
 	// SHITY WORKAROUND
 	<div
 		id="div-table-button"
@@ -79,7 +79,7 @@ templ TeamPlayerTable(players []matchModel.Player, match matchModel.Match) {
 				}
 			}
 		</table>
-		@ui.ButtonLinkAction("black", "lg", fmt.Sprintf("/match/%d/start", match.Id), templ.Attributes{
+		@ui.ButtonLinkAction("primary", "lg", fmt.Sprintf("/match/%d/start", match.Id), templ.Attributes{
 			"id":    "link-start-match-body",
 			"class": "max-w-max sm:w-auto",
 		}) {
@@ -116,13 +116,13 @@ templ TeamPlayerListPage(user user.User, popinMessages layout.PopinMessages, nav
 				<div
 					class={ "flex items-center justify-between",
 								"border-2 rounded-md p-2 mb-2",
-								"border-" + team.Color + "-200" }
+								"border-" + team.Color + "-200 dark:border-" + team.Color + "-700" }
 				>
 					for _, class := range classes {
 						<button
 							class={
 								"rounded-md lg:w-16 lg:h-16 md:w-12 md:h-12 w-8 h-8",
-								"bg-" + team.Color + "-200",
+								"bg-" + team.Color + "-200 dark:bg-" + team.Color + "-800",
 							}
 							hx-post={ fmt.Sprintf("/match/%d/player", match.Id) }
 							hx-vals={ fmt.Sprintf(`{"idTeam": "%d", "idClass": "%d", "name": "%s"}`, team.Id, class.Id, class.Name+" - "+i18n.T(ctx, "global.team."+team.Color)) }
@@ -148,7 +148,7 @@ templ TeamPlayerListPageUnAutorized(user user.User, navItems []layout.NavItem, l
 	@teamPlayerListPageLayout(user, layout.PopinMessages{}, navItems, languages, pageSlug, match) {
 		<h1 class="mb-2">{ i18n.T(ctx, "page.match.unauthorized.h1") }</h1>
 		<p>{ i18n.T(ctx, "page.match.unauthorized.p", i18n.M{"matchName": match.Name, "matchId": match.Id }) }</p>
-		@ui.ButtonLinkAction("black", "lg", "/match", templ.Attributes{"class": "w-full sm:w-auto"}) {
+		@ui.ButtonLinkAction("primary", "lg", "/match", templ.Attributes{"class": "w-full sm:w-auto"}) {
 			{ i18n.T(ctx, "page.match.unauthorized.button.go-back-list") }
 		}
 	}

@@ -115,7 +115,7 @@ templ Spell(mps matchModel.MatchPlayerSpell, isSpectator bool) {
 				templ.KV("border-cyan-500", mps.RoundBeforeRecovery >= 3),
 			}
 		>
-			<span class="tooltip rounded shadow-lg p-1 bg-gray-100 text-black top-full -left-1/2 pointer-events-none">
+			<span class="tooltip rounded shadow-lg p-1 top-full -left-1/2 pointer-events-none">
 				<ul>
 					<li class="font-bold">{ mps.Spell.Name }</li>
 					<li>{ i18n.T(ctx, "page.start-match.delay-between-use") } : <span class="font-bold">{ strconv.Itoa(mps.Spell.Delay) }</span></li>
