@@ -2,10 +2,7 @@ package page
 
 import (
 	"encoding/json"
-	"fmt"
-	"io"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/rousseau-romain/round-timing/config"
@@ -22,33 +19,18 @@ type Handler struct {
 	*handlers.Handler
 }
 
-func (h *Handler) HandleCommitId(w http.ResponseWriter, r *http.Request) {
-	jsonFile, err := os.Open("config/commit-id.json")
-	if err != nil {
-		h.Slog.Error(err.Error())
-		fmt.Println(err)
-	}
-
-	defer jsonFile.Close()
-
-	byteValue, _ := io.ReadAll(jsonFile)
-
-	var commit struct {
-		CommitId string `json:"commit_id"`
-	}
-
-	json.Unmarshal(byteValue, &commit)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(byteValue)
-}
-
 func (h *Handler) HandleVersion(w http.ResponseWriter, r *http.Request) {
-	var version struct {
-		Version string `json:"version"`
+	version := struct {
+		Version  string `json:"version"`
+		Commit   string `json:"commit"`
+		Time     string `json:"time"`
+		Modified string `json:"modified"`
+	}{
+		Version:  config.VERSION,
+		Commit:   config.COMMIT,
+		Time:     config.BUILD_TIME,
+		Modified: config.VCS_MODIFIED,
 	}
-
-	version.Version = config.VERSION
 
 	byteValue, _ := json.Marshal(version)
 
