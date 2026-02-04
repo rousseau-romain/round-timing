@@ -9,6 +9,14 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// Set via -ldflags at build time, used as fallback when VCS info is unavailable
+var (
+	version    = ""
+	commit     = ""
+	buildTime  = ""
+	vcsModified = ""
+)
+
 var (
 	VERSION,
 	COMMIT,
@@ -57,6 +65,7 @@ func init() {
 	BUILD_TIME = "unknown"
 	VCS_MODIFIED = "false"
 
+	// Try debug.ReadBuildInfo() first (works with go build locally)
 	if info, ok := debug.ReadBuildInfo(); ok {
 		for _, s := range info.Settings {
 			switch s.Key {
@@ -68,6 +77,20 @@ func init() {
 				VCS_MODIFIED = s.Value
 			}
 		}
+	}
+
+	// Fall back to ldflags values (set during Docker build)
+	if COMMIT == "unknown" && commit != "" {
+		COMMIT = commit
+	}
+	if BUILD_TIME == "unknown" && buildTime != "" {
+		BUILD_TIME = buildTime
+	}
+	if VCS_MODIFIED == "false" && vcsModified != "" {
+		VCS_MODIFIED = vcsModified
+	}
+	if version != "" {
+		VERSION = version
 	}
 
 	ENV = os.Getenv("ENV")
