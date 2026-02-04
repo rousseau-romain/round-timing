@@ -51,6 +51,7 @@ templ Layout(title string, popinMessages PopinMessages, user user.User, navItems
 			data-config-container-expanded-id={ getConfigId(auth.UserConfigurationsFromContext(ctx), "container_expanded") }
 			data-config-dark-mode={ strconv.FormatBool(isConfigEnabled(auth.UserConfigurationsFromContext(ctx), "dark_mode")) }
 			data-config-dark-mode-id={ getConfigId(auth.UserConfigurationsFromContext(ctx), "dark_mode") }
+			class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
 		>
 			if config.ENV == "development" || config.ENV == "staging" {
 				<script src="/public/script/htmx-2.0.8/htmx.js"></script>
@@ -65,7 +66,7 @@ templ Layout(title string, popinMessages PopinMessages, user user.User, navItems
 			<script src="/public/script/htmx-2.0.8/ext/ws.js"></script>
 			<script src="/public/script/alpine-init.js"></script>
 			@Nav(user, navItems, languages, pageSlug)
-			<div class="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white" id="content" hx-ext="response-targets">
+			<div class="min-h-screen" id="content" hx-ext="response-targets">
 				<div id="popinMessages">
 					if popinMessages.Title != "" {
 						@PopinMessage(popinMessages)
