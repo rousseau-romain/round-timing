@@ -1,0 +1,188 @@
+package match
+
+import (
+	"fmt"
+	"strconv"
+
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/rousseau-romain/round-timing/config"
+	matchModel "github.com/rousseau-romain/round-timing/model/match"
+	"github.com/rousseau-romain/round-timing/model/system"
+	"github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/views/components/layout"
+	"github.com/rousseau-romain/round-timing/views/components/ui"
+)
+
+templ StartMatchPage(user user.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string, match matchModel.Match, players []matchModel.Player, playersSpells []matchModel.MatchPlayerSpell, isSpectator bool) {
+	@layout.Layout(i18n.T(ctx, "page.start-match.title"), popinMessages, user, navItems, languages, pageSlug) {
+		@ui.ContainerToggleable() {
+			@MatchPageTable(user, popinMessages, navItems, languages, pageSlug, match, players, playersSpells, isSpectator)
+		}
+	}
+}
+
+templ MatchPageTable(user user.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string, match matchModel.Match, players []matchModel.Player, playersSpells []matchModel.MatchPlayerSpell, isSpectator bool) {
+	// Header with match name and round
+	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+		<div>
+			@ui.PageHeader() {
+				{ match.Name }
+			}
+			<p class="text-gray-500 dark:text-gray-400">
+				{ i18n.T(ctx, "global.round") } n°
+				<span class="font-bold text-lg text-gray-900 dark:text-white">{ strconv.Itoa(match.Round) }</span>
+			</p>
+		</div>
+		<div class="flex items-center gap-2">
+			@ui.ButtonExpandWidth()
+			@ui.ButtonFullscreen()
+			@ui.ButtonCopy(fmt.Sprintf("%s/match/%d/spectate", config.PUBLIC_HOST_PORT, match.Id))
+		</div>
+	</div>
+	// Action buttons
+	@ui.Section() {
+		<div class="flex flex-wrap justify-center gap-3">
+			@ui.ButtonAction("success", "lg", templ.Attributes{
+				"type":      "submit",
+				"hx-get":    fmt.Sprintf("/match/%d/increase-round", match.Id),
+				"hx-target": "next table",
+				"class":     "w-full sm:w-auto",
+			}) {
+				{ i18n.T(ctx, "page.start-match.button.next-round") }
+			}
+			@ui.ButtonAction("primary", "lg", templ.Attributes{
+				"type":      "submit",
+				"hx-get":    toggleMasteryURL(match.Id, match.MultipleMasteryEnabled),
+				"hx-target": "#toggleable-container",
+				"class":     "w-full sm:w-auto",
+			}) {
+				{ i18n.T(ctx, "page.start-match.button.toggle-multiple-mastery") }
+			}
+			@ui.ButtonAction("danger", "lg", templ.Attributes{
+				"type":     "submit",
+				"hx-patch": fmt.Sprintf("/match/%d/reset", match.Id),
+				"class":    "w-full sm:w-auto",
+			}) {
+				{ i18n.T(ctx, "page.start-match.button.reset-match") }
+			}
+		</div>
+	}
+	// Players table
+	@ui.Section() {
+		@ui.Card("default") {
+			<div class="overflow-x-auto">
+				@DivPlayerTable(match, players, playersSpells, isSpectator)
+			</div>
+		}
+	}
+}
+
+func styleName(color, name string) string {
+	return fmt.Sprintf(`<span class="font-bold text-center" style="color: %s">%s</span>`, color, name)
+}
+
+func toggleMasteryURL(matchId int, multipleMasteryEnabled int) string {
+	if multipleMasteryEnabled == 1 {
+		return fmt.Sprintf("/match/%d/toggle-mastery/0", matchId)
+	}
+	return fmt.Sprintf("/match/%d/toggle-mastery/1", matchId)
+}
+
+templ Spell(mps matchModel.MatchPlayerSpell, isSpectator bool) {
+	<div
+		class="has-tooltip flex flex-col items-center"
+		if !isSpectator {
+			hx-target="this"
+			skipConfirmation
+			if mps.RoundBeforeRecovery == 0 {
+				hx-get={ fmt.Sprintf("/match/%d/player-spell/%d/use", mps.MatchId, mps.Id) }
+			} else {
+				hx-get={ fmt.Sprintf("/match/%d/player-spell/%d/remove-round-recovery", mps.MatchId, mps.Id) }
+				hx-trigger="dblclick, longpress"
+				x-data="{ timer: null }"
+				@touchstart="timer = setTimeout(() => $dispatch('longpress'), 500)"
+				@touchend="clearTimeout(timer)"
+				@touchmove="clearTimeout(timer)"
+			}
+		}
+	>
+		@templ.Raw(styleName(mps.Spell.Color, mps.Spell.ShortName))
+		<div
+			class={
+				"relative border-2 rounded w-fit m-auto",
+				templ.KV("border-red-500", mps.RoundBeforeRecovery == 1),
+				templ.KV("border-yellow-500", mps.RoundBeforeRecovery == 2),
+				templ.KV("border-cyan-500", mps.RoundBeforeRecovery >= 3),
+			}
+		>
+			<span class="tooltip rounded shadow-lg p-1 top-full -left-1/2 pointer-events-none">
+				<ul>
+					<li class="font-bold">{ mps.Spell.Name }</li>
+					<li>{ i18n.T(ctx, "page.start-match.delay-between-use") } : <span class="font-bold">{ strconv.Itoa(mps.Spell.Delay) }</span></li>
+				</ul>
+			</span>
+			<img
+				alt={ mps.Spell.Name }
+				src={ mps.Spell.UrlImage }
+				class={
+					"w-10 md:w-16 img-class",
+					templ.KV("cursor-pointer transition-all hover:scale-110", mps.RoundBeforeRecovery == 0 && !isSpectator),
+					templ.KV("grayscale", mps.RoundBeforeRecovery > 0),
+				}
+			/>
+			@ui.BadgeRecovery(mps.RoundBeforeRecovery)
+		</div>
+	</div>
+}
+
+templ Player(p matchModel.Player, playersSpells []matchModel.MatchPlayerSpell, isSpectator bool) {
+	@ui.TrColor(p.Team.Color) {
+		<td class="px-4 py-2" colspan="3">
+			<div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+				<div class="flex items-center gap-2 justify-center">
+					@ui.AvatarToggle(templ.Attributes{"title": p.Name, "alt": p.Class.Name, "src": p.Class.UrlImage + "F.svg"})
+					<span class="font-medium whitespace-nowrap">{ p.Name }</span>
+				</div>
+				<div class="flex gap-4 flex-wrap">
+					for _, ps := range playersSpells {
+						if ps.PlayerId == p.Id {
+							@Spell(ps, isSpectator)
+						}
+					}
+				</div>
+			</div>
+		</td>
+	}
+}
+
+templ DivPlayerTable(match matchModel.Match, players []matchModel.Player, spells []matchModel.MatchPlayerSpell, isSpectator bool) {
+	<div
+		if isSpectator {
+			hx-ws={ fmt.Sprintf("connect:/match/%d/table-live", match.Id) }
+			hx-ext="ws"
+			hx-trigger="ws"
+			hx-swap="innerHTML"
+		}
+	>
+		@PlayerTable(match, players, spells, isSpectator)
+	</div>
+}
+
+templ PlayerTable(match matchModel.Match, players []matchModel.Player, spells []matchModel.MatchPlayerSpell, isSpectator bool) {
+	<table
+		id="ws-table-players"
+		class="min-w-full text-sm"
+	>
+		<tbody
+			if !isSpectator {
+				hx-swap="outerHTML swap:0.5s"
+				hx-target="closest tr"
+			}
+			class="divide-y divide-gray-200 dark:divide-gray-700"
+		>
+			for _, player := range players {
+				@Player(player, spells, isSpectator)
+			}
+		</tbody>
+	</table>
+}

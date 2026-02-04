@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "<your_project_path>"
+      ]
+    },
+    "gopls": {
+      "command": "gopls",
+      "args": ["mcp"]
+    },
+    "tailwindcss": {
+      "command": "npx",
+      "args": ["-y", "tailwindcss-mcp-server"]
+    },
+    "templ": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://gitmcp.io/a-h/templ"]
+    }
+  }
+}

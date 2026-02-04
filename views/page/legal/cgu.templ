@@ -1,0 +1,120 @@
+package legal
+
+import (
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/model/system"
+	"github.com/rousseau-romain/round-timing/views/components/layout"
+)
+
+templ CGU(popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string) {
+	@layout.Layout(i18n.T(ctx, "page.cgu.title"), popinMessages, user.User{}, navItems, languages, pageSlug) {
+		<div class="grid place-content-center bg-white px-4 dark:bg-gray-900">
+			<h1 class="text-center text-2xl font-bold text-indigo-600 sm:text-3xl">{ i18n.T(ctx, "page.cgu.h1") }</h1>
+			<h2 class="text-lg font-semibold">1. Présentation des CGU </h2>
+			<p class="mb-4">
+				1.1 Round Timing est un fan-site proposé à l'adresse 
+				<a href="https://round-timing.web-rows.ovh" class="text-indigo-600 hover:underline">
+					https://round-timing.web-rows.ovh
+				</a>
+				basé sur l'univers du jeu DOFUS, jeu appartenant à la société Ankama Game.
+			</p>
+			<p class="mb-4">Round Timing permet de calculer des combat en rapport avec le Jeu. </p>
+			<p class="mb-4">1.2 L'utilisation du Site est régie par les présentes conditions générales d'utilisation.</p>
+			<p class="mb-4">1.3 Ainsi, les CGU déterminent le cadre contractuel des relations entre vous et Round Timing.</p>
+			<h2 class="text-lg font-semibold">2. Acceptation des CGU </h2>
+			<p class="mb-4">2.1 Vous vous engagez à respectez les termes des CGU.</p>
+			<p class="mb-4">2.2 Toute utilisation du Site non conforme aux CGU est prohibée.</p>
+			<h2 class="text-lg font-semibold">3. Accès </h2>
+			<p class="mb-4">3.1 Le Site étant proposé sur Internet, pour y accéder, vous devez avoir une connexion Internet. Tous les coûts des connexions téléphoniques et d'accès à Internet sont à votre charge.</p>
+			<p class="mb-4">3.2 Round Timing ne vous accorde qu'une licence limitée, non exclusive et non transférable d'accès et d'utilisation de son contenu. Cette licence est soumise au respect des règles prévues par les présentes CGU. </p>
+			<p class="mb-4">3.3 Pour accéder à la totalité du Service proposé par le Site, vous devez créer un compte Round Timing en cliquant sur "Connexion" situé sur la barre de navigation principale du site.</p>
+			<h2 class="text-lg font-semibold">4. Création de Compte </h2>
+			<h3 class="text-md font-medium">4.1 Caractéristiques </h3>
+			<p class="mb-4">4.1.1 Pour créer un Compte, vous devez être une personne physique, âgée de dix-huit (18) ans ou ayant atteint l'âge légal dans votre pays de résidence, ou avoir obtenu l'accord de votre représentant légal (parent ou tuteur) si vous êtes mineur.</p>
+			<p class="mb-4">4.1.2 Vous devez vous inscrire via un compte provenant des réseaux sociaux supportés (Google, Discord) </p>
+			<p class="mb-4">4.1.5 La gestion du Compte et des informations personnelles se fait uniquement sur <a href="https://round-timing.web-rows.ovh/profile" class="text-indigo-600 hover:underline">https://round-timing.web-rows.ovh/profile</a></p>
+			<p class="mb-4">4.1.6 La connexion via réseaux sociaux vous permettent d'accéder à l'ensemble du Service.</p>
+			<h2 class="text-lg font-semibold">4.3 Responsabilité / Sécurité </h2>
+			<h3 class="text-md font-medium">4.3.1 Sécurité</h3>
+			<p class="mb-4">
+				Pour garantir la sécurité de votre Compte et éviter ainsi le vol de Compte communément appelé le "hack de Compte", vous vous engagez à : 
+				<ul class="list-disc pl-5">
+					<li>Ne pas donner accès à votre Compte à un tiers. Le prêt, le partage, l'échange, le don, l'achat, le transfert et la vente de Compte sont interdits. Tout prêt, partage, échange, don, achat, transfert ou vente de Compte ne sera pas opposable à Round Timing et pourra donner lieu aux sanctions prévues à l'Article 8</li>
+					<li>Prendre toutes les mesures afin d'éviter qu'un tiers puisse accéder au Compte que vous avez activé, même à votre insu</li>
+					<li>Ne pas utiliser le Compte d'un tiers</li>
+					<li>Utiliser une boîte email personnelle et ne pas partager cet email</li>
+				</ul>
+			</p>
+			<h3 class="text-md font-medium">4.3.2 Responsabilité</h3>
+			<p class="mb-4">4.3.2.1 La sécurité de votre Compte est de votre seule responsabilité et Round Timing ne pourra pas être tenue pour responsable des dommages que pourrait subir votre Compte ou votre ordinateur suite à la perte ou au partage des identifiants de votre Compte.</p>
+			<p class="mb-4">4.3.2.2 Round Timing ne pourra en aucune manière être reconnu responsable en cas de vol de compte ou de toutes altérations que pourra subir votre Compte.</p>
+			<p class="mb-4">4.3.2.3 Vous reconnaissez également que vous êtes présumé être l'utilisateur de votre Compte et le responsable des actions entreprises via votre Compte et sur votre Compte.</p>
+			<p class="mb-4">4.3.2.4 Vous reconnaissez que vous, et non pas Round Timing, êtes responsable de toutes les communications électroniques et des contenus envoyés depuis votre ordinateur et que vous ne devez utiliser le Service que dans le respect des lois.</p>
+			<h2 class="text-lg font-semibold">5. Règles de conduite </h2>
+			<p class="mb-4">5.1 Round Timing étant un site accessible à tous, vous êtes tenu de respecter des règles de conduite et ce, notamment afin de préserver l'image du site, et son utilisation par autrui.</p>
+			<p class="mb-4">5.2 Vous vous engagez à ne pas insulter, menacer les autres utilisateurs ou les collaborateurs de Round Timing ou à tenir des propos racistes, choquant, offensants, discriminatoires ou contraires aux lois françaises, européennes ou internationales.</p>
+			<p class="mb-4">5.3 Vous vous engagez à ne pas tenir de propos vulgaires, ou à connotation sexuelle voire pornographique sur le Site.</p>
+			<p class="mb-4">5.4 Vous vous engagez également à ne pas envoyer des "spam", des "flood", des offres commerciales quelles qu'elles soient aux autres utilisateurs ; voler les Comptes, ou tenter de le faire ; menacer, harceler ou embarrasser les autres utilisateurs par quelque moyen que ce soit ; mettre à disposition des autres utilisateurs des informations personnelles sur vous-même ou sur un autre utilisateur ; collecter des informations dans Round Timing.</p>
+			<p class="mb-4">5.5 Vos communications écrites publiques peuvent être enregistrées, analysées, ou effacées par Round Timing, afin de contrôler si vos communications respectent les lois.</p>
+			<p class="mb-4">5.6 Vous vous engagez à ne pas créer, utiliser, diffuser tout programme non distribué par Round Timing et pouvant servir à modifier les caractéristiques de votre Compte ou de celui d'un tiers, risquant de porter atteinte à Round Timing.</p>
+			<p class="mb-4">5.7 Vous vous engagez à ne pas diffuser et promouvoir sur Round Timing tout programme pouvant servir à pirater ou utiliser de manière frauduleuse le Jeu Dofus.</p>
+			<p class="mb-4">5.8 Vous acceptez de ne pas utiliser de serveurs mandataires (également appelés proxy) pour vous connecter et/ou utiliser le Service.</p>
+			<p class="mb-4">5.9 Vous acceptez de ne pas utiliser des failles, bugs ou toute autre forme d'erreur pour obtenir des informations confidentielles sur le Site ou ses utilisateurs. De même, vous vous engagez à avertir immédiatement Round Timing lorsque vous constatez une faille ou une erreur dans le site, le forum ou tout autre service via son Support.</p>
+			<p class="mb-4">5.10 Vous reconnaissez que le Compte ainsi que tout le contenu du Site sont la propriété exclusive de Round Timing, conformément à l'Article 11. Par conséquent, vous vous interdisez de vendre ou de troquer votre Compte sur Round Timing. Vous vous engagez à ne pas faire le commerce d'éléments issus des créations de Round Timing et à ne pas faire la promotion de ce genre d'activités portant atteinte aux droits de Round Timing.</p>
+			<h2 class="text-lg font-semibold">6. Limite d'utilisation du service </h2>
+			<p class="mb-4">6.1 Vous reconnaissez que le piratage et les logiciels non autorisés par Round Timing portent préjudice au Site. Il vous est donc interdit de créer ou utiliser des cheats /hacks, des programmes de collecte des informations, des scripts ou des macros destinés à porter atteinte au Site.</p>
+			<p class="mb-4">6.2 Vous admettez que l'utilisation d'outils de piratage des autres utilisateurs de Round Timing est interdite.</p>
+			<p class="mb-4">6.3 Vous vous interdisez de participer, organiser ou d'être impliqué dans une attaque contre les serveurs hébergeant le Site.</p>
+			<p class="mb-4">6.4 Vous n'êtes pas autorisé à utiliser le Service du Site d'une manière qui puisse le rendre inaccessible, l'endommager ou l'empêcher de fonctionner.</p>
+			<p class="mb-4">6.8 De manière générale, l'utilisation du Site ne doit pas violer les règlements et les lois nationales et internationales.</p>
+			<h2 class="text-lg font-semibold">7. Informations personnelles / Politique de confidentialité </h2>
+			<p class="mb-4">7.1 Round Timing s'engage à ne pas communiquer vos informations à des tiers et à tout mettre en oeuvre pour empêcher la diffusion de celles-ci, sauf autorisation expresse de votre part. Round Timing se réserve le droit de poursuivre toute personne qui tenterait d'accéder à des informations personnelles qui ne la concernerait pas.</p>
+			<p class="mb-4">7.2 En tant qu'utilisateur, et en application de la législation en vigueur, vous êtes seul habilité à accéder à vos informations personnelles, à les modifier et à les supprimer. Vous pouvez exercer ce droit en envoyant un message privé à un des administrateurs ou modérateurs sur le Discord de Round Timing, en indiquant votre mail et en justifiant de votre identité.</p>
+			<p class="mb-4">7.3 Round Timing n'a aucune obligation de fournir des informations liées à un Compte spécifique, même si un utilisateur le demande, sauf aux autorités compétentes dans le cadre d'une enquête judiciaire.</p>
+			<h2 class="text-lg font-semibold">8. Sanctions </h2>
+			<p class="mb-4">8.1 En cas de violation d'une ou de plusieurs dispositions des présentes CGU ou de tout autre document rédigé par Round Timing, Round Timing se réserve le droit de mettre fin ou restreindre sans aucun avertissement préalable et à sa seule discrétion, votre usage et accès au Service et à votre Compte.</p>
+			<p class="mb-4">8.2 Les sanctions sont fonction de la gravité de la violation. Elles pourront consister, de manière non limitative, en les actions suivantes :<br/> L'avertissement : L'avertissement n'a pas de conséquence directe sur le Compte. Vous pourrez continuer à accéder au Site sans changement. Il est là avant tout pour vous avertir que vous risquez des sanctions plus importantes si vous continuez d'enfreindre les règles de Round Timing.<br/> La suspension temporaire : Le Compte est fermé temporairement, vous ne pouvez plus y accéder pour une durée limitée.<br/> La suspension définitive : Le Compte est fermé définitivement, vous ne pouvez plus y accéder. Cette sanction est généralement appliquée dans les cas de récidives, ou de manquement grave ou impardonnable aux règles de Round Timing. </p>
+			<p class="mb-4">8.3 Round Timing se réserve le droit d'appliquer n'importe quelle sanction à un Compte, compte tenu de la gravité de la violation, sans obligatoirement avertir ou appliquer une sanction de durée moindre au préalable. Vous acceptez que ces sanctions sont sans appel et que vous ne pourrez en aucun cas contester les décisions prises par Round Timing.</p>
+			<p class="mb-4">8.4 Round Timing se réserve également le droit de modifier les noms de Compte, les noms de personnages et les noms de guilde ne respectant pas les règles énoncées ci-dessus ainsi que ceux qui seront jugés inadaptés. Round Timing pourra le cas échéant suspendre temporairement ou définitivement l'accès au Compte ou supprimer une guilde, sans dédommagement.</p>
+			<p class="mb-4">8.5 En plus des sanctions décrites ci-dessus, Round Timing pourra prendre les sanctions qui s'imposent, et notamment engager des poursuites civiles et pénales contre le contrevenant.</p>
+			<h2 class="text-lg font-semibold">9. Support </h2>
+			<p class="mb-4">9.1 L'email de Round Timing est le moyen d'accès privilégié au support utilisateur de Round Timing pour le Site et le Service.</p>
+			<p class="mb-4">9.2 Dans le cas où vous suspecteriez raisonnablement une faille dans la sécurité, y compris, la perte, le vol ou l'utilisation non autorisée de vos identifiants ou tout autre problème lié à la sécurité de votre Compte, vous devrez avertir immédiatement Round Timing via son email. Round Timing pourra alors réinitialiser votre compte et vous proposer des solutions pour améliorer la sécurité de votre Compte. Round Timing pourra également bloquer l'accès au Compte en question, le temps de mener une enquête. à l'issue de l'enquête, Round Timing tranchera le litige, à sa seule discrétion.</p>
+			<h2 class="text-lg font-semibold">10. Responsabilité et garantie </h2>
+			<p class="mb-4">10.1 Round Timing n'a aucune obligation concernant l'accès et l'utilisation du Service. Round Timing ne peut pas garantir que les fonctions proposées par le Service seront toujours disponibles ou sans erreurs typographiques, techniques ou autres, que les défauts seront corrigés ou que le Service est exempt de virus ou de bugs.</p>
+			<p class="mb-4">10.2 Pour des motifs de maintenance, de test, de réparation ou de toute autre nature liés à l'amélioration et au fonctionnement du Service, celui-ci pourra être interrompu temporairement par Round Timing, sans que sa responsabilité ne puisse être engagée.</p>
+			<p class="mb-4">10.3 La responsabilité de Round Timing ne saurait être engagée dans les cas de force majeure prévus par la loi.</p>
+			<p class="mb-4">10.4 Round Timing se réserve le droit d'interrompre le Service définitivement, vous en serez alors averti par tous moyens.</p>
+			<p class="mb-4">10.5 Sauf mentions contraires prévues par la loi ou conditions particulières prévues expressément entre Round Timing et vous, vous reconnaissez et acceptez que : </p>
+			<ul class="list-disc pl-5 mb-4">
+				<li>Le Site, son Service et son contenu sont fournis "en l'état"</li>
+				<li>L'utilisation de ceux-ci se fait sous votre entière responsabilité et à vos risques. Pour les utilisateurs mineurs, la responsabilité incombe à leurs représentants légaux.</li>
+				<li>Round Timing se dégage de toute responsabilité en cas d'utilisation du Service non conforme aux présentes CGU. Il ne serait être tenu responsable des dommages, directs ou indirects, des pertes de données ou profits, qui pourraient survenir en raison de l'utilisation ou de la non-utilisation du Service, de négligence ou de toute autre raison associée au Service.</li>
+				<li>Toute communication entre Round Timing et vous, qu'elle soit orale ou écrite, ne pourra donner lieu à une quelconque garantie non prévue par les CGU.</li>
+				<li>Round Timing ne pourra être tenue responsable de vos erreurs ou omissions.</li>
+			</ul>
+			<p class="mb-4">10.6 De même, concernant les liens provenant de pages Internet ou autres menant vers le Service mais non gérés par Round Timing ou les liens contenus sur le Service menant vers des pages Internet ou autres gérés et édités par des tiers, Round Timing ne pourra être tenue pour responsable de leurs contenus pour le cas où les tiers gérant et éditant ces contenus ne respecteraient pas les réglementations françaises, européennes ou internationales.</p>
+			<p class="mb-4">10.7 Certains pays n'autorisent pas les exclusions ou les limitations de garantie, les limitations ou exclusions citées peuvent ainsi ne pas s'appliquer à vous. Aucune information ou indication reçue par vous de Round Timing, par oral ou par écrit, ne saurait altérer ce déni de garantie ou vous faire bénéficier d'une garantie.</p>
+			<h2 class="text-lg font-semibold">11. Propriété intellectuelle / Marques </h2>
+			<p class="mb-4">11.1 Tous les éléments, fonctionnalités, outils, documents qui font partie de l'univers de DOFUS sont la propriété exclusive d'Ankama Game. Tous les autres éléments, fonctionnalités, outils, documents créés pour le Site et fournis par Round Timing (de façon non limitative la charte graphique, les logos, les images, etc.) sont protégés par les lois françaises et internationales sur le droit</p>
+			<p class="mb-4">11.2 Toutes données liées au Site ou à son Service appartiennent à Round Timing et sont protégées par les lois françaises, européennes et internationales sur le droit d'auteur. Vous devez par conséquent respecter les interdictions prévues à l'Article 6. Vous n'avez pas le droit, en tout ou partie, de copier, reproduire, traduire, extraire, modifier le code source, désassembler, décompiler, modifier, louer, vendre, distribuer ou créer des oeuvres dérivées inspirées du Site ou du contenu sans l'accord écrit préalable de Round Timing.</p>
+			<p class="mb-4">11.3 Toutes les marques figurant sur le Site sont des marques déposées et/ou enregistrées par Round Timing. Vous ne pouvez pas utiliser ces marques sans l'autorisation écrire préalable de Round Timing. Vous n'avez pas l'autorisation d'utiliser des meta-tags ou d'autres "textes cachés" utilisant les noms et marques déposées de Round Timing sans une autorisation écrite préalable. Les autres marques figurant sur le Site, n'appartenant pas à Round Timing appartiennent à leurs titulaires respectifs.</p>
+			<p class="mb-4">11.4 Toute utilisation non conforme met fin à l'autorisation ou à la licence accordée par Round Timing.</p>
+			<h2 class="text-lg font-semibold">12. Révision </h2>
+			<p class="mb-4">12.1 Round Timing se réserve le droit de modifier, ajouter et/ou supprimer certaines règles prévues par les CGU. Vous en serez alors averti par tout moyen.</p>
+			<h2 class="text-lg font-semibold">13. Résiliation </h2>
+			<p class="mb-4">13.1 Cet Accord entre en vigueur le jour de votre acceptation et ce, jusqu'à son terme, à moins que l'une des parties, à savoir vous ou Round Timing, ne le résilie plus tôt.</p>
+			<p class="mb-4">13.2 Ainsi, vous pouvez mettre fin à cet Accord pour toute raison légitime (prévue par une loi, un règlement ou une décision judiciaire).</p>
+			<p class="mb-4">Vous devrez alors envoyer une notification préalable, justifiant votre volonté de résilier votre Compte par mail. Vous pourrez alors demander que Round Timing supprime votre Compte et vos informations personnelles. Il est admis que si vous résiliez le présent Accord, vous ne pourrez plus accéder au Service, ni aux contenus du Site. </p>
+			<p class="mb-4">13.3 Round Timing peut, quant à lui, mettre fin à cet Accord avec ou sans avertissement préalable et avec ou sans notification préalable, si vous ne respectez pas règles prévues par les CGU.</p>
+			<h2 class="text-lg font-semibold">14. Collecte et utilisation d'informations </h2>
+			<p class="mb-4">14.1 Pour des besoins statistiques, Round Timing peut être amené à récolter des informations de navigation. Ces informations ne contiennent pas de données personnelles.</p>
+			<p class="mb-4">14.2 Round Timing se réserve également le droit de collecter certaines informations liées à votre ordinateur (IP, fournisseur d'accès, configuration matérielle, configuration logicielle).</p>
+			<p class="mb-4">14.3 Round Timing pourra utiliser ces informations à toutes fins, notamment pour contrôler le respect des termes du présent Accord.</p>
+			<h2 class="text-lg font-semibold">15. Divers </h2>
+			<p class="mb-4">15.1 L'ensemble des CGU est gouverné et interprété conformément à la loi française, à l'exception des conditions plus favorables prévues par les lois de votre pays de résidence.</p>
+			<p class="mb-4">15.2 Si l'une des conditions ou termes de cet Accord était considéré comme illégal, invalide ou inapplicable au regard d'une loi nationale, cette condition ou terme sera supprimé sans préjudice de l'application des autres dispositions.</p>
+		</div>
+	}
+}

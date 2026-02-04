@@ -1,0 +1,11 @@
+package ui
+
+// AvatarToggle renders a clickable image that toggles between male/female character avatars
+templ AvatarToggle(attrs templ.Attributes) {
+	<img
+		{ attrs... }
+		x-data
+		@click="$el.src = $el.src.includes('F') ? $el.src.replace('F', 'M') : $el.src.replace('M', 'F')"
+		class="img-class h-8 cursor-pointer transition-all hover:scale-110"
+	/>
+}

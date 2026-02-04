@@ -2,6 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ==========================================================================
+   CSS Variables (Design Tokens)
+   ========================================================================== */
+
+:root {
+  /* Brand Colors */
+  --color-accent: theme('colors.orange.400');
+  --color-success: theme('colors.green.500');
+  --color-danger: theme('colors.red.500');
+  --color-primary: theme('colors.indigo.600');
+
+  /* Background */
+  --color-bg-primary: theme('colors.white');
+  --color-bg-secondary: theme('colors.gray.50');
+
+  /* Text */
+  --color-text-primary: theme('colors.gray.900');
+  --color-text-secondary: theme('colors.gray.700');
+  --color-text-muted: theme('colors.gray.500');
+
+  /* Borders */
+  --color-border: theme('colors.gray.300');
+  --color-border-light: theme('colors.gray.200');
+}
+
+.dark {
+  /* Background */
+  --color-bg-primary: theme('colors.gray.900');
+  --color-bg-secondary: theme('colors.gray.800');
+
+  /* Text */
+  --color-text-primary: theme('colors.white');
+  --color-text-secondary: theme('colors.gray.200');
+  --color-text-muted: theme('colors.gray.400');
+
+  /* Borders */
+  --color-border: theme('colors.gray.600');
+  --color-border-light: theme('colors.gray.700');
+}
+
+/* ==========================================================================
+   Typography
+   ========================================================================== */
+
+@layer base {
+  h1 {
+    @apply text-2xl;
+  }
+  h2 {
+    @apply text-xl;
+  }
+  h3 {
+    @apply text-lg;
+  }
+}
+
+/* ==========================================================================
+   Form Elements
+   ========================================================================== */
+
 @layer base {
   [type="text"],
   [type="password"],
@@ -27,16 +87,13 @@
   [type="radio"] {
     @apply rounded focus:ring-orange-400 dark:bg-gray-900;
   }
+}
 
-  h1 {
-    @apply text-2xl;
-  }
-  h2 {
-    @apply text-xl;
-  }
-  h3 {
-    @apply text-lg;
-  }
+/* ==========================================================================
+   Links
+   ========================================================================== */
+
+@layer base {
   .content a,
   .breadcrumbs a {
     @apply text-green-500 hover:text-green-700;
@@ -46,22 +103,26 @@
   }
 }
 
-.btn {
-  @apply inline-flex justify-center py-2 px-4 mr-1 rounded-md whitespace-nowrap
-    bg-green-400 hover:bg-green-500
-    text-sm text-white font-bold
-    focus:outline-none focus:ring-2 focus:ring-green-800;
+/* ==========================================================================
+   Utility Classes
+   ========================================================================== */
+
+@layer utilities {
+  /* Tooltip */
+  .tooltip {
+    @apply invisible absolute bg-gray-100 dark:bg-gray-700 text-black dark:text-white;
+  }
+
+  .has-tooltip:hover .tooltip {
+    @apply visible z-50;
+  }
 }
+
+/* ==========================================================================
+   Third-party Integration (HTMX)
+   ========================================================================== */
 
 tr.htmx-swapping td {
   opacity: 0;
   transition: opacity 1s ease-out;
-}
-
-.tooltip {
-  @apply invisible absolute;
-}
-
-.has-tooltip:hover .tooltip {
-  @apply visible z-50;
 }

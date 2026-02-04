@@ -1,0 +1,92 @@
+package match
+
+import (
+	"fmt"
+	"time"
+
+	"github.com/invopop/ctxi18n/i18n"
+	matchModel "github.com/rousseau-romain/round-timing/model/match"
+	"github.com/rousseau-romain/round-timing/model/system"
+	"github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/views/components/forms"
+	"github.com/rousseau-romain/round-timing/views/components/layout"
+	"github.com/rousseau-romain/round-timing/views/components/ui"
+)
+
+templ Match(m matchModel.Match) {
+	@ui.Tr() {
+		@ui.TdPrimary() {
+			{ m.Name }
+		}
+		@ui.TdAction() {
+			@ui.ButtonLink("primary", "sm", "/match/"+fmt.Sprintf("%d", m.Id)) {
+				{ i18n.T(ctx, "global.buttons.see") }
+			}
+		}
+		@ui.TdAction() {
+			@ui.ButtonAction("danger", "sm", templ.Attributes{
+				"hx-delete": "/match/" + fmt.Sprintf("%d", m.Id),
+			}) {
+				{ i18n.T(ctx, "global.buttons.delete") }
+			}
+		}
+	}
+}
+
+templ MatchTable(matchs []matchModel.Match) {
+	<div class="overflow-x-auto">
+		@ui.Table("default") {
+			@ui.TableHead("default") {
+				@ui.Tr() {
+					@ui.Th() {
+						{ i18n.T(ctx, "global.table.name") }
+					}
+					@ui.ThEmpty()
+					@ui.ThEmpty()
+				}
+			}
+			@ui.TableBody(templ.Attributes{
+				"hx-swap":   "outerHTML swap:0.5s",
+				"hx-target": "closest tr",
+			}) {
+				for _, match := range matchs {
+					@Match(match)
+				}
+			}
+		}
+	</div>
+}
+
+templ matchPage(user user.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string, match []matchModel.Match) {
+	@layout.Layout(i18n.T(ctx, "page.match-list.title"), popinMessages, user, navItems, languages, pageSlug) {
+		@ui.Container("default") {
+			<h1>{ i18n.T(ctx, "page.match-list.h1") }</h1>
+			{ children... }
+		}
+	}
+}
+
+templ MatchListPage(user user.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string, matchs []matchModel.Match) {
+	@matchPage(user, popinMessages, navItems, languages, pageSlug, matchs) {
+		<form
+			class="space-y-4"
+			hx-post="/match"
+			hx-swap="afterbegin"
+			hx-target="tbody"
+			hx-target-error="#popinMessages"
+		>
+			<div>
+				@forms.InputAction("text", "name", "", templ.Attributes{
+					"placeholder": i18n.T(ctx, "global.table.name"),
+					"required":    true,
+					"value":       i18n.T(ctx, "global.match") + " " + time.Now().Format("2006-01-02 15:04:05"),
+					"class":       "w-full p-3",
+				})
+			</div>
+			@ui.ButtonAction("primary", "lg", templ.Attributes{"type": "submit", "class": "w-full sm:w-auto"}) {
+				{ i18n.T(ctx, "page.match-list.button-create-match") }
+			}
+		</form>
+		@MatchTable(matchs)
+	}
+}

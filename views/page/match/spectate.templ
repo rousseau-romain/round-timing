@@ -1,0 +1,43 @@
+package match
+
+import (
+	"strconv"
+
+	"github.com/invopop/ctxi18n/i18n"
+	matchModel "github.com/rousseau-romain/round-timing/model/match"
+	"github.com/rousseau-romain/round-timing/model/system"
+	"github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/views/components/layout"
+	"github.com/rousseau-romain/round-timing/views/components/ui"
+)
+
+templ SpectateMatchPage(user user.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string, match matchModel.Match, players []matchModel.Player, playersSpells []matchModel.MatchPlayerSpell, isSpectator bool) {
+	@layout.Layout(i18n.T(ctx, "page.start-match.title"), popinMessages, user, navItems, languages, pageSlug) {
+		@ui.ContainerToggleable() {
+			// Header with match name and round
+			<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+				<div>
+					@ui.PageHeader() {
+						{ match.Name }
+					}
+					<p class="text-gray-500 dark:text-gray-400">
+						{ i18n.T(ctx, "global.round") } n°
+						<span class="font-bold text-lg text-gray-900 dark:text-white">{ strconv.Itoa(match.Round) }</span>
+					</p>
+				</div>
+				<div class="flex items-center gap-2">
+					@ui.ButtonExpandWidth()
+					@ui.ButtonFullscreen()
+				</div>
+			</div>
+			// Players table
+			@ui.Section() {
+				@ui.Card() {
+					<div class="overflow-x-auto">
+						@DivPlayerTable(match, players, playersSpells, isSpectator)
+					</div>
+				}
+			}
+		}
+	}
+}

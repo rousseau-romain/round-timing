@@ -1,0 +1,21 @@
+package ui
+
+import "github.com/invopop/ctxi18n/i18n"
+
+templ ErrorPageContent(errorCode string, errorMessage string, translationKey string) {
+	<div class="grid place-content-center bg-white px-4 dark:bg-gray-900">
+		<div class="text-center">
+			<h1 class="text-9xl font-black text-gray-200 dark:text-gray-700">{ errorCode }</h1>
+			<p class="mt-4 text-gray-500 dark:text-gray-400">
+				if errorMessage != "" {
+					{ errorMessage }
+				} else {
+					{ i18n.T(ctx, translationKey) }
+				}
+			</p>
+			@ButtonLinkAction("primary", "lg", "/", templ.Attributes{"class": "mt-6"}) {
+				{ i18n.T(ctx, "global.buttons.go-back") } { i18n.T(ctx, "page.home.title") }
+			}
+		</div>
+	</div>
+}

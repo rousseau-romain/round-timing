@@ -1,29 +1,50 @@
 package auth
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
-	"net/url"
-	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/invopop/ctxi18n/i18n"
-	"github.com/rousseau-romain/round-timing/config"
-	"github.com/rousseau-romain/round-timing/helper"
-	"github.com/rousseau-romain/round-timing/model"
-	"github.com/rousseau-romain/round-timing/shared/components"
-	"github.com/rousseau-romain/round-timing/views/page"
-
-	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/discord"
 	"github.com/markbates/goth/providers/google"
+	"github.com/rousseau-romain/round-timing/config"
+	"github.com/rousseau-romain/round-timing/model/user"
 )
+
+type contextKey string
+
+const userContextKey contextKey = "authenticatedUser"
+const userConfigurationsContextKey contextKey = "userConfigurations"
+
+func RequestWithUser(r *http.Request, u user.User) *http.Request {
+	return r.WithContext(context.WithValue(r.Context(), userContextKey, u))
+}
+
+func UserFromRequest(r *http.Request) (user.User, bool) {
+	u, ok := r.Context().Value(userContextKey).(user.User)
+	return u, ok && u.Id != 0
+}
+
+func RequestWithUserConfigurations(r *http.Request, configs []user.UserConfiguration) *http.Request {
+	return r.WithContext(context.WithValue(r.Context(), userConfigurationsContextKey, configs))
+}
+
+func UserConfigurationsFromRequest(r *http.Request) []user.UserConfiguration {
+	configs, _ := r.Context().Value(userConfigurationsContextKey).([]user.UserConfiguration)
+	return configs
+}
+
+func UserConfigurationsFromContext(ctx context.Context) []user.UserConfiguration {
+	configs, _ := ctx.Value(userConfigurationsContextKey).([]user.UserConfiguration)
+	return configs
+}
 
 type AuthService struct{}
 
@@ -48,40 +69,9 @@ func NewAuthService(store sessions.Store) *AuthService {
 	return &AuthService{}
 }
 
-func GenerateCSRFToken(sessionID string) string {
-	token, _ := helper.GenerateSalt()
-	csrfTokens[sessionID] = token
-	return token
-}
-
-var csrfTokens = make(map[string]string) // Store CSRF tokens
-
 type Claims struct {
 	Email string `json:"email"`
 	jwt.RegisteredClaims
-}
-
-func enabledUserIfWhiteListed(w http.ResponseWriter, slog *slog.Logger, user model.User) bool {
-	if model.GetFeatureFlagIsEnabled("WHITE_LIST") && !user.Enabled {
-		isWhiteListed, err := model.IsEmailWhiteListed(user.Email)
-		if err != nil {
-			slog.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return false
-		}
-		if isWhiteListed {
-			var t = true
-			model.UpdateUser(user.Id, model.UserUpdate{Enabled: &t})
-			return true
-		}
-		errorTitle := "You can't acces here"
-		errorMessage := fmt.Sprintf("Ask to be add to whitelist at email %s", helper.MailContact)
-		slog.Info("User is not white listed!", "userEmail", user.Email)
-		w.Header().Set("Location", fmt.Sprintf("/?errorTitle=%s&errorMessages=%s", url.QueryEscape(errorTitle), errorMessage))
-		w.WriteHeader(http.StatusTemporaryRedirect)
-		return false
-	}
-	return true
 }
 
 func (s *AuthService) StoreUserSession(w http.ResponseWriter, r *http.Request, slog *slog.Logger, user goth.User) error {
@@ -111,14 +101,6 @@ func (s *AuthService) RemoveUserSession(w http.ResponseWriter, r *http.Request, 
 		Expires:  time.Unix(0, 0), // Expire the cookie immediately
 	})
 
-	// Expire the CSRF token cookie as well
-	http.SetCookie(w, &http.Cookie{
-		Name:    "csrf_token",
-		Value:   "",
-		Path:    "/",
-		Expires: time.Unix(0, 0),
-	})
-
 	session, err := gothic.Store.Get(r, SessionName)
 	if err != nil {
 		slog.Error(err.Error())
@@ -132,260 +114,72 @@ func (s *AuthService) RemoveUserSession(w http.ResponseWriter, r *http.Request, 
 	session.Save(r, w)
 }
 
-func AllowToBeAuth(handlerFunc http.HandlerFunc, auth *AuthService, slog *slog.Logger) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		handlerFunc(w, r)
+var errNotAuthenticated = errors.New("user is not authenticated")
+
+func (s *AuthService) GetAuthenticateUserFromRequest(r *http.Request, slog *slog.Logger) (user.User, error) {
+	// Return cached user if already resolved for this request
+	if u, ok := r.Context().Value(userContextKey).(user.User); ok && u.Id != 0 {
+		return u, nil
 	}
+
+	// Try OAuth2 session first
+	if u, err := s.getUserFromOAuthSession(r, slog); err == nil {
+		return u, nil
+	}
+
+	// Fall back to JWT cookie (email/password login)
+	if u, err := s.getUserFromJWT(r, slog); err == nil {
+		return u, nil
+	}
+
+	return user.User{}, errNotAuthenticated
 }
 
-func getCookieHandler(r *http.Request, name string) (http.Cookie, error) {
-	// Retrieve a specific cookie by name
-	cookie, err := r.Cookie(name)
-	if err != nil {
-		// Handle error if the cookie is not found
-		if err == http.ErrNoCookie {
-			return http.Cookie{}, errors.New("cookie not found")
-		} else {
-			return http.Cookie{}, fmt.Errorf("error retrieving cookie: %v", err)
-		}
-	}
-	return *cookie, err
-}
-
-func (s *AuthService) GetAuthenticateUserFromRequest(r *http.Request, slog *slog.Logger) (model.User, error) {
+func (s *AuthService) getUserFromOAuthSession(r *http.Request, slog *slog.Logger) (user.User, error) {
 	session, err := gothic.Store.Get(r, SessionName)
-	var user model.User
 	if err != nil {
-		slog.Error(err.Error())
-		return user, err
+		return user.User{}, err
 	}
 
-	slog = slog.With("userEmail", user)
-
-	u := session.Values["user"]
-
-	// User is not from OAuth2 verify if user is authenticated by email
-	if u == nil {
-		cookieToken, err := getCookieHandler(r, "token")
-		if err != nil {
-			return user, errors.New("user is not authenticated")
-		}
-
-		claims := Claims{}
-		token, err := jwt.ParseWithClaims(cookieToken.Value, &claims, func(token *jwt.Token) (interface{}, error) {
-			return []byte(config.JWT_SECRET_KEY), nil
-		})
-		if err != nil || !token.Valid {
-			slog.Error("Unauthorized: Invalid token", "token", cookieToken.Value)
-			return user, err
-		}
-
-		// Extract claims and use them
-		if claims, ok := token.Claims.(*Claims); ok && token.Valid {
-			user, err := model.GetUserByEmail(claims.Email)
-			if err != nil {
-				slog.Error("Error fetching user by email", "email", claims.Email, "error", err)
-				return user, err
-			}
-			return user, nil
-		}
-		slog.Info("user is not authenticated", "userId", user.Id)
-		return user, errors.New("user is not authenticated")
+	sessionUser, ok := session.Values["user"]
+	if !ok || sessionUser == nil {
+		return user.User{}, errNotAuthenticated
 	}
 
-	goticUser := u.(goth.User)
-	userDb, err := model.GetUserByOauth2Id(goticUser.UserID)
+	gothUser, ok := sessionUser.(goth.User)
+	if !ok || gothUser.UserID == "" {
+		return user.User{}, errNotAuthenticated
+	}
+
+	u, err := user.GetUserByOauth2Id(gothUser.UserID)
 	if err != nil {
-		slog.Error("Error fetching user", "goticUserId", goticUser.UserID, "error", err)
-		return userDb, err
+		slog.Error("Error fetching user", "goticUserId", gothUser.UserID, "error", err)
+		return user.User{}, err
 	}
-	return userDb, nil
+	return u, nil
 }
 
-func RequireAuth(handlerFunc http.HandlerFunc, auth *AuthService, slog *slog.Logger) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		user, err := auth.GetAuthenticateUserFromRequest(r, slog)
-		if err != nil {
-			slog.Error(err.Error())
-			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
-			return
-		}
-		slog = slog.With("userId", user.Id)
-
-		if !enabledUserIfWhiteListed(w, slog, user) {
-			return
-		}
-
-		handlerFunc(w, r)
+func (s *AuthService) getUserFromJWT(r *http.Request, slog *slog.Logger) (user.User, error) {
+	cookie, err := r.Cookie("token")
+	if err != nil {
+		return user.User{}, errNotAuthenticated
 	}
-}
 
-func RequireAuthAndAdmin(handlerFunc http.HandlerFunc, auth *AuthService, slog *slog.Logger) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		user, err := auth.GetAuthenticateUserFromRequest(r, slog)
-		if err != nil {
-			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
-			return
-		}
-		slog = slog.With("userId", user.Id)
-
-		if !enabledUserIfWhiteListed(w, slog, user) {
-			return
-		}
-
-		if !user.IsAdmin {
-			errorTitle := "You can't acces here"
-			slog.Info("User is not Admin", "userId", user.Id)
-			w.Header().Set("Location", fmt.Sprintf("/?errorTitle=%s", url.QueryEscape(errorTitle)))
-			w.WriteHeader(http.StatusTemporaryRedirect)
-			return
-		}
-
-		handlerFunc(w, r)
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(cookie.Value, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(config.JWT_SECRET_KEY), nil
+	})
+	if err != nil || !token.Valid {
+		slog.Error("Unauthorized: Invalid token")
+		return user.User{}, errNotAuthenticated
 	}
-}
 
-func RequireNotAuth(handlerFunc http.HandlerFunc, auth *AuthService, slog *slog.Logger) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		user, _ := auth.GetAuthenticateUserFromRequest(r, slog)
-		if user.Id == 0 {
-			handlerFunc(w, r)
-			return
-		}
-		slog = slog.With("userId", user.Id)
-
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+	u, err := user.GetUserByEmail(claims.Email)
+	if err != nil {
+		slog.Error("Error fetching user by email", "email", claims.Email, "error", err)
+		return user.User{}, err
 	}
-}
-
-func RequireAuthAndSpectateOfUserMatch(handlerFunc http.HandlerFunc, auth *AuthService, slog *slog.Logger) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		user, err := auth.GetAuthenticateUserFromRequest(r, slog)
-		if err != nil {
-			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
-			return
-		}
-		slog = slog.With("userId", user.Id)
-
-		if !enabledUserIfWhiteListed(w, slog, user) {
-			return
-		}
-
-		vars := mux.Vars(r)
-
-		matchId, _ := strconv.Atoi(vars["idMatch"])
-
-		_, err = model.GetMatch(matchId)
-		if err != nil {
-			languages, _ := model.GetLanguages()
-			errorMessage := i18n.T(r.Context(), "page.match.errors.match-not-found", i18n.M{"matchId": matchId})
-			slog.Error("Match not found", "matchId", matchId)
-			w.WriteHeader(http.StatusNotFound)
-			page.NotFoundPage(errorMessage, []components.NavItem{}, languages, r.URL.Path, user).Render(r.Context(), w)
-			return
-		}
-
-		userMatch, err := model.GetUserIdByMatch(matchId)
-		if err != nil {
-			slog.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		isUsersSpectateByIdUser, err := model.IsUsersSpectateByIdUser(userMatch.Id, user.IdShare)
-
-		if err != nil {
-			slog.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		if !isUsersSpectateByIdUser {
-			errorMessage := i18n.T(r.Context(), "page.match.errors.match-unauthorized-spectator", i18n.M{"matchId": matchId})
-			slog.Info("User is not spectator for match", "userId", user.Id, "userMatchId", userMatch.Id, "matchId", matchId)
-			w.WriteHeader(http.StatusForbidden)
-			languages, _ := model.GetLanguages()
-			page.ForbidenPage(errorMessage, []components.NavItem{}, languages, r.URL.Path, user).Render(r.Context(), w)
-			return
-		}
-
-		handlerFunc(w, r)
-	}
-}
-
-func RequireAuthAndHisMatch(handlerFunc http.HandlerFunc, auth *AuthService, slog *slog.Logger) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		user, err := auth.GetAuthenticateUserFromRequest(r, slog)
-		if err != nil {
-			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
-			return
-		}
-		slog = slog.With("userId", user.Id)
-
-		if !enabledUserIfWhiteListed(w, slog, user) {
-			return
-		}
-
-		vars := mux.Vars(r)
-
-		matchId, _ := strconv.Atoi(vars["idMatch"])
-
-		_, err = model.GetMatch(matchId)
-		if err != nil {
-			languages, _ := model.GetLanguages()
-			errorMessage := i18n.T(r.Context(), "page.match.errors.match-not-found", i18n.M{"matchId": matchId})
-			slog.Error("Match not found", "matchId", matchId)
-			w.WriteHeader(http.StatusNotFound)
-			page.NotFoundPage(errorMessage, []components.NavItem{}, languages, r.URL.Path, user).Render(r.Context(), w)
-			return
-		}
-
-		userMatch, err := model.GetUserIdByMatch(matchId)
-		if err != nil {
-			slog.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		if userMatch.Id != user.Id {
-			languages, _ := model.GetLanguages()
-			errorMessage := i18n.T(r.Context(), "page.match.errors.match-unauthorized", i18n.M{"matchId": matchId})
-			slog.Info("User is not the owner of the match", "userId", user.Id, "userMatchId", userMatch.Id)
-			w.WriteHeader(http.StatusUnauthorized)
-			page.ForbidenPage(errorMessage, []components.NavItem{}, languages, r.URL.Path, user).Render(r.Context(), w)
-			return
-		}
-
-		handlerFunc(w, r)
-	}
-}
-
-func RequireAuthAndHisAccount(handlerFunc http.HandlerFunc, auth *AuthService, slog *slog.Logger) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		user, err := auth.GetAuthenticateUserFromRequest(r, slog)
-		if err != nil {
-			slog.Error(err.Error())
-			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
-			return
-		}
-		slog = slog.With("userId", user.Id)
-
-		if !enabledUserIfWhiteListed(w, slog, user) {
-			return
-		}
-
-		vars := mux.Vars(r)
-
-		userId, _ := strconv.Atoi(vars["idUser"])
-
-		if user.Id != userId {
-			slog.Info("User is not the owner of the account", "userId", user.Id, "userId", userId)
-			http.Error(w, fmt.Sprintf("User %v is not the owner of the account %v", user.Id, userId), http.StatusUnauthorized)
-			return
-		}
-
-		handlerFunc(w, r)
-	}
+	return u, nil
 }
 
 func buildCallbackURL(provider string) string {

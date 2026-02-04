@@ -1,0 +1,189 @@
+package ui
+
+import "github.com/invopop/ctxi18n/i18n"
+
+// buttonClasses returns the common button classes for a given variant and size.
+// All variants support dark mode.
+// Variants: "" or "primary" (indigo, default), "success" (green), "danger" (red), "outline" (bordered)
+// Sizes: "" or "md" (default), "sm", "lg"
+func buttonClasses(variant, size string) string {
+	base := "inline-flex items-center justify-center rounded-md font-medium transition focus:outline-none focus:ring-2"
+
+	var variantClass string
+	switch variant {
+	case "primary", "":
+		variantClass = "bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-600"
+	case "success":
+		variantClass = "bg-green-600 text-white hover:bg-green-700 focus:ring-green-500 dark:bg-green-500 dark:hover:bg-green-600"
+	case "danger":
+		variantClass = "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 dark:bg-red-500 dark:hover:bg-red-600"
+	case "outline":
+		variantClass = "border-2 border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-gray-300 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-400 dark:hover:bg-gray-700"
+	default:
+		variantClass = "bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-600"
+	}
+
+	var sizeClass string
+	switch size {
+	case "sm":
+		sizeClass = "px-4 py-2 text-xs"
+	case "lg":
+		sizeClass = "px-5 py-3 text-base"
+	case "md", "":
+		sizeClass = "px-4 py-2 text-sm"
+	default:
+		sizeClass = "px-4 py-2 text-sm"
+	}
+
+	return base + " " + variantClass + " " + sizeClass
+}
+
+// Button renders a styled button with configurable variants and sizes.
+// Variants: "" or "primary" (indigo, default), "success" (green), "danger" (red), "outline" (bordered)
+// Sizes: "" or "md" (default), "sm", "lg"
+// Pass empty strings for defaults: @ui.Button("", "") for primary/md
+templ Button(variant string, size string) {
+	<button class={ buttonClasses(variant, size) }>
+		{ children... }
+	</button>
+}
+
+// ButtonAction renders a button with HTMX and other custom attributes.
+// Use this when you need hx-* attributes or other custom attributes on the button.
+// Pass empty strings for defaults: @ui.ButtonAction("", "", attrs) for primary/md
+templ ButtonAction(variant string, size string, attrs templ.Attributes) {
+	<button class={ buttonClasses(variant, size) } { attrs... }>
+		{ children... }
+	</button>
+}
+
+// ButtonLink renders an anchor styled as a button.
+// Use this for navigation links that should look like buttons.
+// Pass empty strings for defaults: @ui.ButtonLink("", "", "/path") for primary/md
+templ ButtonLink(variant string, size string, href string) {
+	<a href={ templ.SafeURL(href) } class={ buttonClasses(variant, size) }>
+		{ children... }
+	</a>
+}
+
+// ButtonLinkAction renders an anchor styled as a button with custom attributes.
+// Use this when you need additional classes or attributes on a button link.
+// Pass empty strings for defaults: @ui.ButtonLinkAction("", "", "/path", attrs) for primary/md
+templ ButtonLinkAction(variant string, size string, href string, attrs templ.Attributes) {
+	<a href={ templ.SafeURL(href) } class={ buttonClasses(variant, size) } { attrs... }>
+		{ children... }
+	</a>
+}
+
+// ButtonSubmit renders a submit-style button (primary blue)
+templ ButtonSubmit(text string) {
+	<button
+		class="inline-block shrink-0 rounded-md border border-blue-600 bg-blue-600 px-12 py-3 text-sm font-medium text-white transition hover:bg-transparent hover:text-blue-600 focus:ring-3 focus:outline-hidden dark:hover:bg-blue-700 dark:hover:text-white"
+	>
+		{ text }
+	</button>
+}
+
+// ButtonOAuth renders an OAuth sign-in button
+templ ButtonOAuth(href string, provider string) {
+	<a
+		href={ templ.SafeURL(href) }
+		class="block w-full rounded-lg bg-indigo-600 px-5 py-3 text-sm font-medium text-white text-center"
+	>
+		{ i18n.T(ctx, "page.signin.signin-button", i18n.M{"provider": provider}) }
+	</a>
+}
+
+// ButtonToggle renders a toggle button that switches between enabled/disabled states
+templ ButtonToggle(textEnabled, textDisabled, hxPatch string, isEnabled bool) {
+	<button
+		class={
+			"items-center p-2 rounded font-medium",
+			templ.KV("bg-green-100 text-green-800 hover:bg-green-200", isEnabled),
+			templ.KV("bg-red-100 text-red-800 hover:bg-red-200", !isEnabled),
+		}
+		hx-patch={ hxPatch }
+		hx-trigger="click"
+		hx-target="this"
+		hx-swap="outerHTML"
+	>
+		if isEnabled {
+			{ textEnabled }
+		} else {
+			{ textDisabled }
+		}
+	</button>
+}
+
+// ButtonCopy renders a copy-to-clipboard button with an input field
+templ ButtonCopy(textToCopy string) {
+	<div
+		class="inline-flex items-center rounded-lg border bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 overflow-hidden"
+		x-data="{ copied: false }"
+	>
+		<input
+			class="px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-mono border-none outline-none"
+			type="text"
+			value={ textToCopy }
+			readonly
+			x-ref="input"
+		/>
+		<button
+			@click="$refs.input.select(); navigator.clipboard.writeText($refs.input.value); copied = true; setTimeout(() => copied = false, 2000)"
+			class="px-3 py-2 mr-2 bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500 hover:text-gray-800 dark:hover:text-white transition-colors rounded"
+			type="button"
+		>
+			<div x-show="!copied">
+				<svg aria-hidden="true" focusable="false" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+					<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path>
+					<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+				</svg>
+			</div>
+			<div x-show="copied" x-cloak>
+				<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M3 8.5L6.5 12L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-500"></path>
+				</svg>
+			</div>
+		</button>
+	</div>
+}
+
+// ButtonFullscreen renders a fullscreen toggle button
+templ ButtonFullscreen() {
+	<button
+		x-data="{ isFullscreen: !!document.fullscreenElement }"
+		x-init="document.addEventListener('fullscreenchange', () => isFullscreen = !!document.fullscreenElement)"
+		@click="document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()"
+		class="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-800 dark:hover:text-white transition-colors"
+		type="button"
+		title="Toggle fullscreen"
+	>
+		<svg x-show="!isFullscreen" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+		</svg>
+		<svg x-show="isFullscreen" x-cloak width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
+		</svg>
+	</button>
+}
+
+// ButtonExpandWidth renders a button to toggle between contained and full-width layout
+// Works with ContainerToggleable component via Alpine.store for shared reactive state
+templ ButtonExpandWidth() {
+	<button
+		class="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-800 dark:hover:text-white transition-colors"
+		type="button"
+		title="Toggle width"
+		x-data="{ throttled: false }"
+		@click="if (!throttled) { throttled = true; $store.config.toggleContainerExpanded(); setTimeout(() => throttled = false, 400) }"
+	>
+		<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<path
+				:d="$store.config.isContainerExpanded
+					? 'M4 12 h16 M7 8l-4 4l4  4M17 8l4  4l-4 4'
+					: 'M8 12 h7  M4 8l4  4l-4 4M19 8l-4 4l4  4'
+				"
+			></path>
+		</svg>
+	</button>
+}

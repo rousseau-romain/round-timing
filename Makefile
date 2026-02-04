@@ -10,42 +10,39 @@ Command := $(firstword $(MAKECMDGOALS))
 	@true
 
 live/go:
-	@go run github.com/air-verse/air@v1.52.3 \
-		--build.cmd "go build -o tmp/main" --build.bin "tmp/main" --build.delay "1000" \
+	@go run github.com/air-verse/air@v1.64.0 \
+		--build.cmd "go build -o tmp/main" --build.entrypoint "tmp/main" --build.delay "1000" \
 		--build.exclude_dir "node_modules,tmp,vendor" \
 		--build.include_ext "go,yaml" \
 		--build.stop_on_error "false" \
 		--misc.clean_on_exit true
 
 live/templ:
-	@templ generate -watch -proxy="http://127.0.0.1:2468" --open-browser=false
+	@go tool templ generate -watch -proxy="http://127.0.0.1:2468" -cmd="go run ." --open-browser=false
 
 live/tailwind:
 	@npx tailwindcss -i input.css -o public/tailwind.css --watch
 
-live: 
+live:
 	make build/commit-id ${COMMIT_ID}
-	make -j4 live/templ live/tailwind live/go 
+	make -j3 live/templ live/tailwind
 
 build/tailwind:
 	npx tailwindcss -i input.css -o public/tailwind.css --minify
 
 build/templ:
-	templ generate
+	go tool templ generate
 
 build/commit-id:
 	echo "{\"commit_id\": \"$(Arguments)\"}" > config/commit-id.json
 
 install:
 	brew install golang-migrate gnupg
-	go install github.com/air-verse/air@v1.52.3
-	go install github.com/a-h/templ/cmd/templ@v0.2.793
+	go mod tidy
 	npm install
 
 	@echo 'add "go.goroot:"$$GOROOT" to settings.json VsCode'
 	@echo 'after run "make db_init' 
-
-
 
 # DB commands
 db/encrypt:
@@ -57,7 +54,6 @@ db/decrypt:
 	gpg database/migration/database.tar.gz.gpg
 	tar -xzvf database/migration/database.tar.gz
 	shred -u database/migration/database.tar.gz.gpg database/migration/database.tar.gz
-
 
 db/combine/script:
 	cd database/migration/ && cat $$(ls | grep .up.sql)| grep -v '^--' | grep -v '^START TRANSACTION;' | grep -v '^COMMIT;' > ../../output.sql

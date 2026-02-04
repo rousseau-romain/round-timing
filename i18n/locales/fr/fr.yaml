@@ -90,10 +90,17 @@ fr:
       title: "Profile"
       h1: "Profile:"
       p-user-id: "Votre identifiant est:"
+      h2-spectators: "Utilisateurs spectateurs:"
       h2-spells-favorites: "Sorts favoris:"
       h2-configuration: "Configuration:"
       logout: "Deconnexion"
       no-spectate: "Vous n'avez aucun spectateur, ajouter en via le formulaire ci-dessous."
+      button:
+        add-spectator: "Ajouter un spectateur"
+      input:
+        placeholder-user-id: "Id utilisateur exemple: 1"
+      table:
+        id-user-spectate: "Id utilisateur spectateur"
       errors:
         user-spectate:
           already-exist: "Le spectateur (%{userSpectateId}) est déjà répertorié"
@@ -129,6 +136,7 @@ fr:
       connect-with-email: "Connectez-vous avec votre adresse email"
       already-exists-with-provider: "Un compte est déja crée avec l'email %{email} et le provider %{provider}."
       invalid-credentials: "Login ou mot de passe incorrect"
+      too-many-requests: "Trop de tentatives. Veuillez réessayer plus tard."
       no-account: "Vous n'avez pas de compte ?"
       create-account: "Créez-en un"
     start-match:

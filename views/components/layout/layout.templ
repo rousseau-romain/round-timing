@@ -1,0 +1,296 @@
+package layout
+
+import (
+	"fmt"
+	"strconv"
+	"time"
+
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/rousseau-romain/round-timing/config"
+	"github.com/rousseau-romain/round-timing/model/system"
+	"github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/service/auth"
+	"github.com/rousseau-romain/round-timing/views/components/icons"
+)
+
+func isConfigEnabled(configs []user.UserConfiguration, key string) bool {
+	for _, c := range configs {
+		if c.Key == key {
+			return c.IsEnabled
+		}
+	}
+	return false
+}
+
+func getConfigId(configs []user.UserConfiguration, key string) string {
+	for _, c := range configs {
+		if c.Key == key {
+			return strconv.Itoa(c.IdConfiguration)
+		}
+	}
+	return "0"
+}
+
+type PopinMessages struct {
+	Title    string
+	Messages []string
+	Type     string
+}
+
+templ Layout(title string, popinMessages PopinMessages, user user.User, navItems []NavItem, languages []system.Language, pageSlug string) {
+	<html class={ templ.KV("dark", isConfigEnabled(auth.UserConfigurationsFromContext(ctx), "dark_mode")) }>
+		<head>
+			<title>Round Timing - { title }</title>
+			<link rel="icon" type="image/svg+xml" href="/public/img/favicon.svg"/>
+			<link rel="stylesheet" type="text/css" href={ fmt.Sprintf("/public/tailwind.css?build=%s", strconv.FormatInt(time.Now().Unix(), 10)) }/>
+			<style>[x-cloak] { display: none !important; }</style>
+		</head>
+		<body
+			data-authenticated={ strconv.FormatBool(user.Id != 0) }
+			data-config-container-expanded={ strconv.FormatBool(isConfigEnabled(auth.UserConfigurationsFromContext(ctx), "container_expanded")) }
+			data-config-container-expanded-id={ getConfigId(auth.UserConfigurationsFromContext(ctx), "container_expanded") }
+			data-config-dark-mode={ strconv.FormatBool(isConfigEnabled(auth.UserConfigurationsFromContext(ctx), "dark_mode")) }
+			data-config-dark-mode-id={ getConfigId(auth.UserConfigurationsFromContext(ctx), "dark_mode") }
+			class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+		>
+			if config.ENV == "development" || config.ENV == "staging" {
+				<script src="/public/script/htmx-2.0.8/htmx.js"></script>
+				<script defer src="/public/script/alpine-3.15.4.js"></script>
+				<script src="/public/script/htmx-2.0.8/ext/debug.js"></script>
+				<button class="border border-red-600 bg-red-300 text-red-600 dark:bg-red-900 dark:text-red-400 dark:border-red-500 top-0 right-0 absolute">Debug MOD</button>
+			} else {
+				<script src="/public/script/htmx-2.0.8/htmx.min.js"></script>
+				<script defer src="/public/script/alpine-3.15.4.min.js"></script>
+			}
+			<script src="/public/script/htmx-2.0.8/ext/response-targets.js"></script>
+			<script src="/public/script/htmx-2.0.8/ext/ws.js"></script>
+			<script src="/public/script/alpine-init.js"></script>
+			@Nav(user, navItems, languages, pageSlug)
+			<div class="min-h-screen" id="content" hx-ext="response-targets">
+				<div id="popinMessages">
+					if popinMessages.Title != "" {
+						@PopinMessage(popinMessages)
+					}
+				</div>
+				{ children... }
+			</div>
+			@Footer()
+		</body>
+	</html>
+}
+
+type NavItem struct {
+	Name, Url string
+}
+
+templ Nav(user user.User, navItems []NavItem, languages []system.Language, pageSlug string) {
+	<header class="bg-white dark:bg-gray-900">
+		<div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
+			<div class="flex h-16 items-center justify-between">
+				<div class="md:flex md:items-center md:gap-12">
+					<a class="block text-sky-600 dark:text-sky-600" href="/">
+						<span class="sr-only">Home</span>
+						<svg
+							class="hover:animate-spin fill-sky-600 "
+							width="30px"
+							height="30px"
+							viewBox="0 0 528.916 528.916"
+						>
+							<path
+								d="M523.859,232.329h-41.701c-5.07,0-9.715-4.073-10.59-9.067c-19.57-111.442-117-196.409-233.962-196.409
+								C106.589,26.853,0,133.441,0,264.458c0,131.018,106.589,237.605,237.606,237.605c12.675,0,22.95-10.275,22.95-22.949
+								s-10.275-22.949-22.95-22.949c-105.708,0-191.706-85.998-191.706-191.707c0-105.707,85.995-191.706,191.703-191.706
+								c91.583,0,168.325,64.569,187.208,150.564c1.086,4.951-2.359,9.012-7.426,9.012H380.66c-5.07,0-6.578,3.182-3.371,7.108
+								l69.162,84.621c3.209,3.926,8.408,3.926,11.619,0l69.162-84.621C530.439,235.511,528.928,232.329,523.859,232.329z"
+								stroke-linejoin="round"
+							></path>
+						</svg>
+					</a>
+				</div>
+				<div class="hidden md:block">
+					<nav aria-label="Global">
+						<ul class="flex items-center gap-6 text-sm">
+							for _, nav := range navItems {
+								<li class="block">
+									<a href={ templ.SafeURL("/" + nav.Url) } class="text-gray-500 transition hover:text-gray-500/75 dark:text-white dark:hover:text-white/75">{ nav.Name }</a>
+								</li>
+							}
+						</ul>
+					</nav>
+				</div>
+				<div class="flex items-center gap-4">
+					<div class="sm:flex sm:gap-4">
+						if user.Email != "" {
+							<a href="/profile">
+								<div class="w-10 h-10 p-1 rounded-full bg-gray-200 dark:bg-gray-700">
+									@icons.User("currentColor", 32, 32)
+								</div>
+							</a>
+							<div x-data="{ open: false }">
+								<img
+									alt="flag"
+									id="header-select-language"
+									class="cursor-pointer w-10 h-8"
+									src={ "/public/img/flag/" + strconv.Itoa(user.IdLanguage) + ".svg" }
+									@click="open = !open"
+								/>
+								@PopinSelectLanguage(user, languages)
+							</div>
+						} else {
+							if pageSlug != "/signin" && pageSlug != "/signup" {
+								<a
+									class="rounded-md bg-sky-600 px-5 py-2.5 text-sm font-medium text-white shadow dark:hover:bg-sky-500"
+									href="/signin"
+								>
+									{ i18n.T(ctx, "global.signin") }
+								</a>
+								<div class="relative w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
+									<svg class="absolute w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+								</div>
+							}
+						}
+					</div>
+					<div class="block md:hidden" x-data="{ menuOpen: false }">
+						<button
+							id="button-burger-menu"
+							@click="menuOpen = !menuOpen"
+							class="rounded bg-gray-100 p-2 text-gray-600 transition hover:text-gray-600/75 dark:bg-gray-800 dark:text-white dark:hover:text-white/75"
+						>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-5 w-5"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+								stroke-width="2"
+							>
+								<path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
+							</svg>
+						</button>
+						<div class="absolute right-0 w-fit bg-white dark:bg-gray-800 border dark:border-gray-700" x-show="menuOpen" x-cloak @click.outside="menuOpen = false">
+							@MobileMenu(user, navItems)
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</header>
+}
+
+templ MobileMenu(user user.User, navItems []NavItem) {
+	<ul class="space-y-1 border dark:border-gray-700">
+		for _, nav := range navItems {
+			<li class="block">
+				<a href={ templ.SafeURL("/" + nav.Url) } class="block rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200">{ nav.Name }</a>
+			</li>
+		}
+	</ul>
+}
+
+templ PopinMessage(popinMessages PopinMessages) {
+	if len(popinMessages.Messages) > 0 {
+		<div
+			x-data="{
+				open: true,
+				close() {
+					this.open = false;
+					const url = new URL(window.location);
+					if (url.searchParams.has('errorTitle') || url.searchParams.has('errorMessages')) {
+						url.searchParams.delete('errorTitle');
+						url.searchParams.delete('errorMessages');
+						window.history.replaceState({}, document.title, url);
+						location.reload();
+					}
+				}
+			}"
+			x-show="open"
+			x-cloak
+			@click="close()"
+			class="popin-message w-screen h-screen absolute top-0 right-0 bg-gray-800 bg-opacity-40 cursor-pointer place-items-center justify-center flex"
+		>
+			<div
+				role="alert"
+				@click.stop
+				class={
+					"z-50 pr-10 relative mr-4 ml-4 w-fit rounded border-s-4 p-4",
+					"border-gray-500 bg-gray-50 text-gray-700 dark:bg-gray-900 dark:border-gray-600",
+					templ.KV("border-green-500 bg-green-50 text-green-700 dark:bg-green-900 dark:border-green-600", popinMessages.Type == "success"),
+					templ.KV("border-red-500 bg-red-50 text-red-700 dark:bg-red-900 dark:border-red-600", popinMessages.Type == "error"),
+					templ.KV("border-yellow-500 bg-yellow-50 text-yellow-700 dark:bg-yellow-900 dark:border-yellow-600", popinMessages.Type == "warning"),
+					templ.KV("border-sky-500 bg-sky-50 text-sky-700 dark:bg-sky-900 dark:border-sky-600", popinMessages.Type == "info"),
+				}
+			>
+				<div class="close absolute right-2 top-2 cursor-pointer" @click="close()">
+					<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+						<line x1="5" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
+						<line x1="19" y1="5" x2="5" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
+					</svg>
+				</div>
+				if popinMessages.Title != "" {
+					<div
+						class={
+							"flex items-center gap-2",
+							templ.KV("text-green-800 dark:text-green-100", popinMessages.Type == "success"),
+							templ.KV("text-red-800 dark:text-red-100", popinMessages.Type == "error"),
+							templ.KV("text-yellow-800 dark:text-yellow-100", popinMessages.Type == "warning"),
+							templ.KV("text-sky-800 dark:text-sky-100", popinMessages.Type == "info"),
+						}
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+							<path
+								fill-rule="evenodd"
+								d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z"
+								clip-rule="evenodd"
+							></path>
+						</svg>
+						<strong class="block font-medium">{ popinMessages.Title }</strong>
+					</div>
+				}
+				for _, e := range popinMessages.Messages {
+					if e != "" {
+						<p
+							class={
+								"mt-2 text-sm",
+								templ.KV("text-green-700 dark:text-green-200", popinMessages.Type == "success"),
+								templ.KV("text-red-700 dark:text-red-200", popinMessages.Type == "error"),
+								templ.KV("text-yellow-700 dark:text-yellow-200", popinMessages.Type == "warning"),
+								templ.KV("text-sky-700 dark:text-sky-200", popinMessages.Type == "info"),
+							}
+						>
+							{ e }
+						</p>
+					}
+				}
+			</div>
+		</div>
+	}
+}
+
+templ PopinSelectLanguage(user user.User, languages []system.Language) {
+	<div
+		id="popin-language"
+		class="h-screen w-screen absolute top-0 right-0 bg-gray-800 bg-opacity-40 cursor-pointer place-items-center justify-center flex"
+		x-show="open"
+		x-cloak
+		@click="open = false"
+	>
+		<section class="w-max h-max rounded-3xl shadow-2xl bg-slate-50 dark:bg-gray-800 border dark:border-gray-600 z-20" @click.stop>
+			<div class="p-8 text-center">
+				<h2 class="mt-6 text-3xl font-bold dark:text-white">{ i18n.T(ctx, "global.header.select-language") }</h2>
+				<ul>
+					for _, l := range languages {
+						<li>
+							<button
+								type="submit"
+								class="inline-block w-full rounded-lg bg-transparent sm:w-auto border dark:border-gray-600"
+								hx-patch={ fmt.Sprintf("/user/%d/locale/%s", user.Id, l.Locale) }
+							>
+								<img alt="flag" class="cursor-pointer w-20 transition-all hover:scale-105" src={ fmt.Sprintf("/public/img/flag/%d.svg", l.Id) }/>
+							</button>
+						</li>
+					}
+				</ul>
+			</div>
+		</section>
+	</div>
+}

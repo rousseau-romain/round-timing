@@ -29,3 +29,6 @@ func ConnectDb() *sql.DB {
 }
 
 var db = ConnectDb()
+
+// DB is exported for use by subpackages
+var DB = db

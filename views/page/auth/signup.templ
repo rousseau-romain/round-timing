@@ -1,0 +1,46 @@
+package auth
+
+import (
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/model/system"
+	"github.com/rousseau-romain/round-timing/views/components/forms"
+	"github.com/rousseau-romain/round-timing/views/components/layout"
+	"github.com/rousseau-romain/round-timing/views/components/ui"
+)
+
+templ SignupPage(navItems []layout.NavItem, languages []system.Language, pageSlug string, popinMessage layout.PopinMessages) {
+	@layout.Layout(i18n.T(ctx, "page.signup.title"), popinMessage, user.User{}, navItems, languages, pageSlug) {
+		<div class="mx-auto max-w-screen-xl px-4 py-16 sm:px-6 lg:px-8">
+			<h1 class="text-center text-lg font-medium">{ i18n.T(ctx, "page.signup.h1") }</h1>
+			<div class="mx-auto max-w-lg flex flex-col space-y-4">
+				<form
+					hx-post="/signup"
+					hx-target-error="#popinMessages"
+					class="mt-8 grid grid-cols-6 gap-6"
+				>
+					@forms.Input("email", "email", "email", "global.email", true)
+					@forms.InputHalf("password", "password", "password", "global.password", true)
+					@forms.InputHalf("password", "password-confirmation", "password-confirmation", "page.signup.password-confirmation", true)
+					<div class="col-span-6">
+						<p class="text-sm text-gray-500 dark:text-gray-400">
+							{ i18n.T(ctx, "page.signup.p-agree-terms.1") }
+							<a href="/cgu" class="text-gray-700 underline dark:text-gray-200">
+								{ i18n.T(ctx, "page.signup.p-agree-terms.2") }
+							</a>
+							{ i18n.T(ctx, "page.signup.p-agree-terms.3") }
+							<a href="/privacy" class="text-gray-700 underline dark:text-gray-200">{ i18n.T(ctx, "page.signup.p-agree-terms.4") } </a>.
+						</p>
+					</div>
+					<div class="col-span-6 sm:flex sm:items-center sm:gap-4">
+						@ui.ButtonSubmit(i18n.T(ctx, "page.signup.signup-button"))
+						<p class="mt-4 text-sm text-gray-500 sm:mt-0 dark:text-gray-400">
+							{ i18n.T(ctx, "page.signup.p-already-account") }
+							<a href="/signin" class="text-gray-700 underline dark:text-gray-200">{ i18n.T(ctx, "global.signin") }</a>.
+						</p>
+					</div>
+				</form>
+			</div>
+		</div>
+	}
+}

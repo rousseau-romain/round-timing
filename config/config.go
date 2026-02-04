@@ -26,32 +26,43 @@ var (
 	GOOGLE_CLIENT_ID,
 	GOOGLE_CLIENT_SECRET,
 	GITHUB_CLIENT_ID,
-	GITHUB_CLIENT_SECRET string
+	GITHUB_CLIENT_SECRET,
+	ENV string
 	COOKIES_AUTH_AGE_IN_SECONDS int
 	COOKIES_AUTH_IS_SECURE      bool
 	COOKIES_AUTH_IS_HTTP_ONLY   bool
 )
 
+func requiredEnv(key string) string {
+	val := os.Getenv(key)
+	if val == "" {
+		log.Fatalf("required environment variable %s is not set", key)
+	}
+	return val
+}
+
 func init() {
 	log.SetFlags(log.Llongfile)
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalln("Coudn't load env file!!")
+		log.Println("No .env file found, using environment variables")
 	}
 
-	VERSION = "v1.4.3"
-	DB_HOST = os.Getenv("DB_HOST")
-	DB_NAME = os.Getenv("DB_NAME")
-	DB_PASSWORD = os.Getenv("DB_PASSWORD")
-	DB_USER = os.Getenv("DB_USER")
-	DB_DRIVER = os.Getenv("DB_DRIVER")
-	DB_PORT = os.Getenv("DB_PORT")
-	DB_URL = os.Getenv("DB_URL")
-	SALT_SECRET = os.Getenv("SALT_SECRET")
-	JWT_SECRET_KEY = os.Getenv("JWT_SECRET_KEY")
+	VERSION = "v1.5.0"
+	ENV = os.Getenv("ENV")
 
-	PUBLIC_HOST_PORT = os.Getenv("PUBLIC_HOST_PORT")
-	COOKIES_AUTH_SECRET = os.Getenv("COOKIES_AUTH_SECRET")
+	DB_HOST = requiredEnv("DB_HOST")
+	DB_NAME = requiredEnv("DB_NAME")
+	DB_PASSWORD = requiredEnv("DB_PASSWORD")
+	DB_USER = requiredEnv("DB_USER")
+	DB_DRIVER = requiredEnv("DB_DRIVER")
+	DB_PORT = requiredEnv("DB_PORT")
+	DB_URL = os.Getenv("DB_URL")
+
+	SALT_SECRET = requiredEnv("SALT_SECRET")
+	JWT_SECRET_KEY = requiredEnv("JWT_SECRET_KEY")
+	PUBLIC_HOST_PORT = requiredEnv("PUBLIC_HOST_PORT")
+	COOKIES_AUTH_SECRET = requiredEnv("COOKIES_AUTH_SECRET")
 
 	COOKIES_AUTH_AGE_IN_SECONDS = 60 * 60 * 24 * 2
 	COOKIES_AUTH_IS_SECURE, _ = strconv.ParseBool(os.Getenv("COOKIES_AUTH_IS_SECURE"))

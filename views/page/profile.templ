@@ -2,90 +2,122 @@ package page
 
 import (
 	"fmt"
+
 	"github.com/invopop/ctxi18n/i18n"
-	"github.com/rousseau-romain/round-timing/model"
-	"github.com/rousseau-romain/round-timing/shared/components"
+	"github.com/rousseau-romain/round-timing/model/game"
+	"github.com/rousseau-romain/round-timing/model/system"
+	"github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/views/components/forms"
+	"github.com/rousseau-romain/round-timing/views/components/icons"
+	"github.com/rousseau-romain/round-timing/views/components/layout"
+	"github.com/rousseau-romain/round-timing/views/components/ui"
 )
 
-templ ProfilePage(user model.User, popinMessages components.PopinMessages, navItems []components.NavItem, languages []model.Language, pageSlug string, idUserShares []string, classes []model.Class, spells []model.SpellByClass, userConfigurations []model.UserConfiguration) {
-	@components.Layout(i18n.T(ctx, "page.profile.title"), popinMessages, user, navItems, languages, pageSlug) {
-		<div class="mx-auto container">
-			<h1 class="text-2xl font-semibold">{ i18n.T(ctx, "page.profile.h1") }</h1>
-			<div class="mb-2">
-				<div class="flex gap-2">
-					<p class="text-gray-500">{ i18n.T(ctx, "page.profile.p-user-id") }</p>
-					@components.ButtonCopy(user.IdShare)
-				</div>
-			</div>
-			<h2 class="font-semibold">Utilisateurs spectateurs:</h2>
-			<div class="mb-2">
-				if len(idUserShares) == 0 {
-					<p class="text-gray-500">{ i18n.T(ctx, "page.profile.no-spectate") }</p>
+templ ProfilePage(user user.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string, idUserShares []string, classes []game.Class, spells []game.SpellByClass, userConfigurations []user.UserConfiguration) {
+	@layout.Layout(i18n.T(ctx, "page.profile.title"), popinMessages, user, navItems, languages, pageSlug) {
+		@ui.Container("padded") {
+			@ui.PageHeader() {
+				{ i18n.T(ctx, "page.profile.h1") }
+			}
+			// User ID Section
+			@ui.Section() {
+				@ui.Card("default") {
+					<div class="flex items-center justify-between gap-4">
+						<div>
+							<p class="text-sm text-gray-500 dark:text-gray-400">{ i18n.T(ctx, "page.profile.p-user-id") }</p>
+							<p class="font-mono text-lg mt-1">{ user.IdShare }</p>
+						</div>
+						@ui.ButtonCopy(user.IdShare)
+					</div>
 				}
-				<form
-					hx-post="/profile/user-spectate"
-					hx-swap="afterbegin"
-					hx-target="tbody"
-					hx-target-error="#popinMessages"
-				>
-					<input
-						class="mb-2 w-1/2 block rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-						placeholder="id user example: 1"
-						required
-						type="text"
-						name="idUserShare"
-					/>
-					<button
-						type="submit"
-						class="inline-block rounded-md bg-sky-600 px-5 py-2.5 text-sm font-medium text-white shadow hover:bg-sky-500"
+			}
+			// Spectators Section
+			@ui.Section() {
+				@ui.Card("default") {
+					<h2 class="text-lg font-semibold mb-4">{ i18n.T(ctx, "page.profile.h2-spectators") }</h2>
+					<form
+						class="mb-4"
+						hx-post="/profile/user-spectate"
+						hx-swap="afterbegin"
+						hx-target="tbody"
+						hx-target-error="#popinMessages"
 					>
-						Ajouter un spectateur
-					</button>
-				</form>
-			</div>
-			@TableUserSpectate(idUserShares)
-			<h2 class="font-semibold mb-2">{ i18n.T(ctx, "page.profile.h2-configuration") }</h2>
-			@TableUserConfiguration(userConfigurations)
-			<h2 class="font-semibold mb-2">{ i18n.T(ctx, "page.profile.h2-spells-favorites") }</h2>
-			<div class="mb-2 p-2">
-				@ListSpellClass(classes, spells)
-			</div>
-			<a
-				class="m-auto table rounded-md bg-red-600 px-6 py-3 text-md font-medium text-white shadow hover:bg-red-500"
-				href={ templ.SafeURL("/auth/logout/" + user.ProviderLogin) }
-			>
-				{ i18n.T(ctx, "page.profile.logout") }
-			</a>
-		</div>
+						<div class="flex flex-col sm:flex-row gap-2">
+							@forms.InputAction("text", "idUserShare", "", templ.Attributes{
+								"placeholder": i18n.T(ctx, "page.profile.input.placeholder-user-id"),
+								"required":    true,
+								"class":       "flex-1",
+							})
+							@ui.ButtonAction("primary", "md", templ.Attributes{"type": "submit"}) {
+								{ i18n.T(ctx, "page.profile.button.add-spectator") }
+							}
+						</div>
+					</form>
+					if len(idUserShares) == 0 {
+						<p class="text-gray-500 dark:text-gray-400 text-center py-4">{ i18n.T(ctx, "page.profile.no-spectate") }</p>
+					} else {
+						@TableUserSpectate(idUserShares)
+					}
+				}
+			}
+			// Configuration Section
+			if len(userConfigurations) > 0 {
+				@ui.Section() {
+					@ui.Card("default") {
+						<h2 class="text-lg font-semibold mb-4">{ i18n.T(ctx, "page.profile.h2-configuration") }</h2>
+						@TableUserConfiguration(userConfigurations)
+					}
+				}
+			}
+			// Favorite Spells Section
+			@ui.Section() {
+				@ui.Card("default") {
+					<h2 class="text-lg font-semibold mb-4">{ i18n.T(ctx, "page.profile.h2-spells-favorites") }</h2>
+					@ListSpellClass(classes, spells)
+				}
+			}
+			// Logout Section
+			@ui.Section() {
+				<div class="flex justify-center">
+					@ui.ButtonLink("danger", "md", "/auth/logout/"+user.ProviderLogin) {
+						{ i18n.T(ctx, "page.profile.logout") }
+					}
+				</div>
+			}
+		}
 	}
 }
 
-templ TableUserConfiguration(userConfigurations []model.UserConfiguration) {
-	<table class="table-auto mb-2 border">
-		<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-			<tr>
-				<th>{ i18n.T(ctx, "global.table.name") }</th>
-				<th></th>
-			</tr>
-		</thead>
-		<tbody
-			hx-swap="outerHTML"
-			hx-target="closest tr"
-		>
-			for _, uc := range(userConfigurations) {
-				<tr class="border-b">
-					<td class="first-letter:uppercase p-2">{ uc.Name }</td>
-					<td>
-						@UserConfiguration(uc)
-					</td>
-				</tr>
+templ TableUserConfiguration(userConfigurations []user.UserConfiguration) {
+	@ui.Table("compact") {
+		@ui.TableHead("compact") {
+			@ui.Tr() {
+				@ui.ThCompact() {
+					{ i18n.T(ctx, "global.table.name") }
+				}
+				@ui.ThCompact()
 			}
-		</tbody>
-	</table>
+		}
+		@ui.TableBody(templ.Attributes{
+			"hx-swap":   "outerHTML",
+			"hx-target": "closest tr",
+		}) {
+			for _, uc := range(userConfigurations) {
+				@ui.TrBorder() {
+					@ui.TdCompact() {
+						<span class="capitalize">{ uc.Name }</span>
+					}
+					@ui.TdCompact() {
+						@UserConfiguration(uc)
+					}
+				}
+			}
+		}
+	}
 }
 
-templ UserConfiguration(uc model.UserConfiguration) {
-	@components.ButtonEnableDisable(
+templ UserConfiguration(uc user.UserConfiguration) {
+	@ui.ButtonToggle(
 		i18n.T(ctx, "global.table.enabled"),
 		i18n.T(ctx, "global.table.disabled"),
 		fmt.Sprintf("/profile/configuration/%d/toggle-configuration", uc.IdConfiguration),
@@ -94,50 +126,53 @@ templ UserConfiguration(uc model.UserConfiguration) {
 }
 
 templ TableUserSpectate(idUserShares []string) {
-	<table class="table-auto mb-2">
-		<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-			<tr>
-				<th>id user spectate</th>
-				<th></th>
-			</tr>
-		</thead>
-		<tbody
-			hx-swap="outerHTML"
-			hx-target="closest tr"
-		>
+	@ui.Table("compact") {
+		@ui.TableHead("compact") {
+			@ui.Tr() {
+				@ui.ThCompact() {
+					{ i18n.T(ctx, "page.profile.table.id-user-spectate") }
+				}
+				@ui.ThCompact()
+			}
+		}
+		@ui.TableBody(templ.Attributes{
+			"hx-swap":   "outerHTML",
+			"hx-target": "closest tr",
+		}) {
 			for _, idUserShare := range(idUserShares) {
 				@UserSpectate(idUserShare)
 			}
-		</tbody>
-	</table>
+		}
+	}
 }
 
 templ UserSpectate(idUserShare string) {
-	<tr>
-		<td>{ idUserShare }</td>
-		<td>
-			<button
-				class="inline-block rounded bg-red-600 px-4 py-2 text-xs font-medium text-white hover:bg-red-700"
-				hx-delete="/profile/user-spectate"
-				hx-vals={ fmt.Sprintf(`{"idUserShare": "%s"}`, idUserShare) }
-			>
-				Delete
-			</button>
-		</td>
-	</tr>
+	@ui.Tr() {
+		@ui.TdCompact() {
+			{ idUserShare }
+		}
+		@ui.TdCompact() {
+			@ui.ButtonAction("danger", "sm", templ.Attributes{
+				"hx-delete": "/profile/user-spectate",
+				"hx-vals":   fmt.Sprintf(`{"idUserShare": "%s"}`, idUserShare),
+			}) {
+				{ i18n.T(ctx, "global.buttons.delete") }
+			}
+		}
+	}
 }
 
-templ ListSpellClass(classes []model.Class, spells []model.SpellByClass) {
-	<div class="mb-4 flex gap-4 flex-col">
+templ ListSpellClass(classes []game.Class, spells []game.SpellByClass) {
+	<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 		for _, class := range(classes) {
-			<div class="border p-2 flex flex-row items-center gap-4">
+			<div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex flex-row items-center gap-4 bg-gray-50 dark:bg-gray-800">
 				<img
-					class="h-auto w-8 img-class"
+					class="h-auto w-10 img-class shrink-0"
 					alt={ class.Name }
 					title={ class.Name }
 					src={ class.UrlImage + "F.svg" }
 				/>
-				<div class="flex flex-row flex-wrap gap-2">
+				<div class="flex flex-row flex-wrap gap-3">
 					for _, spell := range(spells) {
 						if spell.IdClass == class.Id {
 							@SpellFavorite(spell)
@@ -149,7 +184,7 @@ templ ListSpellClass(classes []model.Class, spells []model.SpellByClass) {
 	</div>
 }
 
-templ SpellFavorite(s model.SpellByClass) {
+templ SpellFavorite(s game.SpellByClass) {
 	<div
 		class="group relative cursor-pointer transition-all hover:scale-110"
 		hx-patch={ fmt.Sprintf("/profile/spell-favorite/%d/toggle-favorite", s.IdSpell) }
@@ -161,7 +196,7 @@ templ SpellFavorite(s model.SpellByClass) {
 			class="h-12 img-class"
 		/>
 		<div class="absolute -top-[7px] -left-[7px] cursor-pointer transition-all group-hover:scale-110">
-			@components.SVGHeart(s.IsFavorite, "red", 20, 20)
+			@icons.Heart(s.IsFavorite, "red", 20, 20)
 		</div>
 	</div>
 }

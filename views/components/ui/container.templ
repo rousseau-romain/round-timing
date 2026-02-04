@@ -1,0 +1,63 @@
+package ui
+
+// Container renders a centered container with max-width.
+// Variants: "" or "default" (no padding), "padded" (with padding)
+templ Container(variant ...string) {
+	<div
+		class={
+			"container mx-auto",
+			templ.KV("p-4", len(variant) > 0 && variant[0] == "padded"),
+		}
+	>
+		{ children... }
+	</div>
+}
+
+// ContainerToggleable renders a container that can toggle between contained and full-width.
+// Use with ButtonExpandWidth to allow users to toggle the layout.
+templ ContainerToggleable() {
+	<div
+		id="toggleable-container"
+		class="p-4"
+		x-data
+		:class="!$store.config.isContainerExpanded && 'container mx-auto'"
+	>
+		{ children... }
+	</div>
+}
+
+// Card renders a bordered card with rounded corners.
+// Variants: "" or "default" (white bg with shadow), "bordered" (visible border)
+templ Card(variant ...string) {
+	<div
+		class={
+			"rounded-md p-4",
+			templ.KV("bg-white dark:bg-gray-800 shadow-sm", len(variant) == 0 || variant[0] == "default" || variant[0] == ""),
+			templ.KV("border-2 border-gray-200 dark:border-gray-700", len(variant) > 0 && variant[0] == "bordered"),
+		}
+	>
+		{ children... }
+	</div>
+}
+
+// CardColor renders a card with a colored border.
+// Used for team-colored sections.
+templ CardColor(color string) {
+	<div class={ "border-2 rounded-md p-2 mb-2", "border-" + color + "-200" }>
+		{ children... }
+	</div>
+}
+
+// Section renders a section with margin bottom.
+templ Section() {
+	<div class="mb-4">
+		{ children... }
+	</div>
+}
+
+// PageHeader renders a page title.
+templ PageHeader() {
+	<h1 class="text-2xl font-semibold mb-4">
+		{ children... }
+	</h1>
+}

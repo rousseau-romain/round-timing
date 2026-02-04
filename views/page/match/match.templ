@@ -1,0 +1,155 @@
+package match
+
+import (
+	"fmt"
+
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/rousseau-romain/round-timing/model/game"
+	matchModel "github.com/rousseau-romain/round-timing/model/match"
+	"github.com/rousseau-romain/round-timing/model/system"
+	"github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/views/components/forms"
+	"github.com/rousseau-romain/round-timing/views/components/layout"
+	"github.com/rousseau-romain/round-timing/views/components/ui"
+)
+
+templ TeamPlayer(p matchModel.Player, m matchModel.Match) {
+	@ui.TrColor(p.Team.Color) {
+		<td
+			class="text-center whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white"
+		>
+			@forms.InputAction("text", "name", "", templ.Attributes{
+				"value":      p.Name,
+				"hx-patch":   fmt.Sprintf("/match/%d/player/%d", m.Id, p.Id),
+				"hx-swap":    "none",
+				"hx-trigger": "input changed delay:500ms, keyup[key=='Enter']",
+				"class":      "text-center bg-transparent border-none shadow-none focus:ring-0",
+			})
+		</td>
+		<td class="whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">
+			@ui.AvatarToggle(templ.Attributes{"title": p.Name, "alt": p.Class.Name, "src": p.Class.UrlImage + "F.svg"})
+		</td>
+		<td class="text-center whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">
+			{ p.Team.Name }
+		</td>
+		<td class="whitespace-nowrap px-4 py-2">
+			@ui.ButtonAction("danger", "sm", templ.Attributes{
+				"hx-delete": fmt.Sprintf("/match/%d/player/%d", m.Id, p.Id),
+			}) {
+				{ i18n.T(ctx, "global.buttons.delete") }
+			}
+		</td>
+	}
+}
+
+templ TeamPlayerTable(players []matchModel.Player, match matchModel.Match) {
+	<div class="bg-red-200 border-red-200 dark:bg-red-800 dark:border-red-700"></div>
+	<div class="bg-indigo-200 border-indigo-200 dark:bg-indigo-800 dark:border-indigo-700"></div>
+	// SHITY WORKAROUND
+	<div
+		id="div-table-button"
+		x-data="{ hasPlayers: false }"
+		x-init="hasPlayers = $el.querySelector('tbody').children.length > 0"
+		@htmx:after-request.window="setTimeout(() => hasPlayers = $el.querySelector('tbody').children.length > 0, 100)"
+		x-show="hasPlayers"
+		x-cloak
+		class="mb-5 flex-col items-center flex"
+	>
+		<table class="mb-2 min-w-full divide-y-2 divide-gray-200 bg-white text-sm dark:divide-gray-700 dark:bg-gray-900">
+			@ui.TableHead("default") {
+				@ui.Tr() {
+					@ui.Th() {
+						{ i18n.T(ctx, "global.table.name") }
+					}
+					@ui.Th() {
+						{ i18n.T(ctx, "global.table.class") }
+					}
+					@ui.Th() {
+						{ i18n.T(ctx, "global.table.team") }
+					}
+					@ui.ThEmpty()
+				}
+			}
+			@ui.TableBody(templ.Attributes{
+				"hx-swap":   "outerHTML swap:0.1s",
+				"hx-target": "closest tr",
+			}) {
+				for _, player := range players {
+					@TeamPlayer(player, match)
+				}
+			}
+		</table>
+		@ui.ButtonLinkAction("primary", "lg", fmt.Sprintf("/match/%d/start", match.Id), templ.Attributes{
+			"id":    "link-start-match-body",
+			"class": "max-w-max sm:w-auto",
+		}) {
+			if match.Round > 0 {
+				{ i18n.T(ctx, "page.match.button.go-to-match") }
+			} else {
+				{ i18n.T(ctx, "page.match.button.start-match") }
+			}
+		}
+	</div>
+}
+
+templ teamPlayerListPageLayout(user user.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string, match matchModel.Match) {
+	@layout.Layout(i18n.T(ctx, "page.match.title", i18n.M{"name": match.Name}), popinMessages, user, navItems, languages, pageSlug) {
+		@ui.Container("padded") {
+			{ children... }
+		}
+	}
+}
+
+templ TeamPlayerListPage(user user.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string, match matchModel.Match, teams []matchModel.Team, classes []game.Class, players []matchModel.Player) {
+	@teamPlayerListPageLayout(user, popinMessages, navItems, languages, pageSlug, match) {
+		<h1 class="mb-2">{ i18n.T(ctx, "page.match.h1") }</h1>
+		if match.Round > 0 {
+			@ui.ButtonAction("danger", "lg", templ.Attributes{
+				"type":     "submit",
+				"hx-patch": fmt.Sprintf("/match/%d/reset", match.Id),
+				"class":    "w-full sm:w-auto",
+			}) {
+				{ i18n.T(ctx, "page.match.button.reset-match") }
+			}
+		} else {
+			for it, team := range teams {
+				<div
+					class={ "flex items-center justify-between",
+								"border-2 rounded-md p-2 mb-2",
+								"border-" + team.Color + "-200 dark:border-" + team.Color + "-700" }
+				>
+					for _, class := range classes {
+						<button
+							class={
+								"rounded-md lg:w-16 lg:h-16 md:w-12 md:h-12 w-8 h-8",
+								"bg-" + team.Color + "-200 dark:bg-" + team.Color + "-800",
+							}
+							hx-post={ fmt.Sprintf("/match/%d/player", match.Id) }
+							hx-vals={ fmt.Sprintf(`{"idTeam": "%d", "idClass": "%d", "name": "%s"}`, team.Id, class.Id, class.Name+" - "+i18n.T(ctx, "global.team."+team.Color)) }
+							if it == 0 {
+								hx-swap="afterbegin"
+							} else {
+								hx-swap="beforeend"
+							}
+							hx-target="next tbody"
+							hx-target-error="#popinMessages"
+						>
+							<img class="img-class lg:h-12 md:h-9 h-6 w-max mx-auto" alt={ class.Name } src={ class.UrlImage + "F.svg" }/>
+						</button>
+					}
+				</div>
+			}
+		}
+		@TeamPlayerTable(players, match)
+	}
+}
+
+templ TeamPlayerListPageUnAutorized(user user.User, navItems []layout.NavItem, languages []system.Language, pageSlug string, match matchModel.Match) {
+	@teamPlayerListPageLayout(user, layout.PopinMessages{}, navItems, languages, pageSlug, match) {
+		<h1 class="mb-2">{ i18n.T(ctx, "page.match.unauthorized.h1") }</h1>
+		<p>{ i18n.T(ctx, "page.match.unauthorized.p", i18n.M{"matchName": match.Name, "matchId": match.Id }) }</p>
+		@ui.ButtonLinkAction("primary", "lg", "/match", templ.Attributes{"class": "w-full sm:w-auto"}) {
+			{ i18n.T(ctx, "page.match.unauthorized.button.go-back-list") }
+		}
+	}
+}

@@ -90,10 +90,17 @@ es:
       title: "Perfil"
       h1: "Perfil"
       p-user-id: "Tu ID es:"
+      h2-spectators: "Usuarios espectadores:"
       h2-spells-favorites: "Hechizos favoritos:"
       h2-configuration: "Configuración:"
       logout: "Cerrar sesión"
       no-spectate: "No tienes ningúno espectador, agrege uno mediante el formulario de abajo."
+      button:
+        add-spectator: "Agregar un espectador"
+      input:
+        placeholder-user-id: "ID de usuario ejemplo: 1"
+      table:
+        id-user-spectate: "ID usuario espectador"
       errors:
         user-spectate:
           already-exist: "El espectador del usuario (%{userSpectateId}) ya existe"
@@ -129,6 +136,7 @@ es:
       connect-with-email: "Iniciar sesión con tu correo electrónica"
       already-exists-with-provider: "Ya existe una cuenta con el correo electrónico %{email} y el proveedor %{provider}."
       invalid-credentials: "Login o contraseña incorrectos"
+      too-many-requests: "Demasiados intentos. Por favor, inténtelo de nuevo más tarde."
       no-account: "No tienes una cuenta?"
       create-account: "Crear una"
     start-match:

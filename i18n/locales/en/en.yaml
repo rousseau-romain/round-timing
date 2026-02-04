@@ -90,10 +90,17 @@ en:
       title: "Profile"
       h1: "Profile"
       p-user-id: "Your ID is:"
+      h2-spectators: "Spectator users:"
       h2-spells-favorites: "Favorite spells:"
       h2-configuration: "Configuration:"
       logout: "Log out"
       no-spectate: "You have no spectators, add one through the form below."
+      button:
+        add-spectator: "Add a spectator"
+      input:
+        placeholder-user-id: "User ID example: 1"
+      table:
+        id-user-spectate: "Spectator user ID"
       errors:
         user-spectate:
           already-exist: "The user spectate (%{userSpectateId}) already listed"
@@ -129,6 +136,7 @@ en:
       connect-with-email: "Sign in with your email"
       already-exists-with-provider: "An account has already been created with the email %{email} and the provider %{provider}."
       invalid-credentials: "Invalid login or password"
+      too-many-requests: "Too many attempts. Please try again later."
       no-account: "You don't have an account?"
       create-account: "Create one"
     start-match:
