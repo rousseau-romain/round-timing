@@ -15,48 +15,75 @@ import (
 
 templ ProfilePage(user user.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string, idUserShares []string, classes []game.Class, spells []game.SpellByClass, userConfigurations []user.UserConfiguration) {
 	@layout.Layout(i18n.T(ctx, "page.profile.title"), popinMessages, user, navItems, languages, pageSlug) {
-		@ui.Container("default") {
-			<h1 class="text-2xl font-semibold">{ i18n.T(ctx, "page.profile.h1") }</h1>
-			<div class="mb-2">
-				<div class="flex gap-2">
-					<p class="text-gray-500">{ i18n.T(ctx, "page.profile.p-user-id") }</p>
-					@ui.ButtonCopy(user.IdShare)
-				</div>
-			</div>
-			<h2 class="font-semibold">{ i18n.T(ctx, "page.profile.h2-spectators") }</h2>
-			<div class="mb-2">
-				if len(idUserShares) == 0 {
-					<p class="text-gray-500">{ i18n.T(ctx, "page.profile.no-spectate") }</p>
+		@ui.Container("padded") {
+			@ui.PageHeader() {
+				{ i18n.T(ctx, "page.profile.h1") }
+			}
+			// User ID Section
+			@ui.Section() {
+				@ui.Card("default") {
+					<div class="flex items-center justify-between gap-4">
+						<div>
+							<p class="text-sm text-gray-500 dark:text-gray-400">{ i18n.T(ctx, "page.profile.p-user-id") }</p>
+							<p class="font-mono text-lg mt-1">{ user.IdShare }</p>
+						</div>
+						@ui.ButtonCopy(user.IdShare)
+					</div>
 				}
-				<form
-					hx-post="/profile/user-spectate"
-					hx-swap="afterbegin"
-					hx-target="tbody"
-					hx-target-error="#popinMessages"
-				>
-					@forms.InputAction("text", "idUserShare", i18n.T(ctx, "page.profile.h2-spectators"), templ.Attributes{
-						"placeholder": i18n.T(ctx, "page.profile.input.placeholder-user-id"),
-						"required":    true,
-						"class":       "mb-2 w-1/2 block",
-					})
-					@ui.ButtonAction("primary", "md", templ.Attributes{"type": "submit"}) {
-						{ i18n.T(ctx, "page.profile.button.add-spectator") }
+			}
+			// Spectators Section
+			@ui.Section() {
+				@ui.Card("default") {
+					<h2 class="text-lg font-semibold mb-4">{ i18n.T(ctx, "page.profile.h2-spectators") }</h2>
+					<form
+						class="mb-4"
+						hx-post="/profile/user-spectate"
+						hx-swap="afterbegin"
+						hx-target="tbody"
+						hx-target-error="#popinMessages"
+					>
+						<div class="flex flex-col sm:flex-row gap-2">
+							@forms.InputAction("text", "idUserShare", "", templ.Attributes{
+								"placeholder": i18n.T(ctx, "page.profile.input.placeholder-user-id"),
+								"required":    true,
+								"class":       "flex-1",
+							})
+							@ui.ButtonAction("primary", "md", templ.Attributes{"type": "submit"}) {
+								{ i18n.T(ctx, "page.profile.button.add-spectator") }
+							}
+						</div>
+					</form>
+					if len(idUserShares) == 0 {
+						<p class="text-gray-500 dark:text-gray-400 text-center py-4">{ i18n.T(ctx, "page.profile.no-spectate") }</p>
+					} else {
+						@TableUserSpectate(idUserShares)
 					}
-				</form>
-			</div>
-			@TableUserSpectate(idUserShares)
-			<h2 class="font-semibold mb-2">{ i18n.T(ctx, "page.profile.h2-configuration") }</h2>
-			@TableUserConfiguration(userConfigurations)
-			<h2 class="font-semibold mb-2">{ i18n.T(ctx, "page.profile.h2-spells-favorites") }</h2>
-			<div class="mb-2 p-2">
-				@ListSpellClass(classes, spells)
-			</div>
-			<a
-				class="m-auto table rounded-md bg-red-600 px-6 py-3 text-md font-medium text-white shadow hover:bg-red-500"
-				href={ templ.SafeURL("/auth/logout/" + user.ProviderLogin) }
-			>
-				{ i18n.T(ctx, "page.profile.logout") }
-			</a>
+				}
+			}
+			// Configuration Section
+			if len(userConfigurations) > 0 {
+				@ui.Section() {
+					@ui.Card("default") {
+						<h2 class="text-lg font-semibold mb-4">{ i18n.T(ctx, "page.profile.h2-configuration") }</h2>
+						@TableUserConfiguration(userConfigurations)
+					}
+				}
+			}
+			// Favorite Spells Section
+			@ui.Section() {
+				@ui.Card("default") {
+					<h2 class="text-lg font-semibold mb-4">{ i18n.T(ctx, "page.profile.h2-spells-favorites") }</h2>
+					@ListSpellClass(classes, spells)
+				}
+			}
+			// Logout Section
+			@ui.Section() {
+				<div class="flex justify-center">
+					@ui.ButtonLink("danger", "md", "/auth/logout/"+user.ProviderLogin) {
+						{ i18n.T(ctx, "page.profile.logout") }
+					}
+				</div>
+			}
 		}
 	}
 }
@@ -78,7 +105,7 @@ templ TableUserConfiguration(userConfigurations []user.UserConfiguration) {
 			for _, uc := range(userConfigurations) {
 				@ui.TrBorder() {
 					@ui.TdCompact() {
-						<span class="first-letter:uppercase">{ uc.Name }</span>
+						<span class="capitalize">{ uc.Name }</span>
 					}
 					@ui.TdCompact() {
 						@UserConfiguration(uc)
@@ -136,16 +163,16 @@ templ UserSpectate(idUserShare string) {
 }
 
 templ ListSpellClass(classes []game.Class, spells []game.SpellByClass) {
-	<div class="mb-4 flex gap-4 flex-col">
+	<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 		for _, class := range(classes) {
-			<div class="border p-2 flex flex-row items-center gap-4">
+			<div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex flex-row items-center gap-4 bg-gray-50 dark:bg-gray-800">
 				<img
-					class="h-auto w-8 img-class"
+					class="h-auto w-10 img-class shrink-0"
 					alt={ class.Name }
 					title={ class.Name }
 					src={ class.UrlImage + "F.svg" }
 				/>
-				<div class="flex flex-row flex-wrap gap-2">
+				<div class="flex flex-row flex-wrap gap-3">
 					for _, spell := range(spells) {
 						if spell.IdClass == class.Id {
 							@SpellFavorite(spell)

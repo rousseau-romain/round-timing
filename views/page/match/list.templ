@@ -19,7 +19,7 @@ templ Match(m matchModel.Match) {
 			{ m.Name }
 		}
 		@ui.TdAction() {
-			@ui.ButtonLink("indigo", "sm", "/match/"+fmt.Sprintf("%d", m.Id)) {
+			@ui.ButtonLink("primary", "sm", "/match/"+fmt.Sprintf("%d", m.Id)) {
 				{ i18n.T(ctx, "global.buttons.see") }
 			}
 		}
@@ -83,7 +83,7 @@ templ MatchListPage(user user.User, popinMessages layout.PopinMessages, navItems
 					"class":       "w-full p-3",
 				})
 			</div>
-			@ui.ButtonAction("black", "lg", templ.Attributes{"type": "submit", "class": "w-full sm:w-auto"}) {
+			@ui.ButtonAction("primary", "lg", templ.Attributes{"type": "submit", "class": "w-full sm:w-auto"}) {
 				{ i18n.T(ctx, "page.match-list.button-create-match") }
 			}
 		</form>

@@ -1,0 +1,267 @@
+package page
+
+import (
+	"github.com/rousseau-romain/round-timing/model/system"
+	"github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/views/components/forms"
+	"github.com/rousseau-romain/round-timing/views/components/layout"
+	"github.com/rousseau-romain/round-timing/views/components/ui"
+)
+
+templ testUIButtons() {
+	@ui.Card("default") {
+		<h2 class="text-lg font-semibold mb-4">Buttons</h2>
+		<div class="space-y-4">
+			<div>
+				<h3 class="text-sm font-medium mb-2">Variants</h3>
+				<div class="flex flex-wrap gap-2">
+					@ui.Button("primary", "md") {
+						primary
+					}
+					@ui.Button("success", "md") {
+						success
+					}
+					@ui.Button("danger", "md") {
+						danger
+					}
+					@ui.Button("outline", "md") {
+						outline
+					}
+				</div>
+			</div>
+			<div>
+				<h3 class="text-sm font-medium mb-2">Sizes</h3>
+				<div class="flex flex-wrap items-center gap-2">
+					@ui.Button("primary", "sm") {
+						small
+					}
+					@ui.Button("primary", "md") {
+						medium
+					}
+					@ui.Button("primary", "lg") {
+						large
+					}
+				</div>
+			</div>
+		</div>
+	}
+}
+
+templ testUIBadges() {
+	@ui.Card("default") {
+		<h2 class="text-lg font-semibold mb-4">Badges</h2>
+		<div class="flex flex-wrap gap-2">
+			@ui.Badge("red", "") {
+				red
+			}
+			@ui.Badge("yellow", "") {
+				yellow
+			}
+			@ui.Badge("cyan", "") {
+				cyan
+			}
+			@ui.Badge("green", "") {
+				green
+			}
+			@ui.Badge("indigo", "") {
+				indigo
+			}
+			@ui.Badge("gray", "") {
+				gray
+			}
+		</div>
+	}
+}
+
+templ testUICards() {
+	@ui.Card("default") {
+		<h2 class="text-lg font-semibold mb-4">Cards</h2>
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+			@ui.Card("default") {
+				<p class="font-medium">Card default</p>
+				<p class="text-sm text-gray-500 dark:text-gray-400">White bg with shadow</p>
+			}
+			@ui.Card("bordered") {
+				<p class="font-medium">Card bordered</p>
+				<p class="text-sm text-gray-500 dark:text-gray-400">With visible border</p>
+			}
+			@ui.CardColor("red") {
+				<p class="font-medium">CardColor red</p>
+				<p class="text-sm text-gray-500 dark:text-gray-400">Team color card</p>
+			}
+			@ui.CardColor("indigo") {
+				<p class="font-medium">CardColor indigo</p>
+				<p class="text-sm text-gray-500 dark:text-gray-400">Team color card</p>
+			}
+		</div>
+	}
+}
+
+templ testUITableDefault() {
+	@ui.Card("default") {
+		<h2 class="text-lg font-semibold mb-4">Table default</h2>
+		<div class="overflow-x-auto">
+			@ui.Table("default") {
+				@ui.TableHead("default") {
+					@ui.Tr() {
+						@ui.Th() {
+							Name
+						}
+						@ui.Th() {
+							Value
+						}
+						@ui.ThEmpty()
+					}
+				}
+				@ui.TableBody(templ.Attributes{}) {
+					@ui.Tr() {
+						@ui.TdPrimary() {
+							Item 1
+						}
+						@ui.Td() {
+							Value 1
+						}
+						@ui.TdAction() {
+							@ui.Button("danger", "sm") {
+								Delete
+							}
+						}
+					}
+					@ui.TrColor("red") {
+						@ui.TdPrimary() {
+							Team Red
+						}
+						@ui.Td() {
+							Colored row
+						}
+						@ui.TdAction() {
+							@ui.Button("primary", "sm") {
+								Edit
+							}
+						}
+					}
+					@ui.TrColor("indigo") {
+						@ui.TdPrimary() {
+							Team Indigo
+						}
+						@ui.Td() {
+							Colored row
+						}
+						@ui.TdAction() {
+							@ui.Button("primary", "sm") {
+								Edit
+							}
+						}
+					}
+				}
+			}
+		</div>
+	}
+}
+
+templ testUITableCompact() {
+	@ui.Card("default") {
+		<h2 class="text-lg font-semibold mb-4">Table compact</h2>
+		@ui.Table("compact") {
+			@ui.TableHead("compact") {
+				@ui.Tr() {
+					@ui.ThCompact() {
+						Key
+					}
+					@ui.ThCompact() {
+						Value
+					}
+				}
+			}
+			@ui.TableBody(templ.Attributes{}) {
+				@ui.TrBorder() {
+					@ui.TdCompact() {
+						Setting 1
+					}
+					@ui.TdCompact() {
+						Enabled
+					}
+				}
+				@ui.TrBorder() {
+					@ui.TdCompact() {
+						Setting 2
+					}
+					@ui.TdCompact() {
+						Disabled
+					}
+				}
+			}
+		}
+	}
+}
+
+templ testUIForms() {
+	@ui.Card("default") {
+		<h2 class="text-lg font-semibold mb-4">Form elements</h2>
+		<div class="space-y-4 max-w-md">
+			@forms.InputAction("text", "test-input", "Text input", templ.Attributes{
+				"placeholder": "Placeholder text",
+			})
+			@forms.InputAction("email", "test-email", "Email input", templ.Attributes{
+				"placeholder": "email@example.com",
+			})
+			@forms.Select("test-select", "test-select", "Select", []forms.SelectOption{
+				{Value: "1", Label: "Option 1", Selected: true},
+				{Value: "2", Label: "Option 2"},
+				{Value: "3", Label: "Option 3"},
+			}, false)
+			@forms.Checkbox("test-checkbox", "test-checkbox", "Checkbox label", false)
+		</div>
+	}
+}
+
+templ testUIPopinMessages() {
+	@ui.Card("default") {
+		<h2 class="text-lg font-semibold mb-4">Popin Messages</h2>
+		<div class="flex flex-wrap gap-2">
+			@ui.ButtonLink("success", "sm", "/test/ui?errorTitle=Success&errorMessages=This+is+a+success+message&type=success") {
+				Test Success
+			}
+			@ui.ButtonLink("danger", "sm", "/test/ui?errorTitle=Error&errorMessages=This+is+an+error+message&type=error") {
+				Test Error
+			}
+			@ui.ButtonLink("outline", "sm", "/test/ui?errorTitle=Warning&errorMessages=This+is+a+warning+message&type=warning") {
+				Test Warning
+			}
+			@ui.ButtonLink("primary", "sm", "/test/ui?errorTitle=Info&errorMessages=This+is+an+info+message&type=info") {
+				Test Info
+			}
+		</div>
+	}
+}
+
+templ TestUIPage(user user.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string) {
+	@layout.Layout("Test UI", popinMessages, user, navItems, languages, pageSlug) {
+		@ui.Container("padded") {
+			@ui.PageHeader() {
+				Test UI Components
+			}
+			@ui.Section() {
+				@testUIButtons()
+			}
+			@ui.Section() {
+				@testUIBadges()
+			}
+			@ui.Section() {
+				@testUICards()
+			}
+			@ui.Section() {
+				@testUITableDefault()
+			}
+			@ui.Section() {
+				@testUITableCompact()
+			}
+			@ui.Section() {
+				@testUIForms()
+			}
+			@ui.Section() {
+				@testUIPopinMessages()
+			}
+		}
+	}
+}

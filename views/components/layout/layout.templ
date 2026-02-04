@@ -9,8 +9,27 @@ import (
 	"github.com/rousseau-romain/round-timing/config"
 	"github.com/rousseau-romain/round-timing/model/system"
 	"github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/service/auth"
 	"github.com/rousseau-romain/round-timing/views/components/icons"
 )
+
+func isConfigEnabled(configs []user.UserConfiguration, key string) bool {
+	for _, c := range configs {
+		if c.Key == key {
+			return c.IsEnabled
+		}
+	}
+	return false
+}
+
+func getConfigId(configs []user.UserConfiguration, key string) string {
+	for _, c := range configs {
+		if c.Key == key {
+			return strconv.Itoa(c.IdConfiguration)
+		}
+	}
+	return "0"
+}
 
 type PopinMessages struct {
 	Title    string
@@ -19,25 +38,33 @@ type PopinMessages struct {
 }
 
 templ Layout(title string, popinMessages PopinMessages, user user.User, navItems []NavItem, languages []system.Language, pageSlug string) {
-	<html>
+	<html class={ templ.KV("dark", isConfigEnabled(auth.UserConfigurationsFromContext(ctx), "dark_mode")) }>
 		<head>
 			<title>Round Timing - { title }</title>
 			<link rel="icon" type="image/svg+xml" href="/public/img/favicon.svg"/>
 			<link rel="stylesheet" type="text/css" href={ fmt.Sprintf("/public/tailwind.css?build=%s", strconv.FormatInt(time.Now().Unix(), 10)) }/>
 			<style>[x-cloak] { display: none !important; }</style>
 		</head>
-		<body>
+		<body
+			data-authenticated={ strconv.FormatBool(user.Id != 0) }
+			data-config-container-expanded={ strconv.FormatBool(isConfigEnabled(auth.UserConfigurationsFromContext(ctx), "container_expanded")) }
+			data-config-container-expanded-id={ getConfigId(auth.UserConfigurationsFromContext(ctx), "container_expanded") }
+			data-config-dark-mode={ strconv.FormatBool(isConfigEnabled(auth.UserConfigurationsFromContext(ctx), "dark_mode")) }
+			data-config-dark-mode-id={ getConfigId(auth.UserConfigurationsFromContext(ctx), "dark_mode") }
+			class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+		>
 			if config.ENV == "development" || config.ENV == "staging" {
 				<script src="/public/script/htmx-2.0.8/htmx.js"></script>
 				<script defer src="/public/script/alpine-3.15.4.js"></script>
 				<script src="/public/script/htmx-2.0.8/ext/debug.js"></script>
-				<button class="border border-red-600 bg-red-300 text-red-600 top-0 right-0 absolute">Debug MOD</button>
+				<button class="border border-red-600 bg-red-300 text-red-600 dark:bg-red-900 dark:text-red-400 dark:border-red-500 top-0 right-0 absolute">Debug MOD</button>
 			} else {
 				<script src="/public/script/htmx-2.0.8/htmx.min.js"></script>
 				<script defer src="/public/script/alpine-3.15.4.min.js"></script>
 			}
 			<script src="/public/script/htmx-2.0.8/ext/response-targets.js"></script>
 			<script src="/public/script/htmx-2.0.8/ext/ws.js"></script>
+			<script src="/public/script/alpine-init.js"></script>
 			@Nav(user, navItems, languages, pageSlug)
 			<div class="min-h-screen" id="content" hx-ext="response-targets">
 				<div id="popinMessages">
@@ -95,7 +122,7 @@ templ Nav(user user.User, navItems []NavItem, languages []system.Language, pageS
 					<div class="sm:flex sm:gap-4">
 						if user.Email != "" {
 							<a href="/profile">
-								<div class="w-10 h-10 p-1 rounded-full bg-gray-200">
+								<div class="w-10 h-10 p-1 rounded-full bg-gray-200 dark:bg-gray-700">
 									@icons.User("currentColor", 32, 32)
 								</div>
 							</a>
@@ -140,7 +167,7 @@ templ Nav(user user.User, navItems []NavItem, languages []system.Language, pageS
 								<path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
 							</svg>
 						</button>
-						<div class="absolute right-0 w-fit bg-white border" x-show="menuOpen" x-cloak @click.outside="menuOpen = false">
+						<div class="absolute right-0 w-fit bg-white dark:bg-gray-800 border dark:border-gray-700" x-show="menuOpen" x-cloak @click.outside="menuOpen = false">
 							@MobileMenu(user, navItems)
 						</div>
 					</div>
@@ -151,7 +178,7 @@ templ Nav(user user.User, navItems []NavItem, languages []system.Language, pageS
 }
 
 templ MobileMenu(user user.User, navItems []NavItem) {
-	<ul class="space-y-1 border">
+	<ul class="space-y-1 border dark:border-gray-700">
 		for _, nav := range navItems {
 			<li class="block">
 				<a href={ templ.SafeURL("/" + nav.Url) } class="block rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200">{ nav.Name }</a>
@@ -188,7 +215,7 @@ templ PopinMessage(popinMessages PopinMessages) {
 					"z-50 pr-10 relative mr-4 ml-4 w-fit rounded border-s-4 p-4",
 					"border-gray-500 bg-gray-50 text-gray-700 dark:bg-gray-900 dark:border-gray-600",
 					templ.KV("border-green-500 bg-green-50 text-green-700 dark:bg-green-900 dark:border-green-600", popinMessages.Type == "success"),
-					templ.KV("border-red-500 bg-red-50 border600-red-700 dark:bg-red-900 dark:border-red-600", popinMessages.Type == "error"),
+					templ.KV("border-red-500 bg-red-50 text-red-700 dark:bg-red-900 dark:border-red-600", popinMessages.Type == "error"),
 					templ.KV("border-yellow-500 bg-yellow-50 text-yellow-700 dark:bg-yellow-900 dark:border-yellow-600", popinMessages.Type == "warning"),
 					templ.KV("border-sky-500 bg-sky-50 text-sky-700 dark:bg-sky-900 dark:border-sky-600", popinMessages.Type == "info"),
 				}
@@ -247,15 +274,15 @@ templ PopinSelectLanguage(user user.User, languages []system.Language) {
 		x-cloak
 		@click="open = false"
 	>
-		<section class="w-max h-max rounded-3xl shadow-2xl bg-slate-50 z-20" @click.stop>
+		<section class="w-max h-max rounded-3xl shadow-2xl bg-slate-50 dark:bg-gray-800 border dark:border-gray-600 z-20" @click.stop>
 			<div class="p-8 text-center">
-				<h2 class="mt-6 text-3xl font-bold">{ i18n.T(ctx, "global.header.select-language") }</h2>
+				<h2 class="mt-6 text-3xl font-bold dark:text-white">{ i18n.T(ctx, "global.header.select-language") }</h2>
 				<ul>
 					for _, l := range languages {
 						<li>
 							<button
 								type="submit"
-								class="inline-block w-full rounded-lg bg-transparent sm:w-auto border"
+								class="inline-block w-full rounded-lg bg-transparent sm:w-auto border dark:border-gray-600"
 								hx-patch={ fmt.Sprintf("/user/%d/locale/%s", user.Id, l.Locale) }
 							>
 								<img alt="flag" class="cursor-pointer w-20 transition-all hover:scale-105" src={ fmt.Sprintf("/public/img/flag/%d.svg", l.Id) }/>

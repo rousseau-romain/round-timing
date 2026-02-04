@@ -13,7 +13,7 @@ templ ErrorPageContent(errorCode string, errorMessage string, translationKey str
 					{ i18n.T(ctx, translationKey) }
 				}
 			</p>
-			@ButtonLinkAction("indigo", "lg", "/", templ.Attributes{"class": "mt-6"}) {
+			@ButtonLinkAction("primary", "lg", "/", templ.Attributes{"class": "mt-6"}) {
 				{ i18n.T(ctx, "global.buttons.go-back") } { i18n.T(ctx, "page.home.title") }
 			}
 		</div>

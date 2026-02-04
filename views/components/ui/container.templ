@@ -1,26 +1,39 @@
 package ui
 
 // Container renders a centered container with max-width.
-// Variants: "default" (no padding), "padded" (with padding)
-templ Container(variant string) {
+// Variants: "" or "default" (no padding), "padded" (with padding)
+templ Container(variant ...string) {
 	<div
 		class={
 			"container mx-auto",
-			templ.KV("p-4", variant == "padded"),
+			templ.KV("p-4", len(variant) > 0 && variant[0] == "padded"),
 		}
 	>
 		{ children... }
 	</div>
 }
 
+// ContainerToggleable renders a container that can toggle between contained and full-width.
+// Use with ButtonExpandWidth to allow users to toggle the layout.
+templ ContainerToggleable() {
+	<div
+		id="toggleable-container"
+		class="p-4"
+		x-data
+		:class="!$store.config.isContainerExpanded && 'container mx-auto'"
+	>
+		{ children... }
+	</div>
+}
+
 // Card renders a bordered card with rounded corners.
-// Variants: "default", "bordered" (visible border)
-templ Card(variant string) {
+// Variants: "" or "default" (white bg with shadow), "bordered" (visible border)
+templ Card(variant ...string) {
 	<div
 		class={
 			"rounded-md p-4",
-			templ.KV("bg-white dark:bg-gray-800 shadow-sm", variant == "default" || variant == ""),
-			templ.KV("border-2 border-gray-200 dark:border-gray-700", variant == "bordered"),
+			templ.KV("bg-white dark:bg-gray-800 shadow-sm", len(variant) == 0 || variant[0] == "default" || variant[0] == ""),
+			templ.KV("border-2 border-gray-200 dark:border-gray-700", len(variant) > 0 && variant[0] == "bordered"),
 		}
 	>
 		{ children... }

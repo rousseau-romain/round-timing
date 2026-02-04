@@ -110,7 +110,7 @@
 @layer utilities {
   /* Tooltip */
   .tooltip {
-    @apply invisible absolute;
+    @apply invisible absolute bg-gray-100 dark:bg-gray-700 text-black dark:text-white;
   }
 
   .has-tooltip:hover .tooltip {
