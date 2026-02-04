@@ -1,7 +1,6 @@
 include .env
 
 DATABASE_URL=${DB_DRIVER}://${DB_USER}:${DB_PASSWORD}@tcp(${DB_HOST}:${DB_PORT})/${DB_NAME}
-COMMIT_ID := $(shell git rev-parse HEAD)
 
 Arguments := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 Command := $(firstword $(MAKECMDGOALS))
@@ -18,13 +17,12 @@ live/go:
 		--misc.clean_on_exit true
 
 live/templ:
-	@go tool templ generate -watch -proxy="http://127.0.0.1:2468" -cmd="go run ." --open-browser=false
+	@go tool templ generate -watch -proxy="http://127.0.0.1:2468" -cmd="go run -buildvcs ." --open-browser=false
 
 live/tailwind:
 	@npx tailwindcss -i input.css -o public/tailwind.css --watch
 
 live:
-	make build/commit-id ${COMMIT_ID}
 	make -j3 live/templ live/tailwind
 
 build/tailwind:
@@ -32,9 +30,6 @@ build/tailwind:
 
 build/templ:
 	go tool templ generate
-
-build/commit-id:
-	echo "{\"commit_id\": \"$(Arguments)\"}" > config/commit-id.json
 
 install:
 	brew install golang-migrate gnupg
