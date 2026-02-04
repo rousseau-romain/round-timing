@@ -1359,10 +1359,6 @@ footer a:hover {
   overflow: hidden;
 }
 
-.overflow-x-auto {
-  overflow-x: auto;
-}
-
 .whitespace-nowrap {
   white-space: nowrap;
 }
