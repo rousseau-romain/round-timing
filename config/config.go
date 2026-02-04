@@ -3,6 +3,7 @@ package config
 import (
 	"log"
 	"os"
+	"runtime/debug"
 	"strconv"
 
 	"github.com/joho/godotenv"
@@ -10,6 +11,9 @@ import (
 
 var (
 	VERSION,
+	COMMIT,
+	BUILD_TIME,
+	VCS_MODIFIED,
 	DB_HOST,
 	DB_NAME,
 	DB_PASSWORD,
@@ -49,6 +53,23 @@ func init() {
 	}
 
 	VERSION = "v1.5.1"
+	COMMIT = "unknown"
+	BUILD_TIME = "unknown"
+	VCS_MODIFIED = "false"
+
+	if info, ok := debug.ReadBuildInfo(); ok {
+		for _, s := range info.Settings {
+			switch s.Key {
+			case "vcs.revision":
+				COMMIT = s.Value
+			case "vcs.time":
+				BUILD_TIME = s.Value
+			case "vcs.modified":
+				VCS_MODIFIED = s.Value
+			}
+		}
+	}
+
 	ENV = os.Getenv("ENV")
 
 	DB_HOST = requiredEnv("DB_HOST")
