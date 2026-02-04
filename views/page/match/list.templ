@@ -34,27 +34,25 @@ templ Match(m matchModel.Match) {
 }
 
 templ MatchTable(matchs []matchModel.Match) {
-	<div class="overflow-x-auto">
-		@ui.Table("default") {
-			@ui.TableHead("default") {
-				@ui.Tr() {
-					@ui.Th() {
-						{ i18n.T(ctx, "global.table.name") }
-					}
-					@ui.ThEmpty()
-					@ui.ThEmpty()
+	@ui.Table("default") {
+		@ui.TableHead("default") {
+			@ui.Tr() {
+				@ui.Th() {
+					{ i18n.T(ctx, "global.table.name") }
 				}
-			}
-			@ui.TableBody(templ.Attributes{
-				"hx-swap":   "outerHTML swap:0.5s",
-				"hx-target": "closest tr",
-			}) {
-				for _, match := range matchs {
-					@Match(match)
-				}
+				@ui.ThEmpty()
+				@ui.ThEmpty()
 			}
 		}
-	</div>
+		@ui.TableBody(templ.Attributes{
+			"hx-swap":   "outerHTML swap:0.5s",
+			"hx-target": "closest tr",
+		}) {
+			for _, match := range matchs {
+				@Match(match)
+			}
+		}
+	}
 }
 
 templ matchPage(user user.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string, match []matchModel.Match) {

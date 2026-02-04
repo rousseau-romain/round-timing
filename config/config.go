@@ -48,7 +48,7 @@ func init() {
 		log.Println("No .env file found, using environment variables")
 	}
 
-	VERSION = "v1.5.0"
+	VERSION = "v1.5.1"
 	ENV = os.Getenv("ENV")
 
 	DB_HOST = requiredEnv("DB_HOST")

@@ -70,9 +70,7 @@ templ MatchPageTable(user user.User, popinMessages layout.PopinMessages, navItem
 	// Players table
 	@ui.Section() {
 		@ui.Card("default") {
-			<div class="overflow-x-auto">
-				@DivPlayerTable(match, players, playersSpells, isSpectator)
-			</div>
+			@DivPlayerTable(match, players, playersSpells, isSpectator)
 		}
 	}
 }
