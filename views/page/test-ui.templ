@@ -100,62 +100,60 @@ templ testUICards() {
 templ testUITableDefault() {
 	@ui.Card("default") {
 		<h2 class="text-lg font-semibold mb-4">Table default</h2>
-		<div class="overflow-x-auto">
-			@ui.Table("default") {
-				@ui.TableHead("default") {
-					@ui.Tr() {
-						@ui.Th() {
-							Name
+		@ui.Table("default") {
+			@ui.TableHead("default") {
+				@ui.Tr() {
+					@ui.Th() {
+						Name
+					}
+					@ui.Th() {
+						Value
+					}
+					@ui.ThEmpty()
+				}
+			}
+			@ui.TableBody(templ.Attributes{}) {
+				@ui.Tr() {
+					@ui.TdPrimary() {
+						Item 1
+					}
+					@ui.Td() {
+						Value 1
+					}
+					@ui.TdAction() {
+						@ui.Button("danger", "sm") {
+							Delete
 						}
-						@ui.Th() {
-							Value
-						}
-						@ui.ThEmpty()
 					}
 				}
-				@ui.TableBody(templ.Attributes{}) {
-					@ui.Tr() {
-						@ui.TdPrimary() {
-							Item 1
-						}
-						@ui.Td() {
-							Value 1
-						}
-						@ui.TdAction() {
-							@ui.Button("danger", "sm") {
-								Delete
-							}
+				@ui.TrColor("red") {
+					@ui.TdPrimary() {
+						Team Red
+					}
+					@ui.Td() {
+						Colored row
+					}
+					@ui.TdAction() {
+						@ui.Button("primary", "sm") {
+							Edit
 						}
 					}
-					@ui.TrColor("red") {
-						@ui.TdPrimary() {
-							Team Red
-						}
-						@ui.Td() {
-							Colored row
-						}
-						@ui.TdAction() {
-							@ui.Button("primary", "sm") {
-								Edit
-							}
-						}
+				}
+				@ui.TrColor("indigo") {
+					@ui.TdPrimary() {
+						Team Indigo
 					}
-					@ui.TrColor("indigo") {
-						@ui.TdPrimary() {
-							Team Indigo
-						}
-						@ui.Td() {
-							Colored row
-						}
-						@ui.TdAction() {
-							@ui.Button("primary", "sm") {
-								Edit
-							}
+					@ui.Td() {
+						Colored row
+					}
+					@ui.TdAction() {
+						@ui.Button("primary", "sm") {
+							Edit
 						}
 					}
 				}
 			}
-		</div>
+		}
 	}
 }
 

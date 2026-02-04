@@ -3,8 +3,8 @@ package pageAdmin
 import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
-	"github.com/rousseau-romain/round-timing/model/user"
 	"github.com/rousseau-romain/round-timing/model/system"
+	"github.com/rousseau-romain/round-timing/model/user"
 	"github.com/rousseau-romain/round-timing/views/components/layout"
 	"github.com/rousseau-romain/round-timing/views/components/ui"
 )
@@ -48,31 +48,29 @@ templ User(u user.User) {
 }
 
 templ UserTable(users []user.User) {
-	<div class="overflow-x-auto">
-		@ui.Table("default") {
-			@ui.TableHead("default") {
-				@ui.Tr() {
-					@ui.Th() {
-						{ i18n.T(ctx, "global.table.id") }
-					}
-					@ui.Th() {
-						{ i18n.T(ctx, "global.email") }
-					}
-					@ui.Th() {
-						{ i18n.T(ctx, "global.table.enabled") }
-					}
-					@ui.Th() {
-						{ i18n.T(ctx, "global.table.role") }
-					}
+	@ui.Table("default") {
+		@ui.TableHead("default") {
+			@ui.Tr() {
+				@ui.Th() {
+					{ i18n.T(ctx, "global.table.id") }
 				}
-			}
-			@ui.TableBody(templ.Attributes{}) {
-				for _, user := range users {
-					@User(user)
+				@ui.Th() {
+					{ i18n.T(ctx, "global.email") }
+				}
+				@ui.Th() {
+					{ i18n.T(ctx, "global.table.enabled") }
+				}
+				@ui.Th() {
+					{ i18n.T(ctx, "global.table.role") }
 				}
 			}
 		}
-	</div>
+		@ui.TableBody(templ.Attributes{}) {
+			for _, user := range users {
+				@User(user)
+			}
+		}
+	}
 }
 
 templ UserListPage(user user.User, popinMessage layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string, modelUser user.User, users []user.User) {
