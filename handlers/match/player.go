@@ -40,6 +40,8 @@ func (h *Handler) HandleUpdatePlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.Slog.Info("player updated", "playerId", idPlayer, "name", name)
+
 	notify.Notify(matchId)
 }
 
@@ -115,6 +117,8 @@ func (h *Handler) HandleCreatePlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.Slog.Info("player created", "playerId", idPlayer, "name", name, "teamId", idTeam)
+
 	player, err := matchModel.GetPlayer(user.IdLanguage, idPlayer)
 
 	if err != nil {
@@ -149,6 +153,8 @@ func (h *Handler) HandleDeletePlayer(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	h.Slog.Info("player deleted", "playerId", idPlayer, "matchId", matchId)
 
 	notify.Notify(matchId)
 }

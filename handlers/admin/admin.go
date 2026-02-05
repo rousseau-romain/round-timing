@@ -47,6 +47,8 @@ func (h *Handler) HandleUserEnabled(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.Slog.Info("user enabled toggled", "targetUserId", idUser, "enabled", toggleEnabled)
+
 	userEnabled, err := userModel.GetUserById(idUser)
 	if err != nil {
 		h.Slog.Error(err.Error())
