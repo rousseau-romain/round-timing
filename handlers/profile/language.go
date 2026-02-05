@@ -29,6 +29,8 @@ func (h *Handler) HandlePlayerLanguage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.Slog.Info("language changed", "code", code)
+
 	w.Header().Set("HX-Refresh", "true")
 
 }

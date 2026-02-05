@@ -72,6 +72,8 @@ func (h *Handler) HandleProfileToggleUserConfiguration(w http.ResponseWriter, r 
 		return
 	}
 
+	h.Slog.Info("user configuration toggled", "configurationId", idConfiguration)
+
 	userConfiguration, err := userModel.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, idConfiguration)
 	if err != nil {
 		h.Slog.Error(err.Error())
@@ -142,6 +144,8 @@ func (h *Handler) HandleProfileAddSpectate(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	h.Slog.Info("user spectate created", "userSpectateId", r.FormValue("idUserShare"))
+
 	page.UserSpectate(r.FormValue("idUserShare")).Render(r.Context(), w)
 }
 
@@ -160,4 +164,6 @@ func (h *Handler) HandleProfileDeleteSpectate(w http.ResponseWriter, r *http.Req
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	h.Slog.Info("user spectate deleted", "userSpectateId", r.FormValue("idUserShare"))
 }

@@ -17,7 +17,7 @@ live/go:
 		--misc.clean_on_exit true
 
 live/templ:
-	@go tool templ generate -watch -proxy="http://127.0.0.1:2468" -cmd="go run -buildvcs ." --open-browser=false
+	@go tool templ generate -watch -proxy="http://127.0.0.1:2468" -cmd="./scripts/run-with-log.sh" --open-browser=false
 
 live/tailwind:
 	@npx tailwindcss -i input.css -o public/tailwind.css --watch
@@ -80,3 +80,10 @@ migration_fix:
 
 show_deadcode:
 	deadcode .
+
+# Monitoring commands
+monitoring_start:
+	docker-compose up -d loki promtail grafana
+
+monitoring_stop:
+	docker-compose stop loki promtail grafana

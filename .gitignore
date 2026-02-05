@@ -12,3 +12,4 @@ vendor
 node_modules
 **/*.DS_Store
 .mcp.json
+logs/
