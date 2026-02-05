@@ -71,3 +71,17 @@ If not you can debug and fix !
 ## Deploy
 
 Push to branch staging to deploy on this url https://round-timing-staging.web-rows.ovh/
+
+### App (Coolify)
+
+The app is deployed as a **Dockerfile** resource on Coolify.
+
+1. **New Resource** → **Dockerfile** → select the repo
+2. **Branch**: `staging` or `master`
+3. **Port**: `2468`
+4. **Domain**: `https://your-domain.com:2468`
+5. **Environment variables**: copy from `.env.template` and fill in values
+
+### Monitoring (Coolify)
+
+See [monitoring/README.md](monitoring/README.md) for Loki + Grafana deployment instructions.

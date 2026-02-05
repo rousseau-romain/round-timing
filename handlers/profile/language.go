@@ -11,7 +11,7 @@ import (
 
 func (h *Handler) HandlePlayerLanguage(w http.ResponseWriter, r *http.Request) {
 	user, _ := auth.UserFromRequest(r)
-	h.Slog = h.Slog.With("userId", user.Id)
+	logger := h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
 
@@ -24,12 +24,12 @@ func (h *Handler) HandlePlayerLanguage(w http.ResponseWriter, r *http.Request) {
 
 	err := userModel.UpdateUser(user.Id, userUpdate)
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	h.Slog.Info("language changed", "code", code)
+	logger.Info("language changed", "code", code)
 
 	w.Header().Set("HX-Refresh", "true")
 
