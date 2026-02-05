@@ -144,7 +144,7 @@ Configs are baked into Docker images via Dockerfiles (not mounted as volumes):
 |----------|--------------------------|-----------------------------------------------------|
 | Loki     | `loki/Dockerfile`        | `loki/loki-config.yml`                              |
 | Promtail | `promtail/Dockerfile`    | `promtail/promtail-prod-config.yml`                 |
-| Grafana  | `grafana/Dockerfile`     | `grafana/provisioning/datasources/datasources-prod.yml` |
+| Grafana  | `grafana/Dockerfile`     | `grafana/provisioning/datasources/datasources.yml` |
 
 To change a config, edit the file, push, and redeploy.
 
