@@ -98,6 +98,8 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 			fmt.Fprintln(w, err)
 			return
 		}
+
+		h.Slog.Info("user created", "email", user.Email, "provider", user.Provider)
 	}
 
 	err = h.Auth.StoreUserSession(w, r, h.Slog, user)
@@ -197,6 +199,8 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.Slog.Info("user created", "email", email)
+
 	w.Header().Set("HX-Redirect", "/signin")
 	w.WriteHeader(http.StatusCreated)
 }
@@ -261,6 +265,8 @@ func (h *Handler) HandleLoginEmail(w http.ResponseWriter, r *http.Request) {
 		MaxAge:   config.COOKIES_AUTH_AGE_IN_SECONDS,
 	})
 
+	h.Slog.Info("user logged in", "email", email)
+
 	w.Header().Set("HX-Redirect", "/")
 	w.WriteHeader(http.StatusFound)
 }
@@ -275,6 +281,8 @@ func (h *Handler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.Auth.RemoveUserSession(w, r, h.Slog)
+
+	h.Slog.Info("user logged out")
 
 	w.Header().Set("Location", "/")
 	w.WriteHeader(http.StatusTemporaryRedirect)

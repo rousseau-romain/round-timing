@@ -23,6 +23,8 @@ func (h *Handler) HandleToggleSpellFavorite(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	h.Slog.Info("spell favorite toggled", "spellId", idSpell)
+
 	spellFavorite, err := game.GetFavoriteSpellByIdUserAndIdSpell(user.IdLanguage, user.Id, idSpell)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
