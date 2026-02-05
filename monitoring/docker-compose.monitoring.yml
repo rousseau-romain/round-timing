@@ -21,6 +21,8 @@ services:
   grafana:
     build:
       context: ./grafana
+    expose:
+      - "3000"
     volumes:
       - grafana-data:/var/lib/grafana
     environment:
