@@ -79,55 +79,39 @@ MariaDB container → Docker logs   → Promtail → Loki → Grafana
 
 ## Deploy on Coolify
 
-Each monitoring service is deployed as a separate Coolify resource using its own Dockerfile.
+The monitoring stack is deployed as a single **Docker Compose** resource. All services share a network and can communicate by name.
 
-### 1. Create the services
+### 1. Create the resource
 
-For each service, create a **New Resource** → **Public/Private Repository** with:
+**New Resource** → **Docker Compose** → select your repo with:
 
-| Service  | Base Directory         | Dockerfile   | Port |
-|----------|------------------------|-------------|------|
-| Loki     | `/monitoring/loki`     | `Dockerfile` | 3100 |
-| Promtail | `/monitoring/promtail` | `Dockerfile` | 9080 |
-| Grafana  | `/monitoring/grafana`  | `Dockerfile` | 3000 |
+- **Base Directory**: `/monitoring`
+- **Docker Compose File**: `docker-compose.monitoring.yml`
 
 ### 2. Environment variables
 
-**Promtail:**
-
 ```
-LOKI_URL=http://loki:3100
-```
-
-**Grafana:**
-
-```
-LOKI_URL=http://loki:3100
-GF_SECURITY_ADMIN_PASSWORD=<your-password>
+GF_ADMIN_PASSWORD=<your-password>
 ```
 
 ### 3. Volumes
 
-| Service  | Mount                                                  |
-|----------|--------------------------------------------------------|
-| Loki     | Persistent volume → `/loki`                            |
-| Promtail | `/var/lib/docker/containers:/var/lib/docker/containers:ro` |
-| Promtail | `/var/run/docker.sock:/var/run/docker.sock:ro`         |
-| Grafana  | Persistent volume → `/var/lib/grafana`                 |
+Coolify handles persistent volumes for Loki (`/loki`) and Grafana (`/var/lib/grafana`) automatically.
 
-### 4. Networking
+Add these host mounts for Promtail in Coolify's **Storages** tab:
 
-Enable **Connect to Predefined Networks** in **Settings** for all three services and for the main app. This puts them on the same Docker network so they can communicate by service name.
+```
+/var/lib/docker/containers:/var/lib/docker/containers:ro
+/var/run/docker.sock:/var/run/docker.sock:ro
+```
 
-### 5. Watch Paths
+### 4. Watch Paths
 
-Set watch paths so monitoring services only redeploy when their config changes:
+Set watch path to only redeploy when monitoring config changes:
 
-| Service  | Watch Path               |
-|----------|--------------------------|
-| Loki     | `monitoring/loki/**`     |
-| Promtail | `monitoring/promtail/**` |
-| Grafana  | `monitoring/grafana/**`  |
+```
+monitoring/**
+```
 
 ### Production architecture
 
