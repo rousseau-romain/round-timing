@@ -258,16 +258,19 @@ func (h *Handler) HandleStartMatch(w http.ResponseWriter, r *http.Request) {
 
 		var matchPlayerSpells []matchModel.MatchPlayerSpellCreate
 
+		spellsByClass := make(map[int][]game.Spell)
+		for _, spell := range spells {
+			spellsByClass[spell.IdClass] = append(spellsByClass[spell.IdClass], spell)
+		}
+
 		for _, player := range players {
-			for _, spell := range spells {
-				if spell.IdClass == player.Class.Id {
-					matchPlayerSpells = append(matchPlayerSpells, matchModel.MatchPlayerSpellCreate{
-						MatchId:             matchId,
-						PlayerId:            player.Id,
-						SpellId:             spell.Id,
-						RoundBeforeRecovery: 0,
-					})
-				}
+			for _, spell := range spellsByClass[player.Class.Id] {
+				matchPlayerSpells = append(matchPlayerSpells, matchModel.MatchPlayerSpellCreate{
+					MatchId:             matchId,
+					PlayerId:            player.Id,
+					SpellId:             spell.Id,
+					RoundBeforeRecovery: 0,
+				})
 			}
 			for _, globalSpell := range globalSpells {
 				matchPlayerSpells = append(matchPlayerSpells, matchModel.MatchPlayerSpellCreate{
@@ -291,7 +294,7 @@ func (h *Handler) HandleStartMatch(w http.ResponseWriter, r *http.Request) {
 
 	logger.Info("match started", "matchId", matchId)
 
-	userConfigurationFavoriteSpells, err := userModel.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, 1)
+	userConfigurationFavoriteSpells, err := userModel.GetConfigurationByKeyAndIdUser(user.IdLanguage, user.Id, constants.ConfigKeyHideNonFavoriteSpells)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -360,7 +363,7 @@ func (h *Handler) HandleToggleMatchMastery(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	userConfigurationFavoriteSpells, err := userModel.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, 1)
+	userConfigurationFavoriteSpells, err := userModel.GetConfigurationByKeyAndIdUser(user.IdLanguage, user.Id, constants.ConfigKeyHideNonFavoriteSpells)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -410,7 +413,7 @@ func (h *Handler) HandleMatchNextRound(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userConfigurationFavoriteSpells, err := userModel.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, 1)
+	userConfigurationFavoriteSpells, err := userModel.GetConfigurationByKeyAndIdUser(user.IdLanguage, user.Id, constants.ConfigKeyHideNonFavoriteSpells)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)

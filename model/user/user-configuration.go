@@ -9,30 +9,69 @@ type UserConfiguration struct {
 	IsEnabled       bool   `json:"is_enabled"`
 }
 
+func GetConfigurationByKeyAndIdUser(idLanguage, idUser int, key string) (UserConfiguration, error) {
+	sql := `
+		SELECT
+			IFNULL(uc.id, 0) AS id,
+			IFNULL(uc.id_user, 0) AS id_user,
+			IFNULL(c.id, 0) AS id_configuration,
+			c.` + "`key`" + `,
+			ct.name,
+			IF(uc.id_user IS NULL, 0, 1) AS is_enabled
+		FROM configuration AS c
+		LEFT JOIN user_configuration AS uc ON uc.id_configuration = c.id AND uc.id_user = ?
+		JOIN configuration_translation AS ct ON ct.id_configuration = c.id AND ct.id_language = ?
+		WHERE c.key = ?
+	`
+
+	row := db.QueryRow(sql, idUser, idLanguage, key)
+
+	var userConfiguration UserConfiguration
+
+	if row.Err() != nil {
+		return userConfiguration, row.Err()
+	}
+
+	err := row.Scan(
+		&userConfiguration.Id,
+		&userConfiguration.IdUser,
+		&userConfiguration.IdConfiguration,
+		&userConfiguration.Key,
+		&userConfiguration.Name,
+		&userConfiguration.IsEnabled,
+	)
+
+	if err != nil && err.Error() != "sql: no rows in result set" {
+		return userConfiguration, err
+	}
+
+	return userConfiguration, nil
+}
+
 func GetConfigurationByIdConfigurationIdUser(idLanguage, idUser, idConfiguration int) (UserConfiguration, error) {
 	sql := `
 		SELECT
 			IFNULL(uc.id, 0) AS id,
 			IFNULL(uc.id_user, 0) AS id_user,
 			IFNULL(c.id, 0) AS id_configuration,
-			c.key,
+			c.` + "`key`" + `,
 			ct.name,
 			IF(uc.id_user IS NULL, 0, 1) AS is_enabled
 		FROM configuration AS c
-		LEFT JOIN user_configuration AS uc ON uc.id_configuration = c.id
+		LEFT JOIN user_configuration AS uc ON uc.id_configuration = c.id AND uc.id_user = ?
 		JOIN configuration_translation AS ct ON ct.id_configuration = c.id AND ct.id_language = ?
-		WHERE (uc.id_user = ? OR uc.id_user IS NULL) AND c.id = ?
+		WHERE c.id = ?
 	`
 
-	rows := db.QueryRow(sql, idLanguage, idUser, idConfiguration)
+	row := db.QueryRow(sql, idUser, idLanguage, idConfiguration)
 
 	var userConfiguration UserConfiguration
 
-	if rows.Err() != nil {
-		return userConfiguration, rows.Err()
+	if row.Err() != nil {
+		return userConfiguration, row.Err()
 	}
 
-	err := rows.Scan(
+	err := row.Scan(
 		&userConfiguration.Id,
 		&userConfiguration.IdUser,
 		&userConfiguration.IdConfiguration,

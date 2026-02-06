@@ -11,6 +11,7 @@ import (
 	"github.com/rousseau-romain/round-timing/config"
 	matchModel "github.com/rousseau-romain/round-timing/model/match"
 	userModel "github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/pkg/constants"
 	"github.com/rousseau-romain/round-timing/pkg/notify"
 	"github.com/rousseau-romain/round-timing/service/auth"
 	pageMatch "github.com/rousseau-romain/round-timing/views/page/match"
@@ -54,7 +55,7 @@ func (h *Handler) HandleSpectateMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userConfigurationFavoriteSpells, err := userModel.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, 1)
+	userConfigurationFavoriteSpells, err := userModel.GetConfigurationByKeyAndIdUser(user.IdLanguage, user.Id, constants.ConfigKeyHideNonFavoriteSpells)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -85,6 +86,12 @@ func (h *Handler) HandleMatchTableLive(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
+	userConfigurationFavoriteSpells, err := userModel.GetConfigurationByKeyAndIdUser(user.IdLanguage, user.Id, constants.ConfigKeyHideNonFavoriteSpells)
+	if err != nil {
+		logger.Error(err.Error())
+		return
+	}
+
 	ch := notify.Subscribe(matchId)
 	defer notify.Unsubscribe(matchId, ch)
 
@@ -111,12 +118,6 @@ func (h *Handler) HandleMatchTableLive(w http.ResponseWriter, r *http.Request) {
 			}
 
 			players, err := matchModel.GetPlayersByIdMatch(user.IdLanguage, matchId)
-			if err != nil {
-				logger.Error(err.Error())
-				return
-			}
-
-			userConfigurationFavoriteSpells, err := userModel.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, 1)
 			if err != nil {
 				logger.Error(err.Error())
 				return
