@@ -11,9 +11,9 @@ import (
 
 // Set via -ldflags at build time, used as fallback when VCS info is unavailable
 var (
-	version    = ""
-	commit     = ""
-	buildTime  = ""
+	version     = ""
+	commit      = ""
+	buildTime   = ""
 	vcsModified = ""
 )
 
@@ -60,7 +60,7 @@ func init() {
 		log.Println("No .env file found, using environment variables")
 	}
 
-	VERSION = "v1.5.1"
+	VERSION = "v1.6.0"
 	COMMIT = "unknown"
 	BUILD_TIME = "unknown"
 	VCS_MODIFIED = "false"
