@@ -1,6 +1,7 @@
 package match
 
 import (
+	"context"
 	"errors"
 
 	"github.com/huandu/go-sqlbuilder"
@@ -28,7 +29,7 @@ type PlayerUpdate struct {
 	Name    *string
 }
 
-func GetPlayersByIdMatch(idTranslation int, idMatch int) ([]Player, error) {
+func GetPlayersByIdMatch(ctx context.Context, idTranslation int, idMatch int) ([]Player, error) {
 	sql := `
 		SELECT
 			p.id,
@@ -46,10 +47,10 @@ func GetPlayersByIdMatch(idTranslation int, idMatch int) ([]Player, error) {
 		JOIN team AS t ON t.id = p.id_team
 		JOIN color_team AS ct ON ct.id = t.id_color_team
 		JOIN ` + "`match`" + ` AS m ON m.id = t.id_match
-		WHERE m.id = ? 
+		WHERE m.id = ?
 	`
 
-	rows, err := db.Query(sql, idTranslation, idMatch)
+	rows, err := db.QueryContext(ctx, sql, idTranslation, idMatch)
 	if err != nil {
 		return nil, err
 	}
@@ -83,9 +84,9 @@ func GetPlayersByIdMatch(idTranslation int, idMatch int) ([]Player, error) {
 	return players, nil
 }
 
-func GetPlayer(idLanguage int, idPlayer int) (Player, error) {
+func GetPlayer(ctx context.Context, idLanguage int, idPlayer int) (Player, error) {
 	sql := `
-		SELECT 
+		SELECT
 			p.id,
 			p.id_team,
 			p.name,
@@ -104,7 +105,7 @@ func GetPlayer(idLanguage int, idPlayer int) (Player, error) {
 	`
 
 	var player Player
-	err := db.QueryRow(sql, idLanguage, idPlayer).Scan(
+	err := db.QueryRowContext(ctx, sql, idLanguage, idPlayer).Scan(
 		&player.Id,
 		&player.Idteam,
 		&player.Name,
@@ -123,14 +124,14 @@ func GetPlayer(idLanguage int, idPlayer int) (Player, error) {
 	return player, err
 }
 
-func CreatePlayer(p PlayerCreate) (int, error) {
+func CreatePlayer(ctx context.Context, p PlayerCreate) (int, error) {
 
 	sql := `
 		INSERT INTO player (id_class, id_team, name)
 		VALUES (?, ?, ?)
 	`
 
-	response, err := db.Exec(sql, p.IdClass, p.IdTeam, p.Name)
+	response, err := db.ExecContext(ctx, sql, p.IdClass, p.IdTeam, p.Name)
 
 	if err != nil {
 		return 0, err
@@ -141,7 +142,7 @@ func CreatePlayer(p PlayerCreate) (int, error) {
 	return int(id), err
 }
 
-func UpdatePlayer(idPlayer int, player PlayerUpdate) error {
+func UpdatePlayer(ctx context.Context, idPlayer int, player PlayerUpdate) error {
 	canUpdate := false
 	sb := sqlbuilder.NewUpdateBuilder()
 	sb.Update("player").Where(sb.Equal("id", idPlayer))
@@ -158,14 +159,14 @@ func UpdatePlayer(idPlayer int, player PlayerUpdate) error {
 
 	if canUpdate {
 		sql, args := sb.Build()
-		_, err := db.Exec(sql, args...)
+		_, err := db.ExecContext(ctx, sql, args...)
 		return err
 	}
 
 	return errors.New("no parameters to update Player")
 }
 
-func DeletePlayersByMatchId(idMatch int) error {
+func DeletePlayersByMatchId(ctx context.Context, idMatch int) error {
 	sql := `
 		DELETE p FROM player AS p
 		JOIN team AS t ON p.id_team = t.id
@@ -173,14 +174,14 @@ func DeletePlayersByMatchId(idMatch int) error {
 		WHERE m.id = ?
 	`
 
-	_, err := db.Exec(sql, idMatch)
+	_, err := db.ExecContext(ctx, sql, idMatch)
 
 	return err
 }
 
-func DeletePlayer(idPlayer int) error {
+func DeletePlayer(ctx context.Context, idPlayer int) error {
 	sql := "DELETE FROM player WHERE id = ?"
-	_, err := db.Exec(sql, idPlayer)
+	_, err := db.ExecContext(ctx, sql, idPlayer)
 
 	return err
 }

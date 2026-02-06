@@ -1,5 +1,7 @@
 package user
 
+import "context"
+
 type UserConfiguration struct {
 	Id              int    `json:"id"`
 	IdUser          int    `json:"id_user"`
@@ -9,7 +11,7 @@ type UserConfiguration struct {
 	IsEnabled       bool   `json:"is_enabled"`
 }
 
-func GetConfigurationByKeyAndIdUser(idLanguage, idUser int, key string) (UserConfiguration, error) {
+func GetConfigurationByKeyAndIdUser(ctx context.Context, idLanguage, idUser int, key string) (UserConfiguration, error) {
 	sql := `
 		SELECT
 			IFNULL(uc.id, 0) AS id,
@@ -24,7 +26,7 @@ func GetConfigurationByKeyAndIdUser(idLanguage, idUser int, key string) (UserCon
 		WHERE c.key = ?
 	`
 
-	row := db.QueryRow(sql, idUser, idLanguage, key)
+	row := db.QueryRowContext(ctx, sql, idUser, idLanguage, key)
 
 	var userConfiguration UserConfiguration
 
@@ -48,7 +50,7 @@ func GetConfigurationByKeyAndIdUser(idLanguage, idUser int, key string) (UserCon
 	return userConfiguration, nil
 }
 
-func GetConfigurationByIdConfigurationIdUser(idLanguage, idUser, idConfiguration int) (UserConfiguration, error) {
+func GetConfigurationByIdConfigurationIdUser(ctx context.Context, idLanguage, idUser, idConfiguration int) (UserConfiguration, error) {
 	sql := `
 		SELECT
 			IFNULL(uc.id, 0) AS id,
@@ -63,7 +65,7 @@ func GetConfigurationByIdConfigurationIdUser(idLanguage, idUser, idConfiguration
 		WHERE c.id = ?
 	`
 
-	row := db.QueryRow(sql, idUser, idLanguage, idConfiguration)
+	row := db.QueryRowContext(ctx, sql, idUser, idLanguage, idConfiguration)
 
 	var userConfiguration UserConfiguration
 
@@ -87,7 +89,7 @@ func GetConfigurationByIdConfigurationIdUser(idLanguage, idUser, idConfiguration
 	return userConfiguration, nil
 }
 
-func GetAllConfigurationByIdUser(idLanguage, idUser int) ([]UserConfiguration, error) {
+func GetAllConfigurationByIdUser(ctx context.Context, idLanguage, idUser int) ([]UserConfiguration, error) {
 	sql := `
 		SELECT
 			IFNULL(uc.id, 0) AS id,
@@ -101,7 +103,7 @@ func GetAllConfigurationByIdUser(idLanguage, idUser int) ([]UserConfiguration, e
 		JOIN configuration_translation AS ct ON ct.id_configuration = c.id AND ct.id_language = ?
 	`
 
-	rows, err := db.Query(sql, idUser, idLanguage)
+	rows, err := db.QueryContext(ctx, sql, idUser, idLanguage)
 	if err != nil {
 		return nil, err
 	}
@@ -132,8 +134,8 @@ func GetAllConfigurationByIdUser(idLanguage, idUser int) ([]UserConfiguration, e
 	return configurationByIdUser, nil
 }
 
-func ToggleUserConfiguration(idUser, idConfiguration int) error {
-	row := db.QueryRow("SELECT EXISTS (SELECT id FROM user_configuration WHERE id_user = ? AND id_configuration = ?)", idUser, idConfiguration)
+func ToggleUserConfiguration(ctx context.Context, idUser, idConfiguration int) error {
+	row := db.QueryRowContext(ctx, "SELECT EXISTS (SELECT id FROM user_configuration WHERE id_user = ? AND id_configuration = ?)", idUser, idConfiguration)
 
 	var isEnable bool
 
@@ -148,10 +150,10 @@ func ToggleUserConfiguration(idUser, idConfiguration int) error {
 	}
 
 	if isEnable {
-		_, err := db.Exec("DELETE FROM user_configuration WHERE id_user = ? AND id_configuration = ?", idUser, idConfiguration)
+		_, err := db.ExecContext(ctx, "DELETE FROM user_configuration WHERE id_user = ? AND id_configuration = ?", idUser, idConfiguration)
 		return err
 	} else {
-		_, err := db.Exec("INSERT INTO user_configuration (id_user, id_configuration) VALUES (?, ?)", idUser, idConfiguration)
+		_, err := db.ExecContext(ctx, "INSERT INTO user_configuration (id_user, id_configuration) VALUES (?, ?)", idUser, idConfiguration)
 		return err
 	}
 }

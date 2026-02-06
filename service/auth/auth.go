@@ -151,7 +151,7 @@ func (s *AuthService) getUserFromOAuthSession(r *http.Request, slog *slog.Logger
 		return user.User{}, errNotAuthenticated
 	}
 
-	u, err := user.GetUserByOauth2Id(gothUser.UserID)
+	u, err := user.GetUserByOauth2Id(r.Context(), gothUser.UserID)
 	if err != nil {
 		slog.Error("Error fetching user", "goticUserId", gothUser.UserID, "error", err)
 		return user.User{}, err
@@ -174,7 +174,7 @@ func (s *AuthService) getUserFromJWT(r *http.Request, slog *slog.Logger) (user.U
 		return user.User{}, errNotAuthenticated
 	}
 
-	u, err := user.GetUserByEmail(claims.Email)
+	u, err := user.GetUserByEmail(r.Context(), claims.Email)
 	if err != nil {
 		slog.Error("Error fetching user by email", "email", claims.Email, "error", err)
 		return user.User{}, err

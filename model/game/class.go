@@ -1,6 +1,8 @@
 package game
 
 import (
+	"context"
+
 	"github.com/rousseau-romain/round-timing/pkg/sqlhelper"
 )
 
@@ -10,7 +12,7 @@ type Class struct {
 	UrlImage string `json:"url_image"`
 }
 
-func GetClasses(idLanguage int) ([]Class, error) {
+func GetClasses(ctx context.Context, idLanguage int) ([]Class, error) {
 	sql := `
 		SELECT
 			c.id,
@@ -21,7 +23,7 @@ func GetClasses(idLanguage int) ([]Class, error) {
 		WHERE c.id != 13
 	`
 
-	rows, err := db.Query(sql, idLanguage)
+	rows, err := db.QueryContext(ctx, sql, idLanguage)
 	if err != nil {
 		return nil, err
 	}

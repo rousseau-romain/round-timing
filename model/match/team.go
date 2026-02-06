@@ -1,5 +1,7 @@
 package match
 
+import "context"
+
 type Team struct {
 	Id          int    `json:"id"`
 	IdMatch     int    `json:"id_match"`
@@ -19,7 +21,7 @@ type TeamUpdate struct {
 	Name        *string
 }
 
-func GetTeamsByIdMatch(idMatch int) ([]Team, error) {
+func GetTeamsByIdMatch(ctx context.Context, idMatch int) ([]Team, error) {
 	sql := `
 		SELECT
 			t.id,
@@ -34,7 +36,7 @@ func GetTeamsByIdMatch(idMatch int) ([]Team, error) {
 		WHERE m.id = ?
 	`
 
-	rows, err := db.Query(sql, idMatch)
+	rows, err := db.QueryContext(ctx, sql, idMatch)
 	if err != nil {
 		return nil, err
 	}
@@ -63,31 +65,32 @@ func GetTeamsByIdMatch(idMatch int) ([]Team, error) {
 
 	return teams, nil
 }
-func NumberPlayerInTeamByTeamId(idTeam int) (int, error) {
+
+func NumberPlayerInTeamByTeamId(ctx context.Context, idTeam int) (int, error) {
 	sql := `
 		SELECT COUNT(*) AS number
 		FROM player AS p
 		WHERE p.id_team = ?
 	`
 
-	rows := db.QueryRow(sql, idTeam)
+	row := db.QueryRowContext(ctx, sql, idTeam)
 
 	var number int
 
-	err := rows.Scan(&number)
+	err := row.Scan(&number)
 
 	return number, err
 
 }
 
-func CreateTeam(m TeamCreate) (int, error) {
+func CreateTeam(ctx context.Context, m TeamCreate) (int, error) {
 
 	sql := `
 		INSERT INTO team (id_match, id_color_team, name)
 		VALUES (?, ?, ?)
 	`
 
-	response, err := db.Exec(sql, m.IdMatch, m.IdColorTeam, m.Name)
+	response, err := db.ExecContext(ctx, sql, m.IdMatch, m.IdColorTeam, m.Name)
 
 	if err != nil {
 		return 0, err
@@ -98,14 +101,14 @@ func CreateTeam(m TeamCreate) (int, error) {
 	return int(id), err
 }
 
-func DeleteTeamsByMatchId(idMatch int) error {
+func DeleteTeamsByMatchId(ctx context.Context, idMatch int) error {
 	sql := `
 		DELETE t FROM team AS t
 		JOIN ` + "`match`" + ` AS m ON t.id_match = m.id
 		WHERE m.id = ?
 	`
 
-	_, err := db.Exec(sql, idMatch)
+	_, err := db.ExecContext(ctx, sql, idMatch)
 
 	return err
 }

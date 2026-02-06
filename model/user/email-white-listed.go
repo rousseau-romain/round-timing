@@ -1,6 +1,8 @@
 package user
 
-func IsEmailWhiteListed(email string) (bool, error) {
+import "context"
+
+func IsEmailWhiteListed(ctx context.Context, email string) (bool, error) {
 	var count int
 	sql := `
 		SELECT
@@ -8,7 +10,7 @@ func IsEmailWhiteListed(email string) (bool, error) {
 		FROM email_white_listed
 		WHERE email = ?;
 	`
-	err := db.QueryRow(sql, email).Scan(&count)
+	err := db.QueryRowContext(ctx, sql, email).Scan(&count)
 
 	if count > 0 {
 		return true, err

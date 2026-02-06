@@ -22,7 +22,7 @@ func (h *Handler) HandlePlayerLanguage(w http.ResponseWriter, r *http.Request) {
 		IdLanguage: &idLanguage,
 	}
 
-	err := userModel.UpdateUser(user.Id, userUpdate)
+	err := userModel.UpdateUser(r.Context(), user.Id, userUpdate)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)

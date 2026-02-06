@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -21,7 +22,7 @@ type Handler struct {
 }
 
 func New(auth *auth.AuthService, slog *slog.Logger) *Handler {
-	languages, err := system.GetLanguages()
+	languages, err := system.GetLanguages(context.Background())
 	if err != nil {
 		languages = []system.Language{}
 	}
@@ -54,7 +55,7 @@ func (h *Handler) GetPageNavCustom(r *http.Request, user userModel.User, match m
 				Url:  fmt.Sprintf("match/%d", match.Id),
 			})
 		} else {
-			lastMatch, err := matchModel.GetLastMatchByUserId(user.Id)
+			lastMatch, err := matchModel.GetLastMatchByUserId(r.Context(), user.Id)
 			if err != nil {
 				h.Slog.Error(err.Error())
 				return pageNav

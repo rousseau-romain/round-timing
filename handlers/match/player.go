@@ -31,7 +31,7 @@ func (h *Handler) HandleUpdatePlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := matchModel.UpdatePlayer(idPlayer, matchModel.PlayerUpdate{
+	err := matchModel.UpdatePlayer(r.Context(), idPlayer, matchModel.PlayerUpdate{
 		Name: &name,
 	})
 	if err != nil {
@@ -67,7 +67,7 @@ func (h *Handler) HandleCreatePlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	canCreatePlayerInTeam, err := matchModel.NumberPlayerInTeamByTeamId(idTeam)
+	canCreatePlayerInTeam, err := matchModel.NumberPlayerInTeamByTeamId(r.Context(), idTeam)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -90,7 +90,7 @@ func (h *Handler) HandleCreatePlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	match, err := matchModel.GetMatch(idMatch)
+	match, err := matchModel.GetMatch(r.Context(), idMatch)
 
 	if err != nil {
 		logger.Error(err.Error())
@@ -105,7 +105,7 @@ func (h *Handler) HandleCreatePlayer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	idClass, _ := strconv.Atoi(r.FormValue("idClass"))
-	idPlayer, err := matchModel.CreatePlayer(matchModel.PlayerCreate{
+	idPlayer, err := matchModel.CreatePlayer(r.Context(), matchModel.PlayerCreate{
 		Name:    name,
 		IdTeam:  idTeam,
 		IdClass: idClass,
@@ -119,7 +119,7 @@ func (h *Handler) HandleCreatePlayer(w http.ResponseWriter, r *http.Request) {
 
 	logger.Info("player created", "playerId", idPlayer, "name", name, "teamId", idTeam)
 
-	player, err := matchModel.GetPlayer(user.IdLanguage, idPlayer)
+	player, err := matchModel.GetPlayer(r.Context(), user.IdLanguage, idPlayer)
 
 	if err != nil {
 		logger.Error(err.Error())
@@ -140,14 +140,14 @@ func (h *Handler) HandleDeletePlayer(w http.ResponseWriter, r *http.Request) {
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 	idPlayer, _ := strconv.Atoi(vars["idPlayer"])
 
-	err := matchModel.DeleteMatchPlayersSpellsByPlayer(idPlayer)
+	err := matchModel.DeleteMatchPlayersSpellsByPlayer(r.Context(), idPlayer)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	err = matchModel.DeletePlayer(idPlayer)
+	err = matchModel.DeletePlayer(r.Context(), idPlayer)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)

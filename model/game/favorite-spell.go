@@ -1,6 +1,8 @@
 package game
 
 import (
+	"context"
+
 	"github.com/rousseau-romain/round-timing/pkg/sqlhelper"
 )
 
@@ -12,7 +14,7 @@ type SpellByClass struct {
 	IsFavorite bool   `json:"is_favorite"`
 }
 
-func GetFavoriteSpellByIdUserAndIdSpell(idLanguage, idUser, idSpell int) (SpellByClass, error) {
+func GetFavoriteSpellByIdUserAndIdSpell(ctx context.Context, idLanguage, idUser, idSpell int) (SpellByClass, error) {
 	sql := `
 		SELECT
 			s.id AS id_spell,
@@ -27,15 +29,15 @@ func GetFavoriteSpellByIdUserAndIdSpell(idLanguage, idUser, idSpell int) (SpellB
 		WHERE s.id = ?
 	`
 
-	rows := db.QueryRow(sql, idLanguage, idUser, idSpell)
+	row := db.QueryRowContext(ctx, sql, idLanguage, idUser, idSpell)
 
 	var spellByClass SpellByClass
 
-	if rows.Err() != nil {
-		return spellByClass, rows.Err()
+	if row.Err() != nil {
+		return spellByClass, row.Err()
 	}
 
-	err := rows.Scan(
+	err := row.Scan(
 		&spellByClass.IdSpell,
 		&spellByClass.IdClass,
 		&spellByClass.UrlImage,
@@ -46,7 +48,7 @@ func GetFavoriteSpellByIdUserAndIdSpell(idLanguage, idUser, idSpell int) (SpellB
 	return spellByClass, err
 }
 
-func GetFavoriteSpellsByIdUser(idLanguage, idUser int) ([]SpellByClass, error) {
+func GetFavoriteSpellsByIdUser(ctx context.Context, idLanguage, idUser int) ([]SpellByClass, error) {
 	sql := `
 		SELECT
 			s.id AS id_spell,
@@ -61,7 +63,7 @@ func GetFavoriteSpellsByIdUser(idLanguage, idUser int) ([]SpellByClass, error) {
 		ORDER BY is_favorite DESC, fs.id ASC
 	`
 
-	rows, err := db.Query(sql, idLanguage, idUser)
+	rows, err := db.QueryContext(ctx, sql, idLanguage, idUser)
 	if err != nil {
 		return nil, err
 	}
@@ -91,10 +93,10 @@ func GetFavoriteSpellsByIdUser(idLanguage, idUser int) ([]SpellByClass, error) {
 	return spellByClasses, nil
 }
 
-func ToggleIsFavoriteSpell(idUser, idSpell int) error {
+func ToggleIsFavoriteSpell(ctx context.Context, idUser, idSpell int) error {
 	isFavorite := false
 
-	rows, err := db.Query("SELECT id FROM favorite_spell WHERE id_user = ? AND id_spell = ?", idUser, idSpell)
+	rows, err := db.QueryContext(ctx, "SELECT id FROM favorite_spell WHERE id_user = ? AND id_spell = ?", idUser, idSpell)
 	if err != nil {
 		return err
 	}
@@ -109,10 +111,10 @@ func ToggleIsFavoriteSpell(idUser, idSpell int) error {
 	}
 
 	if isFavorite {
-		_, err := db.Exec("DELETE FROM favorite_spell WHERE id_user = ? AND id_spell = ?", idUser, idSpell)
+		_, err := db.ExecContext(ctx, "DELETE FROM favorite_spell WHERE id_user = ? AND id_spell = ?", idUser, idSpell)
 		return err
 	} else {
-		_, err := db.Exec("INSERT INTO favorite_spell (id_user, id_spell) VALUES (?, ?)", idUser, idSpell)
+		_, err := db.ExecContext(ctx, "INSERT INTO favorite_spell (id_user, id_spell) VALUES (?, ?)", idUser, idSpell)
 		return err
 	}
 }

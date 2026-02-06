@@ -29,7 +29,7 @@ func (h *Handler) HandleListMatch(w http.ResponseWriter, r *http.Request) {
 	user, _ := auth.UserFromRequest(r)
 	logger := h.Slog.With("userId", user.Id)
 
-	matchs, err := matchModel.GetMatchsByIdUser(user.Id)
+	matchs, err := matchModel.GetMatchsByIdUser(r.Context(), user.Id)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -51,7 +51,7 @@ func (h *Handler) HandleCreateMatch(w http.ResponseWriter, r *http.Request) {
 	}
 	name := strings.TrimSpace(r.FormValue("name"))
 
-	numberOfMatch, err := matchModel.GetNumberOfMatchByUserId(user.Id)
+	numberOfMatch, err := matchModel.GetNumberOfMatchByUserId(r.Context(), user.Id)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -74,7 +74,7 @@ func (h *Handler) HandleCreateMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	matchId, err := matchModel.CreateMatch(matchModel.MatchCreate{
+	matchId, err := matchModel.CreateMatch(r.Context(), matchModel.MatchCreate{
 		Name:   name,
 		IdUser: user.Id,
 	})
@@ -87,7 +87,7 @@ func (h *Handler) HandleCreateMatch(w http.ResponseWriter, r *http.Request) {
 
 	logger.Info("match created", "matchId", matchId, "name", name)
 
-	match, err := matchModel.GetMatch(matchId)
+	match, err := matchModel.GetMatch(r.Context(), matchId)
 
 	if err != nil {
 		logger.Error(err.Error())
@@ -95,7 +95,7 @@ func (h *Handler) HandleCreateMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = matchModel.CreateTeam(matchModel.TeamCreate{
+	_, err = matchModel.CreateTeam(r.Context(), matchModel.TeamCreate{
 		Name:        "Team red",
 		IdColorTeam: 1,
 		IdMatch:     matchId,
@@ -107,7 +107,7 @@ func (h *Handler) HandleCreateMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = matchModel.CreateTeam(matchModel.TeamCreate{
+	_, err = matchModel.CreateTeam(r.Context(), matchModel.TeamCreate{
 		Name:        "Team blue",
 		IdColorTeam: 2,
 		IdMatch:     matchId,
@@ -133,23 +133,23 @@ func (h *Handler) HandleDeleteMatch(w http.ResponseWriter, r *http.Request) {
 
 	id, _ := strconv.Atoi(matchId)
 
-	err := matchModel.DeleteMatchPlayersSpellsByMatchId(id)
+	err := matchModel.DeleteMatchPlayersSpellsByMatchId(r.Context(), id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	err = matchModel.DeletePlayersByMatchId(id)
+	err = matchModel.DeletePlayersByMatchId(r.Context(), id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = matchModel.DeleteTeamsByMatchId(id)
+	err = matchModel.DeleteTeamsByMatchId(r.Context(), id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = matchModel.DeleteMatch(id)
+	err = matchModel.DeleteMatch(r.Context(), id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -166,7 +166,7 @@ func (h *Handler) HandleMatch(w http.ResponseWriter, r *http.Request) {
 
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 
-	match, err := matchModel.GetMatch(matchId)
+	match, err := matchModel.GetMatch(r.Context(), matchId)
 	if err != nil {
 		errorMessage := i18n.T(r.Context(), "page.match.errors.match-not-found", i18n.M{"matchId": matchId})
 		logger.Error(errorMessage, "matchId", matchId)
@@ -175,19 +175,19 @@ func (h *Handler) HandleMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	players, err := matchModel.GetPlayersByIdMatch(user.IdLanguage, matchId)
+	players, err := matchModel.GetPlayersByIdMatch(r.Context(), user.IdLanguage, matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	teams, err := matchModel.GetTeamsByIdMatch(matchId)
+	teams, err := matchModel.GetTeamsByIdMatch(r.Context(), matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	classes, err := game.GetClasses(user.IdLanguage)
+	classes, err := game.GetClasses(r.Context(), user.IdLanguage)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -205,14 +205,14 @@ func (h *Handler) HandleStartMatch(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	matchId, _ := strconv.Atoi(vars["idMatch"])
-	match, err := matchModel.GetMatch(matchId)
+	match, err := matchModel.GetMatch(r.Context(), matchId)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	players, err := matchModel.GetPlayersByIdMatch(user.IdLanguage, matchId)
+	players, err := matchModel.GetPlayersByIdMatch(r.Context(), user.IdLanguage, matchId)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -230,7 +230,7 @@ func (h *Handler) HandleStartMatch(w http.ResponseWriter, r *http.Request) {
 		for _, player := range players {
 			classeIds = append(classeIds, player.Class.Id)
 		}
-		spells, err := game.GetSpellsByIdClass(user.IdLanguage, classeIds, idSpellToExclude)
+		spells, err := game.GetSpellsByIdClass(r.Context(), user.IdLanguage, classeIds, idSpellToExclude)
 		if err != nil {
 			logger.Error(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -241,7 +241,7 @@ func (h *Handler) HandleStartMatch(w http.ResponseWriter, r *http.Request) {
 			idSpellToExclude = []int{}
 		}
 
-		globalSpells, err := game.GetSpellsByIdClass(user.IdLanguage, []int{idClassGlobal}, idSpellToExclude)
+		globalSpells, err := game.GetSpellsByIdClass(r.Context(), user.IdLanguage, []int{idClassGlobal}, idSpellToExclude)
 		if err != nil {
 			logger.Error(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -249,7 +249,7 @@ func (h *Handler) HandleStartMatch(w http.ResponseWriter, r *http.Request) {
 		}
 
 		var round = 1
-		err = matchModel.UpdateMatch(matchId, matchModel.MatchUpdate{Round: &round})
+		err = matchModel.UpdateMatch(r.Context(), matchId, matchModel.MatchUpdate{Round: &round})
 		if err != nil {
 			logger.Error(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -282,7 +282,7 @@ func (h *Handler) HandleStartMatch(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		err = matchModel.CreateMatchPlayersSpells(matchPlayerSpells)
+		err = matchModel.CreateMatchPlayersSpells(r.Context(), matchPlayerSpells)
 		if err != nil {
 			logger.Error(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -294,14 +294,14 @@ func (h *Handler) HandleStartMatch(w http.ResponseWriter, r *http.Request) {
 
 	logger.Info("match started", "matchId", matchId)
 
-	userConfigurationFavoriteSpells, err := userModel.GetConfigurationByKeyAndIdUser(user.IdLanguage, user.Id, constants.ConfigKeyHideNonFavoriteSpells)
+	userConfigurationFavoriteSpells, err := userModel.GetConfigurationByKeyAndIdUser(r.Context(), user.IdLanguage, user.Id, constants.ConfigKeyHideNonFavoriteSpells)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	spellsPlayer, err := matchModel.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
+	spellsPlayer, err := matchModel.GetSpellsPlayersByIdMatch(r.Context(), user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
 
 	if err != nil {
 		logger.Error(err.Error())
@@ -320,7 +320,7 @@ func (h *Handler) HandleResetMatch(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 
-	err := matchModel.ResetMatch(matchId)
+	err := matchModel.ResetMatch(r.Context(), matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -340,7 +340,7 @@ func (h *Handler) HandleToggleMatchMastery(w http.ResponseWriter, r *http.Reques
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 	multipleMasteryEnabled, _ := strconv.Atoi(vars["toggleBool"])
 
-	err := matchModel.UpdateMatch(matchId, matchModel.MatchUpdate{
+	err := matchModel.UpdateMatch(r.Context(), matchId, matchModel.MatchUpdate{
 		MultipleMasteryEnabled: &multipleMasteryEnabled,
 	})
 
@@ -351,26 +351,26 @@ func (h *Handler) HandleToggleMatchMastery(w http.ResponseWriter, r *http.Reques
 
 	logger.Info("match mastery toggled", "matchId", matchId, "multipleMasteryEnabled", multipleMasteryEnabled)
 
-	match, err := matchModel.GetMatch(matchId)
+	match, err := matchModel.GetMatch(r.Context(), matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	players, err := matchModel.GetPlayersByIdMatch(user.IdLanguage, matchId)
+	players, err := matchModel.GetPlayersByIdMatch(r.Context(), user.IdLanguage, matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	userConfigurationFavoriteSpells, err := userModel.GetConfigurationByKeyAndIdUser(user.IdLanguage, user.Id, constants.ConfigKeyHideNonFavoriteSpells)
+	userConfigurationFavoriteSpells, err := userModel.GetConfigurationByKeyAndIdUser(r.Context(), user.IdLanguage, user.Id, constants.ConfigKeyHideNonFavoriteSpells)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	spellsPlayers, err := matchModel.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
+	spellsPlayers, err := matchModel.GetSpellsPlayersByIdMatch(r.Context(), user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -387,7 +387,7 @@ func (h *Handler) HandleMatchNextRound(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 
-	err := matchModel.IncreaseMatchRound(matchId)
+	err := matchModel.IncreaseMatchRound(r.Context(), matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -395,32 +395,32 @@ func (h *Handler) HandleMatchNextRound(w http.ResponseWriter, r *http.Request) {
 
 	logger.Info("match next round", "matchId", matchId)
 
-	err = matchModel.DecreasePlayersSpellsRoundBeforeRecoveryByIdMatch(matchId)
+	err = matchModel.DecreasePlayersSpellsRoundBeforeRecoveryByIdMatch(r.Context(), matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	m, err := matchModel.GetMatch(matchId)
+	m, err := matchModel.GetMatch(r.Context(), matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	players, err := matchModel.GetPlayersByIdMatch(user.IdLanguage, matchId)
+	players, err := matchModel.GetPlayersByIdMatch(r.Context(), user.IdLanguage, matchId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	userConfigurationFavoriteSpells, err := userModel.GetConfigurationByKeyAndIdUser(user.IdLanguage, user.Id, constants.ConfigKeyHideNonFavoriteSpells)
+	userConfigurationFavoriteSpells, err := userModel.GetConfigurationByKeyAndIdUser(r.Context(), user.IdLanguage, user.Id, constants.ConfigKeyHideNonFavoriteSpells)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	spellsPlayers, err := matchModel.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
+	spellsPlayers, err := matchModel.GetSpellsPlayersByIdMatch(r.Context(), user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -438,7 +438,7 @@ func (h *Handler) HandleUsePlayerSpell(w http.ResponseWriter, r *http.Request) {
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 	idPlayerSpell, _ := strconv.Atoi(vars["idPlayerSpell"])
 
-	err := matchModel.UsePlayerSpellByIdPlayerSpell(idPlayerSpell)
+	err := matchModel.UsePlayerSpellByIdPlayerSpell(r.Context(), idPlayerSpell)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -446,7 +446,7 @@ func (h *Handler) HandleUsePlayerSpell(w http.ResponseWriter, r *http.Request) {
 
 	logger.Info("spell used", "matchId", matchId, "playerSpellId", idPlayerSpell)
 
-	spellPlayer, err := matchModel.GetSpellPlayerByIdSpellsPlayers(user.IdLanguage, idPlayerSpell)
+	spellPlayer, err := matchModel.GetSpellPlayerByIdSpellsPlayers(r.Context(), user.IdLanguage, idPlayerSpell)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -465,7 +465,7 @@ func (h *Handler) HandleRemoveRoundRecoveryPlayerSpell(w http.ResponseWriter, r 
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 	idPlayerSpell, _ := strconv.Atoi(vars["idPlayerSpell"])
 
-	err := matchModel.RemoveRoundRecoverySpellByIdPlayerSpell(idPlayerSpell)
+	err := matchModel.RemoveRoundRecoverySpellByIdPlayerSpell(r.Context(), idPlayerSpell)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -473,7 +473,7 @@ func (h *Handler) HandleRemoveRoundRecoveryPlayerSpell(w http.ResponseWriter, r 
 
 	logger.Info("spell recovery removed", "matchId", matchId, "playerSpellId", idPlayerSpell)
 
-	spellPlayer, err := matchModel.GetSpellPlayerByIdSpellsPlayers(user.IdLanguage, idPlayerSpell)
+	spellPlayer, err := matchModel.GetSpellPlayerByIdSpellsPlayers(r.Context(), user.IdLanguage, idPlayerSpell)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

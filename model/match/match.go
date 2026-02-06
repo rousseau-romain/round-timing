@@ -1,6 +1,7 @@
 package match
 
 import (
+	"context"
 	"errors"
 
 	"github.com/huandu/go-sqlbuilder"
@@ -28,12 +29,12 @@ type MatchUpdate struct {
 	MultipleMasteryEnabled *int
 }
 
-func GetMatchsByIdUser(idUser int) ([]Match, error) {
+func GetMatchsByIdUser(ctx context.Context, idUser int) ([]Match, error) {
 	sb := sqlbuilder.NewSelectBuilder()
 	sb.Select("id", "id_user", "name", "round", "multiple_mastery_enabled", "created_at", "updated_at").From("`match`").Where(sb.Equal("id_user", idUser))
 	sql, args := sb.Build()
 
-	rows, err := db.Query(sql, args...)
+	rows, err := db.QueryContext(ctx, sql, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,23 +58,23 @@ func GetMatchsByIdUser(idUser int) ([]Match, error) {
 	return matchs, nil
 }
 
-func GetMatch(idMatch int) (Match, error) {
+func GetMatch(ctx context.Context, idMatch int) (Match, error) {
 	match := Match{}
 
 	sb := sqlbuilder.NewSelectBuilder()
 	sb.Select("id", "id_user", "name", "round", "multiple_mastery_enabled", "created_at", "updated_at").From("`match`").Where(sb.Equal("id", idMatch))
 	sql, args := sb.Build()
 
-	rows := db.QueryRow(sql, args...)
-	if rows.Err() != nil {
-		return match, rows.Err()
+	row := db.QueryRowContext(ctx, sql, args...)
+	if row.Err() != nil {
+		return match, row.Err()
 	}
-	err := rows.Scan(&match.Id, &match.IdUser, &match.Name, &match.Round, &match.MultipleMasteryEnabled, &match.CreatedAt, &match.UpdatedAt)
+	err := row.Scan(&match.Id, &match.IdUser, &match.Name, &match.Round, &match.MultipleMasteryEnabled, &match.CreatedAt, &match.UpdatedAt)
 
 	return match, err
 }
 
-func GetLastMatchByUserId(idUser int) (Match, error) {
+func GetLastMatchByUserId(ctx context.Context, idUser int) (Match, error) {
 	match := Match{}
 
 	sql := `
@@ -89,11 +90,11 @@ func GetLastMatchByUserId(idUser int) (Match, error) {
 		WHERE id_user = ?
 		AND updated_at = (SELECT MAX(updated_at) FROM ` + "`match`" + ` WHERE id_user = ?)
 	`
-	rows := db.QueryRow(sql, idUser, idUser)
-	if rows.Err() != nil {
-		return match, rows.Err()
+	row := db.QueryRowContext(ctx, sql, idUser, idUser)
+	if row.Err() != nil {
+		return match, row.Err()
 	}
-	err := rows.Scan(&match.Id, &match.IdUser, &match.Name, &match.Round, &match.MultipleMasteryEnabled, &match.CreatedAt, &match.UpdatedAt)
+	err := row.Scan(&match.Id, &match.IdUser, &match.Name, &match.Round, &match.MultipleMasteryEnabled, &match.CreatedAt, &match.UpdatedAt)
 	if err != nil && err.Error() == "sql: no rows in result set" {
 		return match, nil
 	}
@@ -101,7 +102,7 @@ func GetLastMatchByUserId(idUser int) (Match, error) {
 	return match, err
 }
 
-func GetNumberOfMatchByUserId(idUser int) (int, error) {
+func GetNumberOfMatchByUserId(ctx context.Context, idUser int) (int, error) {
 	var numberOfMatch = 0
 
 	sql := `
@@ -110,11 +111,11 @@ func GetNumberOfMatchByUserId(idUser int) (int, error) {
 		FROM ` + "`match`" + `
 		WHERE id_user = ?
 	`
-	rows := db.QueryRow(sql, idUser)
-	if rows.Err() != nil {
-		return numberOfMatch, rows.Err()
+	row := db.QueryRowContext(ctx, sql, idUser)
+	if row.Err() != nil {
+		return numberOfMatch, row.Err()
 	}
-	err := rows.Scan(&numberOfMatch)
+	err := row.Scan(&numberOfMatch)
 	if err != nil && err.Error() == "sql: no rows in result set" {
 		return numberOfMatch, nil
 	}
@@ -122,12 +123,12 @@ func GetNumberOfMatchByUserId(idUser int) (int, error) {
 	return numberOfMatch, err
 }
 
-func CreateMatch(m MatchCreate) (int, error) {
+func CreateMatch(ctx context.Context, m MatchCreate) (int, error) {
 	sb := sqlbuilder.NewInsertBuilder()
 	sb.InsertInto("`match`").Cols("id_user", "name").Values(m.IdUser, m.Name)
 	sql, args := sb.Build()
 
-	response, err := db.Exec(sql, args...)
+	response, err := db.ExecContext(ctx, sql, args...)
 
 	if err != nil {
 		return 0, err
@@ -138,7 +139,7 @@ func CreateMatch(m MatchCreate) (int, error) {
 	return int(id), err
 }
 
-func UpdateMatch(idMatch int, match MatchUpdate) error {
+func UpdateMatch(ctx context.Context, idMatch int, match MatchUpdate) error {
 	canUpdate := false
 	sb := sqlbuilder.NewUpdateBuilder()
 	sb.Update("`match`").Where(sb.Equal("id", idMatch))
@@ -164,29 +165,29 @@ func UpdateMatch(idMatch int, match MatchUpdate) error {
 	}
 	if canUpdate {
 		sql, args := sb.Build()
-		_, err := db.Exec(sql, args...)
+		_, err := db.ExecContext(ctx, sql, args...)
 		return err
 	}
 	return errors.New("no parameters to update Match")
 }
 
-func IncreaseMatchRound(idMatch int) error {
+func IncreaseMatchRound(ctx context.Context, idMatch int) error {
 	sql := "UPDATE `match` SET round = round + 1 WHERE id = ?"
 
-	_, err := db.Exec(sql, idMatch)
+	_, err := db.ExecContext(ctx, sql, idMatch)
 
 	return err
 }
 
-func ResetMatch(idMatch int) error {
+func ResetMatch(ctx context.Context, idMatch int) error {
 	var round = 0
 	var multipleMasteryEnabled = 1
-	err := UpdateMatch(idMatch, MatchUpdate{Round: &round, MultipleMasteryEnabled: &multipleMasteryEnabled})
+	err := UpdateMatch(ctx, idMatch, MatchUpdate{Round: &round, MultipleMasteryEnabled: &multipleMasteryEnabled})
 	if err != nil {
 		return err
 	}
 
-	err = ResetMatchPlayersSpells(idMatch)
+	err = ResetMatchPlayersSpells(ctx, idMatch)
 	if err != nil {
 		return err
 	}
@@ -194,10 +195,10 @@ func ResetMatch(idMatch int) error {
 	return err
 }
 
-func DeleteMatch(idMatch int) error {
+func DeleteMatch(ctx context.Context, idMatch int) error {
 	sql := "DELETE FROM `match` WHERE id = ?"
 
-	_, err := db.Exec(sql, idMatch)
+	_, err := db.ExecContext(ctx, sql, idMatch)
 
 	return err
 }

@@ -34,35 +34,35 @@ func (h *Handler) HandleSpectateMatch(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 
-	matchFromUser, err := matchModel.GetLastMatchByUserId(user.Id)
+	matchFromUser, err := matchModel.GetLastMatchByUserId(r.Context(), user.Id)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	match, err := matchModel.GetMatch(matchId)
+	match, err := matchModel.GetMatch(r.Context(), matchId)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	players, err := matchModel.GetPlayersByIdMatch(user.IdLanguage, matchId)
+	players, err := matchModel.GetPlayersByIdMatch(r.Context(), user.IdLanguage, matchId)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	userConfigurationFavoriteSpells, err := userModel.GetConfigurationByKeyAndIdUser(user.IdLanguage, user.Id, constants.ConfigKeyHideNonFavoriteSpells)
+	userConfigurationFavoriteSpells, err := userModel.GetConfigurationByKeyAndIdUser(r.Context(), user.IdLanguage, user.Id, constants.ConfigKeyHideNonFavoriteSpells)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	spellsPlayers, err := matchModel.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
+	spellsPlayers, err := matchModel.GetSpellsPlayersByIdMatch(r.Context(), user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -86,7 +86,7 @@ func (h *Handler) HandleMatchTableLive(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	userConfigurationFavoriteSpells, err := userModel.GetConfigurationByKeyAndIdUser(user.IdLanguage, user.Id, constants.ConfigKeyHideNonFavoriteSpells)
+	userConfigurationFavoriteSpells, err := userModel.GetConfigurationByKeyAndIdUser(r.Context(), user.IdLanguage, user.Id, constants.ConfigKeyHideNonFavoriteSpells)
 	if err != nil {
 		logger.Error(err.Error())
 		return
@@ -111,19 +111,19 @@ func (h *Handler) HandleMatchTableLive(w http.ResponseWriter, r *http.Request) {
 		case <-done:
 			return
 		case <-ch:
-			match, err := matchModel.GetMatch(matchId)
+			match, err := matchModel.GetMatch(r.Context(), matchId)
 			if err != nil {
 				logger.Error(err.Error())
 				return
 			}
 
-			players, err := matchModel.GetPlayersByIdMatch(user.IdLanguage, matchId)
+			players, err := matchModel.GetPlayersByIdMatch(r.Context(), user.IdLanguage, matchId)
 			if err != nil {
 				logger.Error(err.Error())
 				return
 			}
 
-			spellsPlayers, err := matchModel.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
+			spellsPlayers, err := matchModel.GetSpellsPlayersByIdMatch(r.Context(), user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
 			if err != nil {
 				logger.Error(err.Error())
 				return
