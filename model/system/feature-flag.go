@@ -11,7 +11,7 @@ func GetFeatureFlagIsEnabled(name string) bool {
 		SELECT
 			enabled
 		FROM feature_flag
-		WHERE name = "?"
+		WHERE name = ?
 	`
 
 	row := db.QueryRow(sql, name)
