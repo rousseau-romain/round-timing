@@ -33,7 +33,11 @@ func GetLanguages() ([]Language, error) {
 		languages = append(languages, language)
 	}
 
-	return languages, err
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return languages, nil
 }
 
 func GetLanguagesIdByCode(code string) (int, error) {

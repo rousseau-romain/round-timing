@@ -84,7 +84,11 @@ func GetFavoriteSpellsByIdUser(idLanguage, idUser int) ([]SpellByClass, error) {
 		spellByClasses = append(spellByClasses, spellByClass)
 	}
 
-	return spellByClasses, err
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return spellByClasses, nil
 }
 
 func ToggleIsFavoriteSpell(idUser, idSpell int) error {
@@ -98,6 +102,10 @@ func ToggleIsFavoriteSpell(idUser, idSpell int) error {
 
 	for rows.Next() {
 		isFavorite = true
+	}
+
+	if err := rows.Err(); err != nil {
+		return err
 	}
 
 	if isFavorite {

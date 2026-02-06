@@ -57,7 +57,11 @@ func GetTeamsByIdMatch(idMatch int) ([]Team, error) {
 		teams = append(teams, team)
 	}
 
-	return teams, err
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return teams, nil
 }
 func NumberPlayerInTeamByTeamId(idTeam int) (int, error) {
 	sql := `

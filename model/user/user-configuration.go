@@ -86,7 +86,11 @@ func GetAllConfigurationByIdUser(idLanguage, idUser int) ([]UserConfiguration, e
 		configurationByIdUser = append(configurationByIdUser, configuration)
 	}
 
-	return configurationByIdUser, err
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return configurationByIdUser, nil
 }
 
 func ToggleUserConfiguration(idUser, idConfiguration int) error {

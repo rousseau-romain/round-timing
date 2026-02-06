@@ -150,7 +150,11 @@ func GetSpellsPlayersByIdMatch(idLanguage, idMatch, idUser int, getOnlyFavorite 
 		matchSpells = append(matchSpells, matchSpell)
 	}
 
-	return matchSpells, err
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return matchSpells, nil
 }
 
 func CreateMatchPlayersSpells(matchPlayersSpells []MatchPlayerSpellCreate) error {

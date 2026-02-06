@@ -76,7 +76,11 @@ func GetPlayersByIdMatch(idTranslation int, idMatch int) ([]Player, error) {
 		players = append(players, player)
 	}
 
-	return players, err
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return players, nil
 }
 
 func GetPlayer(idLanguage int, idPlayer int) (Player, error) {

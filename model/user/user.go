@@ -67,7 +67,11 @@ func GetUsers() ([]User, error) {
 		users = append(users, user)
 	}
 
-	return users, err
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }
 
 func GetUserByEmail(email string) (User, error) {

@@ -82,5 +82,9 @@ func GetSpellsByIdClass(idLanguage int, idClass []int, idsToExclude []int) ([]Sp
 		spells = append(spells, spell)
 	}
 
-	return spells, err
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return spells, nil
 }

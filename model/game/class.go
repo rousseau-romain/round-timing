@@ -42,5 +42,9 @@ func GetClasses(idLanguage int) ([]Class, error) {
 		classes = append(classes, class)
 	}
 
-	return classes, err
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return classes, nil
 }

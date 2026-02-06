@@ -50,7 +50,11 @@ func GetMatchsByIdUser(idUser int) ([]Match, error) {
 		matchs = append(matchs, match)
 	}
 
-	return matchs, err
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return matchs, nil
 }
 
 func GetMatch(idMatch int) (Match, error) {
