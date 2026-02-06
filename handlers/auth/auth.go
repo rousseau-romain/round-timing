@@ -55,14 +55,14 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	h.Slog = h.Slog.With("userOauth2Id", user.UserID)
+	logger := h.Slog.With("userOauth2Id", user.UserID)
 
 	if !userAlreadyExists {
 		providerLoginName, err := userModel.UserExistsByEmail(user.Email)
 
 		if err != nil {
 			fmt.Fprintln(w, err)
-			h.Slog.Error(err.Error())
+			logger.Error(err.Error())
 			return
 		}
 
@@ -71,7 +71,7 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 			errorMessage := i18n.T(r.Context(), "page.signin.already-exists-with-provider", i18n.M{"email": user.Email, "provider": providerLoginName})
 			err := gothic.Logout(w, r)
 			if err != nil {
-				h.Slog.Error(err.Error())
+				logger.Error(err.Error())
 				return
 			}
 
@@ -99,7 +99,7 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 			return
 		}
 
-		h.Slog.Info("user created", "email", user.Email, "provider", user.Provider)
+		logger.Info("user created", "email", user.Email, "provider", user.Provider)
 	}
 
 	err = h.Auth.StoreUserSession(w, r, h.Slog, user)
@@ -131,7 +131,7 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	if _, err := mail.ParseAddress(email); err != nil {
 		errMessages = append(errMessages, i18n.T(r.Context(), "page.signup.error.email.not-valid"))
 	}
-	h.Slog = h.Slog.With("email", email)
+	logger := h.Slog.With("email", email)
 
 	passwordIsValid, errorMessages := password.Validate(r, pwd)
 	if !passwordIsValid {
@@ -148,13 +148,13 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 			errMessages,
 			http.StatusBadRequest, w, r,
 		)
-		h.Slog.Info(strings.Join(errorMessages, "\n"))
+		logger.Info(strings.Join(errorMessages, "\n"))
 		return
 	}
 
 	provider, err := userModel.UserExistsByEmail(email)
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, "can't create user", http.StatusInternalServerError)
 		return
 	}
@@ -164,13 +164,13 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 			[]string{""},
 			http.StatusConflict, w, r,
 		)
-		h.Slog.Info("Email already exist", "email", email, "provider", provider)
+		logger.Info("Email already exist", "email", email, "provider", provider)
 		return
 	}
 
 	salt, err := password.GenerateSalt()
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, "can't create user", http.StatusInternalServerError)
 		return
 	}
@@ -180,7 +180,7 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	locale := lang.GetPreferred(r)
 	idLanguage, err := system.GetLanguagesIdByCode(locale)
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, "can't create user", http.StatusInternalServerError)
 		return
 	}
@@ -194,12 +194,12 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 
 	_, err = userModel.CreateUser(user)
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, "can't create user", http.StatusInternalServerError)
 		return
 	}
 
-	h.Slog.Info("user created", "email", email)
+	logger.Info("user created", "email", email)
 
 	w.Header().Set("HX-Redirect", "/signin")
 	w.WriteHeader(http.StatusCreated)
@@ -247,11 +247,11 @@ func (h *Handler) HandleLoginEmail(w http.ResponseWriter, r *http.Request) {
 		h.Slog.Info("Invalid credentials: " + errMessage)
 		return
 	}
-	h.Slog = h.Slog.With("userId", user.Id)
+	logger := h.Slog.With("userId", user.Id)
 
 	token, err := generateToken(user.Email)
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, "Could not generate token", http.StatusInternalServerError)
 		return
 	}
@@ -265,7 +265,7 @@ func (h *Handler) HandleLoginEmail(w http.ResponseWriter, r *http.Request) {
 		MaxAge:   config.COOKIES_AUTH_AGE_IN_SECONDS,
 	})
 
-	h.Slog.Info("user logged in", "email", email)
+	logger.Info("user logged in", "email", email)
 
 	w.Header().Set("HX-Redirect", "/")
 	w.WriteHeader(http.StatusFound)
@@ -273,16 +273,16 @@ func (h *Handler) HandleLoginEmail(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 	user, _ := serviceAuth.UserFromRequest(r)
-	h.Slog = h.Slog.With("userId", user.Id)
+	logger := h.Slog.With("userId", user.Id)
 	err := gothic.Logout(w, r)
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		return
 	}
 
 	h.Auth.RemoveUserSession(w, r, h.Slog)
 
-	h.Slog.Info("user logged out")
+	logger.Info("user logged out")
 
 	w.Header().Set("Location", "/")
 	w.WriteHeader(http.StatusTemporaryRedirect)

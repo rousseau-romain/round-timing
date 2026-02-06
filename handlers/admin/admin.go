@@ -17,11 +17,11 @@ type Handler struct {
 
 func (h *Handler) HandleListUser(w http.ResponseWriter, r *http.Request) {
 	user, _ := auth.UserFromRequest(r)
-	h.Slog = h.Slog.With("userId", user.Id)
+	logger := h.Slog.With("userId", user.Id)
 
 	users, err := userModel.GetUsers()
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -30,7 +30,7 @@ func (h *Handler) HandleListUser(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) HandleUserEnabled(w http.ResponseWriter, r *http.Request) {
 	user, _ := auth.UserFromRequest(r)
-	h.Slog = h.Slog.With("userId", user.Id)
+	logger := h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
 	idUser, _ := strconv.Atoi(vars["idUser"])
@@ -42,16 +42,16 @@ func (h *Handler) HandleUserEnabled(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	h.Slog.Info("user enabled toggled", "targetUserId", idUser, "enabled", toggleEnabled)
+	logger.Info("user enabled toggled", "targetUserId", idUser, "enabled", toggleEnabled)
 
 	userEnabled, err := userModel.GetUserById(idUser)
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

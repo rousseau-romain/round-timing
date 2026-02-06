@@ -40,17 +40,11 @@ func (h *Handler) HandleVersion(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) HandleNotFound(w http.ResponseWriter, r *http.Request) {
 	user, _ := auth.UserFromRequest(r)
-	if user.Id != 0 {
-		h.Slog = h.Slog.With("userId", user.Id)
-	}
 	pageView.NotFoundPage("", h.GetPageNavCustom(r, user, matchModel.Match{}), h.Languages, r.URL.Path, user).Render(r.Context(), w)
 }
 
 func (h *Handler) HandleForbidden(w http.ResponseWriter, r *http.Request) {
 	user, _ := auth.UserFromRequest(r)
-	if user.Id != 0 {
-		h.Slog = h.Slog.With("userId", user.Id)
-	}
 	pageView.ForbidenPage("", h.GetPageNavCustom(r, user, matchModel.Match{}), h.Languages, r.URL.Path, user).Render(r.Context(), w)
 }
 
@@ -64,7 +58,6 @@ func (h *Handler) HandleHome(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if user.Id != 0 {
-		h.Slog = h.Slog.With("userId", user.Id)
 		pageNav = h.GetPageNavCustom(r, user, matchModel.Match{})
 		pageView.HomePage(user, h.Error, pageNav, h.Languages, r.URL.Path).Render(r.Context(), w)
 		return
@@ -83,7 +76,6 @@ func (h *Handler) HandleTestUI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if user.Id != 0 {
-		h.Slog = h.Slog.With("userId", user.Id)
 		pageNav = h.GetPageNavCustom(r, user, matchModel.Match{})
 	}
 	pageView.TestUIPage(user, popinMessages, pageNav, h.Languages, r.URL.Path).Render(r.Context(), w)
@@ -91,16 +83,10 @@ func (h *Handler) HandleTestUI(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) HandleCGU(w http.ResponseWriter, r *http.Request) {
 	user, _ := auth.UserFromRequest(r)
-	if user.Id != 0 {
-		h.Slog = h.Slog.With("userId", user.Id)
-	}
 	legal.CGU(h.Error, h.GetPageNavCustom(r, user, matchModel.Match{}), h.Languages, r.URL.Path).Render(r.Context(), w)
 }
 
 func (h *Handler) HandlePrivacy(w http.ResponseWriter, r *http.Request) {
 	user, _ := auth.UserFromRequest(r)
-	if user.Id != 0 {
-		h.Slog = h.Slog.With("userId", user.Id)
-	}
 	legal.Privacy(h.Error, h.GetPageNavCustom(r, user, matchModel.Match{}), h.Languages, r.URL.Path).Render(r.Context(), w)
 }

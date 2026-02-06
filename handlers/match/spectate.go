@@ -28,42 +28,42 @@ var upgrader = websocket.Upgrader{
 
 func (h *Handler) HandleSpectateMatch(w http.ResponseWriter, r *http.Request) {
 	user, _ := auth.UserFromRequest(r)
-	h.Slog = h.Slog.With("userId", user.Id)
+	logger := h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
 	matchId, _ := strconv.Atoi(vars["idMatch"])
 
 	matchFromUser, err := matchModel.GetLastMatchByUserId(user.Id)
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	match, err := matchModel.GetMatch(matchId)
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	players, err := matchModel.GetPlayersByIdMatch(user.IdLanguage, matchId)
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	userConfigurationFavoriteSpells, err := userModel.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, 1)
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	spellsPlayers, err := matchModel.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -73,7 +73,7 @@ func (h *Handler) HandleSpectateMatch(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) HandleMatchTableLive(w http.ResponseWriter, r *http.Request) {
 	user, _ := auth.UserFromRequest(r)
-	h.Slog = h.Slog.With("userId", user.Id)
+	logger := h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
 	matchId, _ := strconv.Atoi(vars["idMatch"])
@@ -106,31 +106,31 @@ func (h *Handler) HandleMatchTableLive(w http.ResponseWriter, r *http.Request) {
 		case <-ch:
 			match, err := matchModel.GetMatch(matchId)
 			if err != nil {
-				h.Slog.Error(err.Error())
+				logger.Error(err.Error())
 				return
 			}
 
 			players, err := matchModel.GetPlayersByIdMatch(user.IdLanguage, matchId)
 			if err != nil {
-				h.Slog.Error(err.Error())
+				logger.Error(err.Error())
 				return
 			}
 
 			userConfigurationFavoriteSpells, err := userModel.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, 1)
 			if err != nil {
-				h.Slog.Error(err.Error())
+				logger.Error(err.Error())
 				return
 			}
 
 			spellsPlayers, err := matchModel.GetSpellsPlayersByIdMatch(user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
 			if err != nil {
-				h.Slog.Error(err.Error())
+				logger.Error(err.Error())
 				return
 			}
 
 			message, _ := templ.ToGoHTML(r.Context(), pageMatch.PlayerTable(match, players, spellsPlayers, true))
 			if err := conn.WriteMessage(websocket.TextMessage, []byte(message)); err != nil {
-				h.Slog.Error("Error writing to WebSocket: " + err.Error())
+				logger.Error("Error writing to WebSocket: " + err.Error())
 				return
 			}
 		}

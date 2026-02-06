@@ -1,0 +1,32 @@
+volumes:
+  loki-data:
+  grafana-data:
+
+services:
+  loki:
+    build:
+      context: ./loki
+    volumes:
+      - loki-data:/loki
+
+  promtail:
+    build:
+      context: ./promtail
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - loki
+
+  grafana:
+    build:
+      context: ./grafana
+    expose:
+      - "3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GF_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_ADMIN_PASSWORD}
+    depends_on:
+      - loki

@@ -25,32 +25,32 @@ func (h *Handler) HandleProfile(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
 		return
 	}
-	h.Slog = h.Slog.With("userId", user.Id)
+	logger := h.Slog.With("userId", user.Id)
 
 	idUserShares, err := userModel.GetUsersSpectateByIdUser(user.Id)
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	classes, err := game.GetClasses(user.IdLanguage)
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	spells, err := game.GetFavoriteSpellsByIdUser(user.IdLanguage, user.Id)
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	userConfigurations, err := userModel.GetAllConfigurationByIdUser(user.IdLanguage, user.Id)
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -60,23 +60,23 @@ func (h *Handler) HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) HandleProfileToggleUserConfiguration(w http.ResponseWriter, r *http.Request) {
 	user, _ := auth.UserFromRequest(r)
-	h.Slog = h.Slog.With("userId", user.Id)
+	logger := h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
 	idConfiguration, _ := strconv.Atoi(vars["idConfiguration"])
 
 	err := userModel.ToggleUserConfiguration(user.Id, idConfiguration)
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	h.Slog.Info("user configuration toggled", "configurationId", idConfiguration)
+	logger.Info("user configuration toggled", "configurationId", idConfiguration)
 
 	userConfiguration, err := userModel.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, idConfiguration)
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -86,7 +86,7 @@ func (h *Handler) HandleProfileToggleUserConfiguration(w http.ResponseWriter, r 
 
 func (h *Handler) HandleProfileAddSpectate(w http.ResponseWriter, r *http.Request) {
 	user, _ := auth.UserFromRequest(r)
-	h.Slog = h.Slog.With("userId", user.Id)
+	logger := h.Slog.With("userId", user.Id)
 
 	if err := uuid.Validate(r.FormValue("idUserShare")); err != nil {
 		handlers.RenderComponentError(
@@ -94,14 +94,14 @@ func (h *Handler) HandleProfileAddSpectate(w http.ResponseWriter, r *http.Reques
 			[]string{""},
 			http.StatusBadRequest, w, r,
 		)
-		h.Slog.Error("User spectate need a valid id", "userSpectateId", r.FormValue("idUserShare"))
+		logger.Error("User spectate need a valid id", "userSpectateId", r.FormValue("idUserShare"))
 		return
 	}
 
 	userSpectateExist, err := userModel.UserExistsByIdShare(r.FormValue("idUserShare"))
 
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
@@ -111,7 +111,7 @@ func (h *Handler) HandleProfileAddSpectate(w http.ResponseWriter, r *http.Reques
 			[]string{""},
 			http.StatusBadRequest, w, r,
 		)
-		h.Slog.Error("User spectate does not exist", "userSpectateId", r.FormValue("idUserShare"))
+		logger.Error("User spectate does not exist", "userSpectateId", r.FormValue("idUserShare"))
 
 		return
 	}
@@ -119,7 +119,7 @@ func (h *Handler) HandleProfileAddSpectate(w http.ResponseWriter, r *http.Reques
 	IsAlreadyUsersSpectate, err := userModel.IsUsersSpectateByIdUser(user.Id, r.FormValue("idUserShare"))
 
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
@@ -129,7 +129,7 @@ func (h *Handler) HandleProfileAddSpectate(w http.ResponseWriter, r *http.Reques
 			[]string{""},
 			http.StatusBadRequest, w, r,
 		)
-		h.Slog.Error("User spectate already exist", "userSpectateId", r.FormValue("idUserShare"))
+		logger.Error("User spectate already exist", "userSpectateId", r.FormValue("idUserShare"))
 		return
 	}
 
@@ -139,31 +139,31 @@ func (h *Handler) HandleProfileAddSpectate(w http.ResponseWriter, r *http.Reques
 	})
 
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	h.Slog.Info("user spectate created", "userSpectateId", r.FormValue("idUserShare"))
+	logger.Info("user spectate created", "userSpectateId", r.FormValue("idUserShare"))
 
 	page.UserSpectate(r.FormValue("idUserShare")).Render(r.Context(), w)
 }
 
 func (h *Handler) HandleProfileDeleteSpectate(w http.ResponseWriter, r *http.Request) {
 	user, _ := auth.UserFromRequest(r)
-	h.Slog = h.Slog.With("userId", user.Id)
+	logger := h.Slog.With("userId", user.Id)
 
 	if err := uuid.Validate(r.FormValue("idUserShare")); err != nil {
-		h.Slog.Error("User spectate need a id", "error", err)
+		logger.Error("User spectate need a id", "error", err)
 		http.Error(w, "User spectate need a id", http.StatusBadRequest)
 		return
 	}
 
 	if err := userModel.DeleteUserSpectate(user.Id, r.FormValue("idUserShare")); err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	h.Slog.Info("user spectate deleted", "userSpectateId", r.FormValue("idUserShare"))
+	logger.Info("user spectate deleted", "userSpectateId", r.FormValue("idUserShare"))
 }

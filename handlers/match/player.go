@@ -18,7 +18,7 @@ var MaxPlayerByTeam = 8
 
 func (h *Handler) HandleUpdatePlayer(w http.ResponseWriter, r *http.Request) {
 	user, _ := auth.UserFromRequest(r)
-	h.Slog = h.Slog.With("userId", user.Id)
+	logger := h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
 
@@ -26,7 +26,7 @@ func (h *Handler) HandleUpdatePlayer(w http.ResponseWriter, r *http.Request) {
 	name := strings.TrimSpace(r.FormValue("name"))
 	idPlayer, _ := strconv.Atoi(vars["idPlayer"])
 	if name == "" {
-		h.Slog.Info("Player need a name", "idPlayer", idPlayer, "name", name)
+		logger.Info("Player need a name", "idPlayer", idPlayer, "name", name)
 		http.Error(w, "Player need a name", http.StatusBadRequest)
 		return
 	}
@@ -36,18 +36,18 @@ func (h *Handler) HandleUpdatePlayer(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		return
 	}
 
-	h.Slog.Info("player updated", "playerId", idPlayer, "name", name)
+	logger.Info("player updated", "playerId", idPlayer, "name", name)
 
 	notify.Notify(matchId)
 }
 
 func (h *Handler) HandleCreatePlayer(w http.ResponseWriter, r *http.Request) {
 	user, _ := auth.UserFromRequest(r)
-	h.Slog = h.Slog.With("userId", user.Id)
+	logger := h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
 
@@ -56,20 +56,20 @@ func (h *Handler) HandleCreatePlayer(w http.ResponseWriter, r *http.Request) {
 	name := strings.TrimSpace(r.FormValue("name"))
 
 	if name == "" {
-		h.Slog.Info("Player need a name", "idPlayer", user.Id, "name", name)
+		logger.Info("Player need a name", "idPlayer", user.Id, "name", name)
 		http.Error(w, "Player need a name", http.StatusBadRequest)
 		return
 	}
 
 	if _, err := strconv.ParseInt(r.FormValue("idTeam"), 10, 64); err != nil {
-		h.Slog.Info("Player need a color", "idPlayer", user.Id, "name", name)
+		logger.Info("Player need a color", "idPlayer", user.Id, "name", name)
 		http.Error(w, "Player need a color", http.StatusBadRequest)
 		return
 	}
 
 	canCreatePlayerInTeam, err := matchModel.NumberPlayerInTeamByTeamId(idTeam)
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
@@ -80,12 +80,12 @@ func (h *Handler) HandleCreatePlayer(w http.ResponseWriter, r *http.Request) {
 			http.StatusBadRequest,
 			w, r,
 		)
-		h.Slog.Info("Max player in team", "teamId", idTeam, "playerName", name)
+		logger.Info("Max player in team", "teamId", idTeam, "playerName", name)
 		return
 	}
 
 	if _, err := strconv.ParseInt(r.FormValue("idClass"), 10, 64); err != nil {
-		h.Slog.Info("Player need a class", "idPlayer", user.Id, "name", name)
+		logger.Info("Player need a class", "idPlayer", user.Id, "name", name)
 		http.Error(w, "Player need a class", http.StatusBadRequest)
 		return
 	}
@@ -93,13 +93,13 @@ func (h *Handler) HandleCreatePlayer(w http.ResponseWriter, r *http.Request) {
 	match, err := matchModel.GetMatch(idMatch)
 
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	if match.Round > 0 {
-		h.Slog.Info("Match already started", "idPlayer", user.Id, "name", name)
+		logger.Info("Match already started", "idPlayer", user.Id, "name", name)
 		http.Error(w, "Match already started", http.StatusBadRequest)
 		return
 	}
@@ -112,17 +112,17 @@ func (h *Handler) HandleCreatePlayer(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	h.Slog.Info("player created", "playerId", idPlayer, "name", name, "teamId", idTeam)
+	logger.Info("player created", "playerId", idPlayer, "name", name, "teamId", idTeam)
 
 	player, err := matchModel.GetPlayer(user.IdLanguage, idPlayer)
 
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -133,7 +133,7 @@ func (h *Handler) HandleCreatePlayer(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) HandleDeletePlayer(w http.ResponseWriter, r *http.Request) {
 	user, _ := auth.UserFromRequest(r)
-	h.Slog = h.Slog.With("userId", user.Id)
+	logger := h.Slog.With("userId", user.Id)
 
 	vars := mux.Vars(r)
 
@@ -142,19 +142,19 @@ func (h *Handler) HandleDeletePlayer(w http.ResponseWriter, r *http.Request) {
 
 	err := matchModel.DeleteMatchPlayersSpellsByPlayer(idPlayer)
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	err = matchModel.DeletePlayer(idPlayer)
 	if err != nil {
-		h.Slog.Error(err.Error())
+		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	h.Slog.Info("player deleted", "playerId", idPlayer, "matchId", matchId)
+	logger.Info("player deleted", "playerId", idPlayer, "matchId", matchId)
 
 	notify.Notify(matchId)
 }
