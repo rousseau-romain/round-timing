@@ -44,10 +44,10 @@ func GetUsers() ([]User, error) {
 	`
 
 	rows, err := db.Query(sql)
-
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	var users []User
 

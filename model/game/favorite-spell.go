@@ -62,10 +62,10 @@ func GetFavoriteSpellsByIdUser(idLanguage, idUser int) ([]SpellByClass, error) {
 	`
 
 	rows, err := db.Query(sql, idLanguage, idUser)
-
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	var spellByClasses []SpellByClass
 
@@ -94,6 +94,7 @@ func ToggleIsFavoriteSpell(idUser, idSpell int) error {
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		isFavorite = true

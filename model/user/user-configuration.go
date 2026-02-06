@@ -63,10 +63,10 @@ func GetAllConfigurationByIdUser(idLanguage, idUser int) ([]UserConfiguration, e
 	`
 
 	rows, err := db.Query(sql, idUser, idLanguage)
-
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	var configurationByIdUser []UserConfiguration
 

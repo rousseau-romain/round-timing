@@ -35,10 +35,10 @@ func GetTeamsByIdMatch(idMatch int) ([]Team, error) {
 	`
 
 	rows, err := db.Query(sql, idMatch)
-
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	var teams []Team
 

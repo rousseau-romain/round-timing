@@ -16,10 +16,10 @@ func GetLanguages() ([]Language, error) {
 	var languages []Language
 
 	rows, err := db.Query(sql)
-
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var language Language

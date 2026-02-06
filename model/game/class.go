@@ -22,10 +22,10 @@ func GetClasses(idLanguage int) ([]Class, error) {
 	`
 
 	rows, err := db.Query(sql, idLanguage)
-
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	var classes []Class
 

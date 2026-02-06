@@ -54,10 +54,10 @@ func GetSpellsByIdClass(idLanguage int, idClass []int, idsToExclude []int) ([]Sp
 		sql = sql + fmt.Sprintf("AND s.id NOT IN (%s)", strings.Join(strIdsToExclude, ","))
 	}
 	rows, err := db.Query(sql, idLanguage)
-
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	var spells []Spell
 

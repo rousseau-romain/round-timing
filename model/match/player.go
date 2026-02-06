@@ -53,6 +53,7 @@ func GetPlayersByIdMatch(idTranslation int, idMatch int) ([]Player, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	var players []Player
 

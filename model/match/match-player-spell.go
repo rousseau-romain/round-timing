@@ -123,10 +123,10 @@ func GetSpellsPlayersByIdMatch(idLanguage, idMatch, idUser int, getOnlyFavorite 
 	`
 	// why can't use ?
 	rows, err := db.Query(sql, idLanguage, idUser, idMatch)
-
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var matchSpell MatchPlayerSpell

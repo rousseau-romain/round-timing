@@ -34,10 +34,10 @@ func GetMatchsByIdUser(idUser int) ([]Match, error) {
 	sql, args := sb.Build()
 
 	rows, err := db.Query(sql, args...)
-
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	var matchs []Match
 

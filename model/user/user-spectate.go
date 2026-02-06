@@ -16,29 +16,27 @@ func GetUsersSpectateByIdUser(idUser int) ([]string, error) {
 	sql := "SELECT id_user_share FROM user_spectate WHERE id_user = ?"
 
 	rows, err := db.Query(sql, idUser)
-
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
-	userShareIds := []string{}
-
-	if rows.Err() != nil {
-		return userShareIds, rows.Err()
-	}
+	var userShareIds []string
 
 	for rows.Next() {
 		var userShareId string
-		err := rows.Scan(
-			&userShareId,
-		)
+		err := rows.Scan(&userShareId)
 		if err != nil {
 			return nil, err
 		}
 		userShareIds = append(userShareIds, userShareId)
 	}
 
-	return userShareIds, err
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return userShareIds, nil
 }
 
 func IsUsersSpectateByIdUser(idUser int, idUserShare string) (bool, error) {
