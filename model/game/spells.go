@@ -1,6 +1,7 @@
 package game
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -22,7 +23,7 @@ type Spell struct {
 	IsEndingCaster bool   `json:"is_ending_caster"`
 }
 
-func GetSpellsByIdClass(idLanguage int, idClass []int, idsToExclude []int) ([]Spell, error) {
+func GetSpellsByIdClass(ctx context.Context, idLanguage int, idClass []int, idsToExclude []int) ([]Spell, error) {
 	var strIdClass []string
 	for _, id := range idClass {
 		strIdClass = append(strIdClass, strconv.Itoa(id))
@@ -53,11 +54,11 @@ func GetSpellsByIdClass(idLanguage int, idClass []int, idsToExclude []int) ([]Sp
 		}
 		sql = sql + fmt.Sprintf("AND s.id NOT IN (%s)", strings.Join(strIdsToExclude, ","))
 	}
-	rows, err := db.Query(sql, idLanguage)
-
+	rows, err := db.QueryContext(ctx, sql, idLanguage)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	var spells []Spell
 
@@ -82,5 +83,9 @@ func GetSpellsByIdClass(idLanguage int, idClass []int, idsToExclude []int) ([]Sp
 		spells = append(spells, spell)
 	}
 
-	return spells, err
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return spells, nil
 }

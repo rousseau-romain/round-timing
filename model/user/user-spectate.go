@@ -1,5 +1,7 @@
 package user
 
+import "context"
+
 type UserSpectate struct {
 	Id          int    `json:"id"`
 	IdUser      int    `json:"id_user"`
@@ -11,42 +13,40 @@ type UserSpectateCreate struct {
 	IdUserShare string `json:"id_user_share"`
 }
 
-func GetUsersSpectateByIdUser(idUser int) ([]string, error) {
+func GetUsersSpectateByIdUser(ctx context.Context, idUser int) ([]string, error) {
 
 	sql := "SELECT id_user_share FROM user_spectate WHERE id_user = ?"
 
-	rows, err := db.Query(sql, idUser)
-
+	rows, err := db.QueryContext(ctx, sql, idUser)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
-	userShareIds := []string{}
-
-	if rows.Err() != nil {
-		return userShareIds, rows.Err()
-	}
+	var userShareIds []string
 
 	for rows.Next() {
 		var userShareId string
-		err := rows.Scan(
-			&userShareId,
-		)
+		err := rows.Scan(&userShareId)
 		if err != nil {
 			return nil, err
 		}
 		userShareIds = append(userShareIds, userShareId)
 	}
 
-	return userShareIds, err
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return userShareIds, nil
 }
 
-func IsUsersSpectateByIdUser(idUser int, idUserShare string) (bool, error) {
+func IsUsersSpectateByIdUser(ctx context.Context, idUser int, idUserShare string) (bool, error) {
 	userId := 0
 
 	sql := "SELECT id FROM user_spectate WHERE id_user = ? AND id_user_share = ?"
 
-	err := db.QueryRow(sql, idUser, idUserShare).Scan(&userId)
+	err := db.QueryRowContext(ctx, sql, idUser, idUserShare).Scan(&userId)
 
 	if err != nil {
 		return false, nil
@@ -55,11 +55,11 @@ func IsUsersSpectateByIdUser(idUser int, idUserShare string) (bool, error) {
 	return userId != 0, err
 }
 
-func CreateUserSpectate(user UserSpectateCreate) (int64, error) {
+func CreateUserSpectate(ctx context.Context, user UserSpectateCreate) (int64, error) {
 
 	sql := "INSERT INTO user_spectate (id_user, id_user_share) VALUES (?, ?)"
 
-	response, err := db.Exec(sql, user.IdUser, user.IdUserShare)
+	response, err := db.ExecContext(ctx, sql, user.IdUser, user.IdUserShare)
 
 	if err != nil {
 		return 0, err
@@ -70,10 +70,10 @@ func CreateUserSpectate(user UserSpectateCreate) (int64, error) {
 	return id, err
 }
 
-func DeleteUserSpectate(idUser int, idUserShare string) error {
+func DeleteUserSpectate(ctx context.Context, idUser int, idUserShare string) error {
 	sql := "DELETE FROM user_spectate WHERE id_user = ? AND id_user_share = ?"
 
-	_, err := db.Exec(sql, idUser, idUserShare)
+	_, err := db.ExecContext(ctx, sql, idUser, idUserShare)
 
 	return err
 }

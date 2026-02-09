@@ -15,6 +15,7 @@ import (
 func registerProfileRoutes(r *mux.Router, handler *handlersProfile.Handler, authService *auth.AuthService, logger *slog.Logger) {
 	r.Handle("/profile", middleware.RequireAuth(handler.HandleProfile, authService, logger)).Methods("GET")
 	r.Handle("/profile/configuration/{idConfiguration:[0-9]+}/toggle-configuration", middleware.RequireAuth(handler.HandleProfileToggleUserConfiguration, authService, logger)).Methods("PATCH")
+	r.Handle("/profile/configuration/{idConfiguration:[0-9]+}/toggle-container-expanded", middleware.RequireAuth(handler.HandleToggleContainerExpanded, authService, logger)).Methods("PATCH")
 	r.Handle("/profile/spell-favorite/{idSpell:[0-9]+}/toggle-favorite", middleware.RequireAuth(handler.HandleToggleSpellFavorite, authService, logger)).Methods("PATCH")
 	r.Handle("/profile/user-spectate", middleware.RequireAuth(handler.HandleProfileAddSpectate, authService, logger)).Methods("POST")
 	r.Handle("/profile/user-spectate", middleware.RequireAuth(handler.HandleProfileDeleteSpectate, authService, logger)).Methods("DELETE")

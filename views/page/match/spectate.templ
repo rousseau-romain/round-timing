@@ -7,6 +7,7 @@ import (
 	matchModel "github.com/rousseau-romain/round-timing/model/match"
 	"github.com/rousseau-romain/round-timing/model/system"
 	"github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/service/auth"
 	"github.com/rousseau-romain/round-timing/views/components/layout"
 	"github.com/rousseau-romain/round-timing/views/components/ui"
 )
@@ -26,7 +27,7 @@ templ SpectateMatchPage(user user.User, popinMessages layout.PopinMessages, navI
 					</p>
 				</div>
 				<div class="flex items-center gap-2">
-					@ui.ButtonExpandWidth()
+					@ui.ButtonExpandWidth(ui.GetContainerExpandedConfig(auth.UserConfigurationsFromContext(ctx)))
 					@ui.ButtonFullscreen()
 				</div>
 			</div>

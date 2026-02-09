@@ -11,6 +11,7 @@ import (
 	"github.com/rousseau-romain/round-timing/handlers"
 	"github.com/rousseau-romain/round-timing/i18n/locales"
 	"github.com/rousseau-romain/round-timing/middleware"
+	"github.com/rousseau-romain/round-timing/model"
 	"github.com/rousseau-romain/round-timing/routes"
 	"github.com/rousseau-romain/round-timing/service/auth"
 
@@ -38,6 +39,9 @@ func run() error {
 	}))
 	slog.SetDefault(logger)
 	versionLogger := logger.With("version", config.VERSION)
+
+	// Log DB pool stats every 5 minutes
+	model.StartDBStatsLogger(5 * time.Minute)
 
 	if err := ctxi18n.Load(locales.Content); err != nil {
 		versionLogger.Error("error loading locales", "error", err)

@@ -1,20 +1,22 @@
 package system
 
+import "context"
+
 type FeatureFlag struct {
 	Id      int    `json:"id"`
 	Name    string `json:"name"`
 	Enabled bool   `json:"enabled"`
 }
 
-func GetFeatureFlagIsEnabled(name string) bool {
+func GetFeatureFlagIsEnabled(ctx context.Context, name string) bool {
 	sql := `
 		SELECT
 			enabled
 		FROM feature_flag
-		WHERE name = "?"
+		WHERE name = ?
 	`
 
-	row := db.QueryRow(sql, name)
+	row := db.QueryRowContext(ctx, sql, name)
 
 	var isEnabled bool
 

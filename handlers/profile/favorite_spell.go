@@ -17,7 +17,7 @@ func (h *Handler) HandleToggleSpellFavorite(w http.ResponseWriter, r *http.Reque
 	vars := mux.Vars(r)
 	idSpell, _ := strconv.Atoi(vars["idSpell"])
 
-	err := game.ToggleIsFavoriteSpell(user.Id, idSpell)
+	err := game.ToggleIsFavoriteSpell(r.Context(), user.Id, idSpell)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -25,7 +25,7 @@ func (h *Handler) HandleToggleSpellFavorite(w http.ResponseWriter, r *http.Reque
 
 	logger.Info("spell favorite toggled", "spellId", idSpell)
 
-	spellFavorite, err := game.GetFavoriteSpellByIdUserAndIdSpell(user.IdLanguage, user.Id, idSpell)
+	spellFavorite, err := game.GetFavoriteSpellByIdUserAndIdSpell(r.Context(), user.IdLanguage, user.Id, idSpell)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -1,11 +1,13 @@
 package system
 
+import "context"
+
 type Language struct {
 	Id     int    `json:"id"`
 	Locale string `json:"locale"`
 }
 
-func GetLanguages() ([]Language, error) {
+func GetLanguages(ctx context.Context) ([]Language, error) {
 	sql := `
 		SELECT
 			id,
@@ -15,11 +17,11 @@ func GetLanguages() ([]Language, error) {
 
 	var languages []Language
 
-	rows, err := db.Query(sql)
-
+	rows, err := db.QueryContext(ctx, sql)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var language Language
@@ -33,10 +35,14 @@ func GetLanguages() ([]Language, error) {
 		languages = append(languages, language)
 	}
 
-	return languages, err
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return languages, nil
 }
 
-func GetLanguagesIdByCode(code string) (int, error) {
+func GetLanguagesIdByCode(ctx context.Context, code string) (int, error) {
 	sql := `
 		SELECT
 			id
@@ -44,7 +50,7 @@ func GetLanguagesIdByCode(code string) (int, error) {
 		WHERE locale = ?
 	`
 
-	row := db.QueryRow(sql, code)
+	row := db.QueryRowContext(ctx, sql, code)
 
 	id := 0
 
@@ -56,7 +62,7 @@ func GetLanguagesIdByCode(code string) (int, error) {
 	return id, err
 }
 
-func GetLanguageLocaleById(id int) (string, error) {
+func GetLanguageLocaleById(ctx context.Context, id int) (string, error) {
 	sql := `
 		SELECT
 			locale
@@ -64,7 +70,7 @@ func GetLanguageLocaleById(id int) (string, error) {
 		WHERE id = ?
 	`
 
-	row := db.QueryRow(sql, id)
+	row := db.QueryRowContext(ctx, sql, id)
 
 	var locale string
 

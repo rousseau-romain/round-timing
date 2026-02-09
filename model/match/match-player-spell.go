@@ -1,6 +1,7 @@
 package match
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/rousseau-romain/round-timing/model/game"
@@ -29,7 +30,7 @@ type MatchPlayerSpellUpdate struct {
 	RoundBeforeRecovery *string
 }
 
-func GetSpellPlayerByIdSpellsPlayers(idLanguage int, idSpellPlayer int) (MatchPlayerSpell, error) {
+func GetSpellPlayerByIdSpellsPlayers(ctx context.Context, idLanguage int, idSpellPlayer int) (MatchPlayerSpell, error) {
 	matchSpell := MatchPlayerSpell{}
 
 	sql := `
@@ -52,13 +53,13 @@ func GetSpellPlayerByIdSpellsPlayers(idLanguage int, idSpellPlayer int) (MatchPl
 		WHERE mps.id = ?
 	`
 
-	rows := db.QueryRow(sql, idLanguage, idSpellPlayer)
+	row := db.QueryRowContext(ctx, sql, idLanguage, idSpellPlayer)
 
-	if rows.Err() != nil {
-		return matchSpell, rows.Err()
+	if row.Err() != nil {
+		return matchSpell, row.Err()
 	}
 
-	err := rows.Scan(&matchSpell.Id,
+	err := row.Scan(&matchSpell.Id,
 		&matchSpell.MatchId,
 		&matchSpell.PlayerId,
 		&matchSpell.Spell.Id,
@@ -75,7 +76,7 @@ func GetSpellPlayerByIdSpellsPlayers(idLanguage int, idSpellPlayer int) (MatchPl
 	return matchSpell, err
 }
 
-func GetSpellsPlayersByIdMatch(idLanguage, idMatch, idUser int, getOnlyFavorite bool) ([]MatchPlayerSpell, error) {
+func GetSpellsPlayersByIdMatch(ctx context.Context, idLanguage, idMatch, idUser int, getOnlyFavorite bool) ([]MatchPlayerSpell, error) {
 	matchSpells := []MatchPlayerSpell{}
 
 	joinFavoriteClause := "LEFT"
@@ -122,11 +123,11 @@ func GetSpellsPlayersByIdMatch(idLanguage, idMatch, idUser int, getOnlyFavorite 
 		ORDER BY mps.player_id DESC, IF(fs.id_spell IS NULL , 1, 2) DESC, fs.id ASC ,s.id ASC
 	`
 	// why can't use ?
-	rows, err := db.Query(sql, idLanguage, idUser, idMatch)
-
+	rows, err := db.QueryContext(ctx, sql, idLanguage, idUser, idMatch)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var matchSpell MatchPlayerSpell
@@ -150,15 +151,19 @@ func GetSpellsPlayersByIdMatch(idLanguage, idMatch, idUser int, getOnlyFavorite 
 		matchSpells = append(matchSpells, matchSpell)
 	}
 
-	return matchSpells, err
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return matchSpells, nil
 }
 
-func CreateMatchPlayersSpells(matchPlayersSpells []MatchPlayerSpellCreate) error {
+func CreateMatchPlayersSpells(ctx context.Context, matchPlayersSpells []MatchPlayerSpellCreate) error {
 	sql := `
 		INSERT INTO match_player_spell
 			(match_id, player_id, spell_id, round_before_recovery)
 		VALUES
-			
+
 	`
 	args := []interface{}{}
 	for _, mps := range matchPlayersSpells {
@@ -167,12 +172,12 @@ func CreateMatchPlayersSpells(matchPlayersSpells []MatchPlayerSpellCreate) error
 	}
 	sql = sql[0 : len(sql)-1]
 
-	_, err := db.Exec(sql, args...)
+	_, err := db.ExecContext(ctx, sql, args...)
 
 	return err
 }
 
-func DecreasePlayersSpellsRoundBeforeRecoveryByIdMatch(idMatch int) error {
+func DecreasePlayersSpellsRoundBeforeRecoveryByIdMatch(ctx context.Context, idMatch int) error {
 	sql := `
 		UPDATE match_player_spell
 		SET round_before_recovery = CASE
@@ -182,65 +187,65 @@ func DecreasePlayersSpellsRoundBeforeRecoveryByIdMatch(idMatch int) error {
 		WHERE match_id = ?
 	`
 
-	_, err := db.Exec(sql, idMatch)
+	_, err := db.ExecContext(ctx, sql, idMatch)
 
 	return err
 }
 
-func UsePlayerSpellByIdPlayerSpell(idPlayerSpell int) error {
+func UsePlayerSpellByIdPlayerSpell(ctx context.Context, idPlayerSpell int) error {
 	sql := `
-		UPDATE match_player_spell 
+		UPDATE match_player_spell
 		SET round_before_recovery = (
-			SELECT s.delay  
-			FROM match_player_spell AS mps 
-			JOIN spell AS s ON s.id = mps.spell_id 
+			SELECT s.delay
+			FROM match_player_spell AS mps
+			JOIN spell AS s ON s.id = mps.spell_id
 			WHERE mps.id = ?
 		)
 		WHERE id = ?
 	`
-	_, err := db.Exec(sql, idPlayerSpell, idPlayerSpell)
+	_, err := db.ExecContext(ctx, sql, idPlayerSpell, idPlayerSpell)
 
 	return err
 }
 
-func RemoveRoundRecoverySpellByIdPlayerSpell(idPlayerSpell int) error {
+func RemoveRoundRecoverySpellByIdPlayerSpell(ctx context.Context, idPlayerSpell int) error {
 	sql := `
-		UPDATE match_player_spell 
+		UPDATE match_player_spell
 		SET round_before_recovery = CASE
 			WHEN round_before_recovery > 0 THEN round_before_recovery - 1
 			ELSE 0
 		END
 		WHERE id = ?
 	`
-	_, err := db.Exec(sql, idPlayerSpell)
+	_, err := db.ExecContext(ctx, sql, idPlayerSpell)
 
 	return err
 }
 
-func ResetMatchPlayersSpells(idMatch int) error {
+func ResetMatchPlayersSpells(ctx context.Context, idMatch int) error {
 	sql := `
 		DELETE FROM match_player_spell
 		WHERE match_id = ?
 	`
 
-	_, err := db.Exec(sql, idMatch)
+	_, err := db.ExecContext(ctx, sql, idMatch)
 
 	return err
 
 }
 
-func DeleteMatchPlayersSpellsByMatchId(idMatch int) error {
+func DeleteMatchPlayersSpellsByMatchId(ctx context.Context, idMatch int) error {
 	sql := "DELETE FROM match_player_spell WHERE match_id = ?"
 
-	_, err := db.Exec(sql, idMatch)
+	_, err := db.ExecContext(ctx, sql, idMatch)
 
 	return err
 }
 
-func DeleteMatchPlayersSpellsByPlayer(idPlayer int) error {
+func DeleteMatchPlayersSpellsByPlayer(ctx context.Context, idPlayer int) error {
 	sql := "DELETE FROM match_player_spell WHERE player_id = ?"
 
-	_, err := db.Exec(sql, idPlayer)
+	_, err := db.ExecContext(ctx, sql, idPlayer)
 
 	return err
 }

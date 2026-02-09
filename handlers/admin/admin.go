@@ -19,7 +19,7 @@ func (h *Handler) HandleListUser(w http.ResponseWriter, r *http.Request) {
 	user, _ := auth.UserFromRequest(r)
 	logger := h.Slog.With("userId", user.Id)
 
-	users, err := userModel.GetUsers()
+	users, err := userModel.GetUsers(r.Context())
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -37,7 +37,7 @@ func (h *Handler) HandleUserEnabled(w http.ResponseWriter, r *http.Request) {
 
 	toggleEnabled, _ := strconv.ParseBool(vars["toggleEnabled"])
 
-	err := userModel.UpdateUser(idUser, userModel.UserUpdate{
+	err := userModel.UpdateUser(r.Context(), idUser, userModel.UserUpdate{
 		Enabled: &toggleEnabled,
 	})
 
@@ -49,7 +49,7 @@ func (h *Handler) HandleUserEnabled(w http.ResponseWriter, r *http.Request) {
 
 	logger.Info("user enabled toggled", "targetUserId", idUser, "enabled", toggleEnabled)
 
-	userEnabled, err := userModel.GetUserById(idUser)
+	userEnabled, err := userModel.GetUserById(r.Context(), idUser)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
