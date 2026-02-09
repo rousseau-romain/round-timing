@@ -1,6 +1,7 @@
 package user
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -31,9 +32,9 @@ type UserCreate struct {
 	IdLanguage    int
 }
 
-func GetUsers() ([]User, error) {
+func GetUsers(ctx context.Context) ([]User, error) {
 	sql := `
-		SELECT 
+		SELECT
 			id,
 			email,
 			id_language,
@@ -43,11 +44,11 @@ func GetUsers() ([]User, error) {
 		FROM user
 	`
 
-	rows, err := db.Query(sql)
-
+	rows, err := db.QueryContext(ctx, sql)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	var users []User
 
@@ -67,10 +68,14 @@ func GetUsers() ([]User, error) {
 		users = append(users, user)
 	}
 
-	return users, err
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }
 
-func GetUserByEmail(email string) (User, error) {
+func GetUserByEmail(ctx context.Context, email string) (User, error) {
 	user := User{}
 
 	sql := `
@@ -88,7 +93,7 @@ func GetUserByEmail(email string) (User, error) {
 			WHERE email = ?
 		`
 
-	err := db.QueryRow(sql, email).Scan(
+	err := db.QueryRowContext(ctx, sql, email).Scan(
 		&user.Id,
 		&user.Oauth2Id,
 		&user.Enabled,
@@ -107,7 +112,7 @@ func GetUserByEmail(email string) (User, error) {
 	return user, err
 }
 
-func GetUserById(idUser int) (User, error) {
+func GetUserById(ctx context.Context, idUser int) (User, error) {
 	user := User{}
 
 	sql := `
@@ -123,7 +128,7 @@ func GetUserById(idUser int) (User, error) {
 			WHERE id = ?
 		`
 
-	err := db.QueryRow(sql, idUser).Scan(
+	err := db.QueryRowContext(ctx, sql, idUser).Scan(
 		&user.Id,
 		&user.Oauth2Id,
 		&user.Enabled,
@@ -140,7 +145,7 @@ func GetUserById(idUser int) (User, error) {
 	return user, err
 }
 
-func GetUserIdByMatch(idmatch int) (User, error) {
+func GetUserIdByMatch(ctx context.Context, idmatch int) (User, error) {
 	user := User{}
 
 	sql := fmt.Sprintf(`
@@ -157,7 +162,7 @@ func GetUserIdByMatch(idmatch int) (User, error) {
 		WHERE m.id = ?
 	`, "`match`")
 
-	err := db.QueryRow(sql, idmatch).Scan(&user.Id, &user.Oauth2Id, &user.Enabled, &user.Email, &user.IdLanguage, &user.IsAdmin, &user.IdShare)
+	err := db.QueryRowContext(ctx, sql, idmatch).Scan(&user.Id, &user.Oauth2Id, &user.Enabled, &user.Email, &user.IdLanguage, &user.IsAdmin, &user.IdShare)
 	if err != nil && err.Error() == "sql: no rows in result set" {
 		return user, nil
 	}
@@ -165,28 +170,28 @@ func GetUserIdByMatch(idmatch int) (User, error) {
 	return user, err
 }
 
-func GetUserByOauth2Id(oauth2Id string) (User, error) {
+func GetUserByOauth2Id(ctx context.Context, oauth2Id string) (User, error) {
 	user := User{}
 
 	sb := sqlbuilder.NewSelectBuilder()
 	sb.Select("id", "oauth2_id", "enabled", "email", "provider_login", "id_language", "is_admin", "id_share").From("user").Where(sb.Equal("oauth2_id", oauth2Id))
 	sql, args := sb.Build()
 
-	err := db.QueryRow(sql, args...).Scan(&user.Id, &user.Oauth2Id, &user.Enabled, &user.Email, &user.ProviderLogin, &user.IdLanguage, &user.IsAdmin, &user.IdShare)
+	err := db.QueryRowContext(ctx, sql, args...).Scan(&user.Id, &user.Oauth2Id, &user.Enabled, &user.Email, &user.ProviderLogin, &user.IdLanguage, &user.IsAdmin, &user.IdShare)
 	if err != nil && err.Error() == "sql: no rows in result set" {
 		return user, nil
 	}
 	return user, err
 }
 
-func UserExistsByOauth2Id(oauth2Id string) (bool, error) {
+func UserExistsByOauth2Id(ctx context.Context, oauth2Id string) (bool, error) {
 	userId := 0
 
 	sb := sqlbuilder.NewSelectBuilder()
 	sb.Select("id").From("user").Where(sb.Equal("oauth2_id", oauth2Id))
 	sql, args := sb.Build()
 
-	err := db.QueryRow(sql, args...).Scan(&userId)
+	err := db.QueryRowContext(ctx, sql, args...).Scan(&userId)
 
 	if err != nil {
 		return false, nil
@@ -195,14 +200,14 @@ func UserExistsByOauth2Id(oauth2Id string) (bool, error) {
 	return userId != 0, err
 }
 
-func UserExistsByIdShare(idShare string) (bool, error) {
+func UserExistsByIdShare(ctx context.Context, idShare string) (bool, error) {
 	userId := 0
 
 	sb := sqlbuilder.NewSelectBuilder()
 	sb.Select("id").From("user").Where(sb.Equal("id_share", idShare))
 	sql, args := sb.Build()
 
-	err := db.QueryRow(sql, args...).Scan(&userId)
+	err := db.QueryRowContext(ctx, sql, args...).Scan(&userId)
 
 	if err != nil {
 		return false, nil
@@ -211,14 +216,14 @@ func UserExistsByIdShare(idShare string) (bool, error) {
 	return userId != 0, err
 }
 
-func UserExistsByEmail(email string) (string, error) {
+func UserExistsByEmail(ctx context.Context, email string) (string, error) {
 	var providerLoginName string
 
 	sb := sqlbuilder.NewSelectBuilder()
 	sb.Select("provider_login").From("user").Where(sb.Equal("email", email))
 	sql, args := sb.Build()
 
-	err := db.QueryRow(sql, args...).Scan(&providerLoginName)
+	err := db.QueryRowContext(ctx, sql, args...).Scan(&providerLoginName)
 
 	if err != nil {
 		return "", nil
@@ -227,14 +232,14 @@ func UserExistsByEmail(email string) (string, error) {
 	return providerLoginName, err
 }
 
-func CreateUser(user UserCreate) (int64, error) {
+func CreateUser(ctx context.Context, user UserCreate) (int64, error) {
 
 	sql := `
 		INSERT INTO user (provider_login, oauth2_id, email, id_language, hash)
 		VALUES (?, ?, ?, ?, ?)
 	`
 
-	response, err := db.Exec(sql, user.ProviderLogin, user.Oauth2Id, user.Email, user.IdLanguage, user.Hash)
+	response, err := db.ExecContext(ctx, sql, user.ProviderLogin, user.Oauth2Id, user.Email, user.IdLanguage, user.Hash)
 
 	if err != nil {
 		return 0, err
@@ -245,7 +250,7 @@ func CreateUser(user UserCreate) (int64, error) {
 	return id, err
 }
 
-func UpdateUser(idUser int, user UserUpdate) error {
+func UpdateUser(ctx context.Context, idUser int, user UserUpdate) error {
 	canUpdate := false
 	sb := sqlbuilder.NewUpdateBuilder()
 	sb.Update("user").Where(sb.Equal("id", idUser))
@@ -262,7 +267,7 @@ func UpdateUser(idUser int, user UserUpdate) error {
 
 	if canUpdate {
 		sql, args := sb.Build()
-		_, err := db.Exec(sql, args...)
+		_, err := db.ExecContext(ctx, sql, args...)
 		return err
 	}
 

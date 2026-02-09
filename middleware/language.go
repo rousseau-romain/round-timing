@@ -26,7 +26,7 @@ func Language(handler http.Handler, authService *auth.AuthService, logger *slog.
 		if user.Id == 0 {
 			locale = lang.GetPreferred(r)
 		} else {
-			locale, err = system.GetLanguageLocaleById(user.IdLanguage)
+			locale, err = system.GetLanguageLocaleById(r.Context(), user.IdLanguage)
 			if err != nil {
 				logger.Error(err.Error())
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -44,7 +44,7 @@ func Language(handler http.Handler, authService *auth.AuthService, logger *slog.
 		r = r.WithContext(ctx)
 
 		if user.Id != 0 {
-			configs, err := userModel.GetAllConfigurationByIdUser(user.IdLanguage, user.Id)
+			configs, err := userModel.GetAllConfigurationByIdUser(r.Context(), user.IdLanguage, user.Id)
 			if err != nil {
 				logger.Error("error fetching user configurations", "error", err)
 			} else {

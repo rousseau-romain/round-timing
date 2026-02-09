@@ -12,6 +12,7 @@ import (
 	"github.com/rousseau-romain/round-timing/model/game"
 	matchModel "github.com/rousseau-romain/round-timing/model/match"
 	userModel "github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/views/components/ui"
 	"github.com/rousseau-romain/round-timing/views/page"
 )
 
@@ -27,28 +28,28 @@ func (h *Handler) HandleProfile(w http.ResponseWriter, r *http.Request) {
 	}
 	logger := h.Slog.With("userId", user.Id)
 
-	idUserShares, err := userModel.GetUsersSpectateByIdUser(user.Id)
+	idUserShares, err := userModel.GetUsersSpectateByIdUser(r.Context(), user.Id)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	classes, err := game.GetClasses(user.IdLanguage)
+	classes, err := game.GetClasses(r.Context(), user.IdLanguage)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	spells, err := game.GetFavoriteSpellsByIdUser(user.IdLanguage, user.Id)
+	spells, err := game.GetFavoriteSpellsByIdUser(r.Context(), user.IdLanguage, user.Id)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	userConfigurations, err := userModel.GetAllConfigurationByIdUser(user.IdLanguage, user.Id)
+	userConfigurations, err := userModel.GetAllConfigurationByIdUser(r.Context(), user.IdLanguage, user.Id)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -65,16 +66,26 @@ func (h *Handler) HandleProfileToggleUserConfiguration(w http.ResponseWriter, r 
 	vars := mux.Vars(r)
 	idConfiguration, _ := strconv.Atoi(vars["idConfiguration"])
 
-	err := userModel.ToggleUserConfiguration(user.Id, idConfiguration)
-	if err != nil {
-		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	value := r.FormValue("value")
+	if value != "" {
+		err := userModel.SetUserConfiguration(r.Context(), user.Id, idConfiguration, value)
+		if err != nil {
+			logger.Error(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		logger.Info("user configuration set", "configurationId", idConfiguration, "value", value)
+	} else {
+		err := userModel.ToggleUserConfiguration(r.Context(), user.Id, idConfiguration, user.IdLanguage)
+		if err != nil {
+			logger.Error(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		logger.Info("user configuration toggled", "configurationId", idConfiguration)
 	}
 
-	logger.Info("user configuration toggled", "configurationId", idConfiguration)
-
-	userConfiguration, err := userModel.GetConfigurationByIdConfigurationIdUser(user.IdLanguage, user.Id, idConfiguration)
+	userConfiguration, err := userModel.GetConfigurationByIdConfigurationIdUser(r.Context(), user.IdLanguage, user.Id, idConfiguration)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -82,6 +93,32 @@ func (h *Handler) HandleProfileToggleUserConfiguration(w http.ResponseWriter, r 
 	}
 
 	page.UserConfiguration(userConfiguration).Render(r.Context(), w)
+}
+
+func (h *Handler) HandleToggleContainerExpanded(w http.ResponseWriter, r *http.Request) {
+	user, _ := auth.UserFromRequest(r)
+	logger := h.Slog.With("userId", user.Id)
+
+	vars := mux.Vars(r)
+	idConfiguration, _ := strconv.Atoi(vars["idConfiguration"])
+
+	err := userModel.ToggleUserConfiguration(r.Context(), user.Id, idConfiguration, user.IdLanguage)
+	if err != nil {
+		logger.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	logger.Info("container expanded toggled", "configurationId", idConfiguration)
+
+	configs, err := userModel.GetAllConfigurationByIdUser(r.Context(), user.IdLanguage, user.Id)
+	if err != nil {
+		logger.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	configId, isExpanded := ui.GetContainerExpandedConfig(configs)
+	ui.ButtonExpandWidth(configId, isExpanded).Render(r.Context(), w)
 }
 
 func (h *Handler) HandleProfileAddSpectate(w http.ResponseWriter, r *http.Request) {
@@ -98,7 +135,7 @@ func (h *Handler) HandleProfileAddSpectate(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	userSpectateExist, err := userModel.UserExistsByIdShare(r.FormValue("idUserShare"))
+	userSpectateExist, err := userModel.UserExistsByIdShare(r.Context(), r.FormValue("idUserShare"))
 
 	if err != nil {
 		logger.Error(err.Error())
@@ -116,7 +153,7 @@ func (h *Handler) HandleProfileAddSpectate(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	IsAlreadyUsersSpectate, err := userModel.IsUsersSpectateByIdUser(user.Id, r.FormValue("idUserShare"))
+	IsAlreadyUsersSpectate, err := userModel.IsUsersSpectateByIdUser(r.Context(), user.Id, r.FormValue("idUserShare"))
 
 	if err != nil {
 		logger.Error(err.Error())
@@ -133,7 +170,7 @@ func (h *Handler) HandleProfileAddSpectate(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	_, err = userModel.CreateUserSpectate(userModel.UserSpectateCreate{
+	_, err = userModel.CreateUserSpectate(r.Context(), userModel.UserSpectateCreate{
 		IdUser:      user.Id,
 		IdUserShare: r.FormValue("idUserShare"),
 	})
@@ -159,7 +196,7 @@ func (h *Handler) HandleProfileDeleteSpectate(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	if err := userModel.DeleteUserSpectate(user.Id, r.FormValue("idUserShare")); err != nil {
+	if err := userModel.DeleteUserSpectate(r.Context(), user.Id, r.FormValue("idUserShare")); err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

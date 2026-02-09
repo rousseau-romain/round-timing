@@ -19,6 +19,17 @@
     "templ": {
       "command": "npx",
       "args": ["-y", "mcp-remote", "https://gitmcp.io/a-h/templ"]
+    },
+    "mysql": {
+      "command": "npx",
+      "args": ["-y", "@benborla29/mcp-server-mysql"],
+      "env": {
+        "MYSQL_HOST": "<your_db_host>",
+        "MYSQL_PORT": "<your_db_port>",
+        "MYSQL_USER": "<your_db_user>",
+        "MYSQL_PASS": "<your_db_password>",
+        "MYSQL_DB": "<your_db_name>"
+      }
     }
   }
 }

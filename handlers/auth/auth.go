@@ -47,7 +47,7 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	userAlreadyExists, err := userModel.UserExistsByOauth2Id(user.UserID)
+	userAlreadyExists, err := userModel.UserExistsByOauth2Id(r.Context(), user.UserID)
 
 	if err != nil {
 		h.Slog.Error(err.Error())
@@ -58,7 +58,7 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 	logger := h.Slog.With("userOauth2Id", user.UserID)
 
 	if !userAlreadyExists {
-		providerLoginName, err := userModel.UserExistsByEmail(user.Email)
+		providerLoginName, err := userModel.UserExistsByEmail(r.Context(), user.Email)
 
 		if err != nil {
 			fmt.Fprintln(w, err)
@@ -83,12 +83,12 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 		}
 		locale := lang.GetPreferred(r)
 
-		idLanguage, err := system.GetLanguagesIdByCode(locale)
+		idLanguage, err := system.GetLanguagesIdByCode(r.Context(), locale)
 		if err != nil {
 			fmt.Fprintln(w, err)
 			return
 		}
-		_, err = userModel.CreateUser(userModel.UserCreate{
+		_, err = userModel.CreateUser(r.Context(), userModel.UserCreate{
 			ProviderLogin: user.Provider,
 			Oauth2Id:      user.UserID,
 			Email:         user.Email,
@@ -152,7 +152,7 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	provider, err := userModel.UserExistsByEmail(email)
+	provider, err := userModel.UserExistsByEmail(r.Context(), email)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, "can't create user", http.StatusInternalServerError)
@@ -178,7 +178,7 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	hashedPassword := password.Hash(pwd, salt)
 
 	locale := lang.GetPreferred(r)
-	idLanguage, err := system.GetLanguagesIdByCode(locale)
+	idLanguage, err := system.GetLanguagesIdByCode(r.Context(), locale)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, "can't create user", http.StatusInternalServerError)
@@ -192,7 +192,7 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 		IdLanguage:    idLanguage,
 	}
 
-	_, err = userModel.CreateUser(user)
+	_, err = userModel.CreateUser(r.Context(), user)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, "can't create user", http.StatusInternalServerError)
@@ -228,7 +228,7 @@ func (h *Handler) HandleLoginEmail(w http.ResponseWriter, r *http.Request) {
 	email := strings.TrimSpace(r.FormValue("email"))
 	pwd := strings.TrimSpace(r.FormValue("password"))
 
-	user, err := userModel.GetUserByEmail(email)
+	user, err := userModel.GetUserByEmail(r.Context(), email)
 
 	// Always run the hash check to prevent timing-based email enumeration.
 	// When the user is not found, check against a dummy hash so the
