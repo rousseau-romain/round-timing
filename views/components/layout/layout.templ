@@ -14,9 +14,7 @@ import (
 )
 
 func getConfigValue(configs []user.UserConfiguration, key string) string {
-	println("getConfigValue", key)
 	for _, c := range configs {
-		println("config", c.Key, c.Value)
 		if c.Key == key {
 			return c.Value
 		}
