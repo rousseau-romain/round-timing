@@ -12,6 +12,7 @@ import (
 	"github.com/rousseau-romain/round-timing/model/game"
 	matchModel "github.com/rousseau-romain/round-timing/model/match"
 	userModel "github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/views/components/ui"
 	"github.com/rousseau-romain/round-timing/views/page"
 )
 
@@ -65,14 +66,24 @@ func (h *Handler) HandleProfileToggleUserConfiguration(w http.ResponseWriter, r 
 	vars := mux.Vars(r)
 	idConfiguration, _ := strconv.Atoi(vars["idConfiguration"])
 
-	err := userModel.ToggleUserConfiguration(r.Context(), user.Id, idConfiguration)
-	if err != nil {
-		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	value := r.FormValue("value")
+	if value != "" {
+		err := userModel.SetUserConfiguration(r.Context(), user.Id, idConfiguration, value)
+		if err != nil {
+			logger.Error(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		logger.Info("user configuration set", "configurationId", idConfiguration, "value", value)
+	} else {
+		err := userModel.ToggleUserConfiguration(r.Context(), user.Id, idConfiguration, user.IdLanguage)
+		if err != nil {
+			logger.Error(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		logger.Info("user configuration toggled", "configurationId", idConfiguration)
 	}
-
-	logger.Info("user configuration toggled", "configurationId", idConfiguration)
 
 	userConfiguration, err := userModel.GetConfigurationByIdConfigurationIdUser(r.Context(), user.IdLanguage, user.Id, idConfiguration)
 	if err != nil {
@@ -82,6 +93,32 @@ func (h *Handler) HandleProfileToggleUserConfiguration(w http.ResponseWriter, r 
 	}
 
 	page.UserConfiguration(userConfiguration).Render(r.Context(), w)
+}
+
+func (h *Handler) HandleToggleContainerExpanded(w http.ResponseWriter, r *http.Request) {
+	user, _ := auth.UserFromRequest(r)
+	logger := h.Slog.With("userId", user.Id)
+
+	vars := mux.Vars(r)
+	idConfiguration, _ := strconv.Atoi(vars["idConfiguration"])
+
+	err := userModel.ToggleUserConfiguration(r.Context(), user.Id, idConfiguration, user.IdLanguage)
+	if err != nil {
+		logger.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	logger.Info("container expanded toggled", "configurationId", idConfiguration)
+
+	configs, err := userModel.GetAllConfigurationByIdUser(r.Context(), user.IdLanguage, user.Id)
+	if err != nil {
+		logger.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	configId, isExpanded := ui.GetContainerExpandedConfig(configs)
+	ui.ButtonExpandWidth(configId, isExpanded).Render(r.Context(), w)
 }
 
 func (h *Handler) HandleProfileAddSpectate(w http.ResponseWriter, r *http.Request) {

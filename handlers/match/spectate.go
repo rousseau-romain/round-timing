@@ -62,7 +62,7 @@ func (h *Handler) HandleSpectateMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	spellsPlayers, err := matchModel.GetSpellsPlayersByIdMatch(r.Context(), user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
+	spellsPlayers, err := matchModel.GetSpellsPlayersByIdMatch(r.Context(), user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.Value == "true")
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -123,7 +123,7 @@ func (h *Handler) HandleMatchTableLive(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			spellsPlayers, err := matchModel.GetSpellsPlayersByIdMatch(r.Context(), user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.IsEnabled)
+			spellsPlayers, err := matchModel.GetSpellsPlayersByIdMatch(r.Context(), user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.Value == "true")
 			if err != nil {
 				logger.Error(err.Error())
 				return

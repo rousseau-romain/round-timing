@@ -13,22 +13,15 @@ import (
 	"github.com/rousseau-romain/round-timing/views/components/icons"
 )
 
-func isConfigEnabled(configs []user.UserConfiguration, key string) bool {
+func getConfigValue(configs []user.UserConfiguration, key string) string {
+	println("getConfigValue", key)
 	for _, c := range configs {
+		println("config", c.Key, c.Value)
 		if c.Key == key {
-			return c.IsEnabled
+			return c.Value
 		}
 	}
-	return false
-}
-
-func getConfigId(configs []user.UserConfiguration, key string) string {
-	for _, c := range configs {
-		if c.Key == key {
-			return strconv.Itoa(c.IdConfiguration)
-		}
-	}
-	return "0"
+	return ""
 }
 
 type PopinMessages struct {
@@ -38,21 +31,17 @@ type PopinMessages struct {
 }
 
 templ Layout(title string, popinMessages PopinMessages, user user.User, navItems []NavItem, languages []system.Language, pageSlug string) {
-	<html class={ templ.KV("dark", isConfigEnabled(auth.UserConfigurationsFromContext(ctx), "dark_mode")) }>
+	<html
+		class={ templ.KV("dark", getConfigValue(auth.UserConfigurationsFromContext(ctx), "dark_mode") == "dark") }
+		data-dark-mode={ getConfigValue(auth.UserConfigurationsFromContext(ctx), "dark_mode") }
+	>
 		<head>
 			<title>Round Timing - { title }</title>
 			<link rel="icon" type="image/svg+xml" href="/public/img/favicon.svg"/>
 			<link rel="stylesheet" type="text/css" href={ fmt.Sprintf("/public/tailwind.css?build=%s", strconv.FormatInt(time.Now().Unix(), 10)) }/>
 			<style>[x-cloak] { display: none !important; }</style>
 		</head>
-		<body
-			data-authenticated={ strconv.FormatBool(user.Id != 0) }
-			data-config-container-expanded={ strconv.FormatBool(isConfigEnabled(auth.UserConfigurationsFromContext(ctx), "container_expanded")) }
-			data-config-container-expanded-id={ getConfigId(auth.UserConfigurationsFromContext(ctx), "container_expanded") }
-			data-config-dark-mode={ strconv.FormatBool(isConfigEnabled(auth.UserConfigurationsFromContext(ctx), "dark_mode")) }
-			data-config-dark-mode-id={ getConfigId(auth.UserConfigurationsFromContext(ctx), "dark_mode") }
-			class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
-		>
+		<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
 			if config.ENV == "development" || config.ENV == "staging" {
 				<script src="/public/script/htmx-2.0.8/htmx.js"></script>
 				<script defer src="/public/script/alpine-3.15.4.js"></script>
@@ -64,7 +53,7 @@ templ Layout(title string, popinMessages PopinMessages, user user.User, navItems
 			}
 			<script src="/public/script/htmx-2.0.8/ext/response-targets.js"></script>
 			<script src="/public/script/htmx-2.0.8/ext/ws.js"></script>
-			<script src="/public/script/alpine-init.js"></script>
+			<script src="/public/script/theme-mode.js"></script>
 			@Nav(user, navItems, languages, pageSlug)
 			<div class="min-h-screen" id="content" hx-ext="response-targets">
 				<div id="popinMessages">

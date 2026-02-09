@@ -1,6 +1,10 @@
 package ui
 
-import "github.com/invopop/ctxi18n/i18n"
+import (
+	"fmt"
+
+	"github.com/invopop/ctxi18n/i18n"
+)
 
 // buttonClasses returns the common button classes for a given variant and size.
 // All variants support dark mode.
@@ -168,22 +172,22 @@ templ ButtonFullscreen() {
 }
 
 // ButtonExpandWidth renders a button to toggle between contained and full-width layout
-// Works with ContainerToggleable component via Alpine.store for shared reactive state
-templ ButtonExpandWidth() {
+// Works with ContainerToggleable component via HTMX swap + hx-on::load for container sync
+templ ButtonExpandWidth(configId int, isExpanded bool) {
 	<button
 		class="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-800 dark:hover:text-white transition-colors"
 		type="button"
 		title="Toggle width"
-		x-data="{ throttled: false }"
-		@click="if (!throttled) { throttled = true; $store.config.toggleContainerExpanded(); setTimeout(() => throttled = false, 400) }"
+		hx-patch={ fmt.Sprintf("/profile/configuration/%d/toggle-container-expanded", configId) }
+		hx-target="this"
+		hx-swap="outerHTML"
 	>
 		<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-			<path
-				:d="$store.config.isContainerExpanded
-					? 'M4 12 h16 M7 8l-4 4l4  4M17 8l4  4l-4 4'
-					: 'M8 12 h7  M4 8l4  4l-4 4M19 8l-4 4l4  4'
-				"
-			></path>
+			if isExpanded {
+				<path d="M4 12 h16 M7 8l-4 4l4  4M17 8l4  4l-4 4"></path>
+			} else {
+				<path d="M8 12 h7  M4 8l4  4l-4 4M19 8l-4 4l4  4"></path>
+			}
 		</svg>
 	</button>
 }

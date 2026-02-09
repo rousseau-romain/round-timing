@@ -2,6 +2,7 @@ package page
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/model/game"
@@ -117,12 +118,50 @@ templ TableUserConfiguration(userConfigurations []user.UserConfiguration) {
 }
 
 templ UserConfiguration(uc user.UserConfiguration) {
-	@ui.ButtonToggle(
-		i18n.T(ctx, "global.table.enabled"),
-		i18n.T(ctx, "global.table.disabled"),
-		fmt.Sprintf("/profile/configuration/%d/toggle-configuration", uc.IdConfiguration),
-		uc.IsEnabled,
-	)
+	<span
+		id={ "config-" + strconv.Itoa(uc.IdConfiguration) }
+		if uc.Key == "dark_mode" {
+			data-active-theme={ uc.Value }
+		}
+	>
+		if uc.IsBooleanConfig() {
+			<button
+				class={
+					"items-center p-2 rounded font-medium",
+					templ.KV("bg-green-100 text-green-800 hover:bg-green-200", uc.Value == "true"),
+					templ.KV("bg-red-100 text-red-800 hover:bg-red-200", uc.Value != "true"),
+				}
+				hx-patch={ fmt.Sprintf("/profile/configuration/%d/toggle-configuration", uc.IdConfiguration) }
+				hx-trigger="click"
+				hx-target={ "#config-" + strconv.Itoa(uc.IdConfiguration) }
+				hx-swap="outerHTML"
+			>
+				if uc.Value == "true" {
+					{ i18n.T(ctx, "global.table.enabled") }
+				} else {
+					{ i18n.T(ctx, "global.table.disabled") }
+				}
+			</button>
+		} else {
+			<div class="flex gap-1">
+				for _, vl := range uc.PossibleValuesWithLabels() {
+					<button
+						class={
+							"px-3 py-1 rounded text-sm font-medium transition-colors",
+							templ.KV("bg-indigo-600 text-white", vl.Value == uc.Value),
+							templ.KV("bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600", vl.Value != uc.Value),
+						}
+						hx-patch={ fmt.Sprintf("/profile/configuration/%d/toggle-configuration", uc.IdConfiguration) }
+						hx-vals={ fmt.Sprintf(`{"value": "%s"}`, vl.Value) }
+						hx-target={ "#config-" + strconv.Itoa(uc.IdConfiguration) }
+						hx-swap="outerHTML"
+					>
+						{ vl.Label }
+					</button>
+				}
+			</div>
+		}
+	</span>
 }
 
 templ TableUserSpectate(idUserShares []string) {
