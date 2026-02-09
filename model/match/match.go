@@ -88,9 +88,10 @@ func GetLastMatchByUserId(ctx context.Context, idUser int) (Match, error) {
 			updated_at
 		FROM ` + "`match`" + `
 		WHERE id_user = ?
-		AND updated_at = (SELECT MAX(updated_at) FROM ` + "`match`" + ` WHERE id_user = ?)
+		ORDER BY updated_at DESC
+		LIMIT 1
 	`
-	row := db.QueryRowContext(ctx, sql, idUser, idUser)
+	row := db.QueryRowContext(ctx, sql, idUser)
 	if row.Err() != nil {
 		return match, row.Err()
 	}

@@ -94,27 +94,22 @@ func GetFavoriteSpellsByIdUser(ctx context.Context, idLanguage, idUser int) ([]S
 }
 
 func ToggleIsFavoriteSpell(ctx context.Context, idUser, idSpell int) error {
-	isFavorite := false
-
-	rows, err := db.QueryContext(ctx, "SELECT id FROM favorite_spell WHERE id_user = ? AND id_spell = ?", idUser, idSpell)
+	// Try DELETE first - if row exists, it will be removed
+	result, err := db.ExecContext(ctx, "DELETE FROM favorite_spell WHERE id_user = ? AND id_spell = ?", idUser, idSpell)
 	if err != nil {
 		return err
 	}
-	defer rows.Close()
 
-	for rows.Next() {
-		isFavorite = true
-	}
-
-	if err := rows.Err(); err != nil {
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
 		return err
 	}
 
-	if isFavorite {
-		_, err := db.ExecContext(ctx, "DELETE FROM favorite_spell WHERE id_user = ? AND id_spell = ?", idUser, idSpell)
-		return err
-	} else {
-		_, err := db.ExecContext(ctx, "INSERT INTO favorite_spell (id_user, id_spell) VALUES (?, ?)", idUser, idSpell)
+	// If no rows deleted, the favorite didn't exist - insert it
+	if rowsAffected == 0 {
+		_, err = db.ExecContext(ctx, "INSERT INTO favorite_spell (id_user, id_spell) VALUES (?, ?)", idUser, idSpell)
 		return err
 	}
+
+	return nil
 }
