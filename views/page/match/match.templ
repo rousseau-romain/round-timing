@@ -16,7 +16,7 @@ import (
 templ TeamPlayer(p matchModel.Player, m matchModel.Match) {
 	@ui.TrColor(p.Team.Color) {
 		<td
-			class="text-center whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white"
+			class="py-2 px-4 font-medium text-center text-gray-900 whitespace-nowrap dark:text-white"
 		>
 			@forms.InputAction("text", "name", "", templ.Attributes{
 				"value":      p.Name,
@@ -26,13 +26,13 @@ templ TeamPlayer(p matchModel.Player, m matchModel.Match) {
 				"class":      "text-center bg-transparent border-none shadow-none focus:ring-0",
 			})
 		</td>
-		<td class="whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">
+		<td class="py-2 px-4 text-gray-700 whitespace-nowrap dark:text-gray-200">
 			@ui.AvatarToggle(templ.Attributes{"title": p.Name, "alt": p.Class.Name, "src": p.Class.UrlImage + "F.svg"})
 		</td>
-		<td class="text-center whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">
+		<td class="py-2 px-4 text-center text-gray-700 whitespace-nowrap dark:text-gray-200">
 			{ p.Team.Name }
 		</td>
-		<td class="whitespace-nowrap px-4 py-2">
+		<td class="py-2 px-4 whitespace-nowrap">
 			@ui.ButtonAction("danger", "sm", templ.Attributes{
 				"hx-delete": fmt.Sprintf("/match/%d/player/%d", m.Id, p.Id),
 			}) {
@@ -53,9 +53,9 @@ templ TeamPlayerTable(players []matchModel.Player, match matchModel.Match) {
 		@htmx:after-request.window="setTimeout(() => hasPlayers = $el.querySelector('tbody').children.length > 0, 100)"
 		x-show="hasPlayers"
 		x-cloak
-		class="mb-5 flex-col items-center flex"
+		class="flex flex-col items-center mb-5"
 	>
-		<table class="mb-2 min-w-full divide-y-2 divide-gray-200 bg-white text-sm dark:divide-gray-700 dark:bg-gray-900">
+		<table class="mb-2 min-w-full text-sm bg-white divide-y-2 divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
 			@ui.TableHead("default") {
 				@ui.Tr() {
 					@ui.Th() {
@@ -134,7 +134,7 @@ templ TeamPlayerListPage(user user.User, popinMessages layout.PopinMessages, nav
 							hx-target="next tbody"
 							hx-target-error="#popinMessages"
 						>
-							<img class="img-class lg:h-12 md:h-9 h-6 w-max mx-auto" alt={ class.Name } src={ class.UrlImage + "F.svg" }/>
+							<img class="mx-auto w-max h-6 md:h-9 lg:h-12 img-class" alt={ class.Name } src={ class.UrlImage + "F.svg" }/>
 						</button>
 					}
 				</div>

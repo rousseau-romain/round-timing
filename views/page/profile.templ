@@ -23,10 +23,10 @@ templ ProfilePage(user user.User, popinMessages layout.PopinMessages, navItems [
 			// User ID Section
 			@ui.Section() {
 				@ui.Card("default") {
-					<div class="flex items-center justify-between gap-4">
+					<div class="flex gap-4 justify-between items-center">
 						<div>
 							<p class="text-sm text-gray-500 dark:text-gray-400">{ i18n.T(ctx, "page.profile.p-user-id") }</p>
-							<p class="font-mono text-lg mt-1">{ user.IdShare }</p>
+							<p class="mt-1 font-mono text-lg">{ user.IdShare }</p>
 						</div>
 						@ui.ButtonCopy(user.IdShare)
 					</div>
@@ -35,7 +35,7 @@ templ ProfilePage(user user.User, popinMessages layout.PopinMessages, navItems [
 			// Spectators Section
 			@ui.Section() {
 				@ui.Card("default") {
-					<h2 class="text-lg font-semibold mb-4">{ i18n.T(ctx, "page.profile.h2-spectators") }</h2>
+					<h2 class="mb-4 text-lg font-semibold">{ i18n.T(ctx, "page.profile.h2-spectators") }</h2>
 					<form
 						class="mb-4"
 						hx-post="/profile/user-spectate"
@@ -43,7 +43,7 @@ templ ProfilePage(user user.User, popinMessages layout.PopinMessages, navItems [
 						hx-target="tbody"
 						hx-target-error="#popinMessages"
 					>
-						<div class="flex flex-col sm:flex-row gap-2">
+						<div class="flex flex-col gap-2 sm:flex-row">
 							@forms.InputAction("text", "idUserShare", "", templ.Attributes{
 								"placeholder": i18n.T(ctx, "page.profile.input.placeholder-user-id"),
 								"required":    true,
@@ -55,7 +55,7 @@ templ ProfilePage(user user.User, popinMessages layout.PopinMessages, navItems [
 						</div>
 					</form>
 					if len(idUserShares) == 0 {
-						<p class="text-gray-500 dark:text-gray-400 text-center py-4">{ i18n.T(ctx, "page.profile.no-spectate") }</p>
+						<p class="py-4 text-center text-gray-500 dark:text-gray-400">{ i18n.T(ctx, "page.profile.no-spectate") }</p>
 					} else {
 						@TableUserSpectate(idUserShares)
 					}
@@ -65,7 +65,7 @@ templ ProfilePage(user user.User, popinMessages layout.PopinMessages, navItems [
 			if len(userConfigurations) > 0 {
 				@ui.Section() {
 					@ui.Card("default") {
-						<h2 class="text-lg font-semibold mb-4">{ i18n.T(ctx, "page.profile.h2-configuration") }</h2>
+						<h2 class="mb-4 text-lg font-semibold">{ i18n.T(ctx, "page.profile.h2-configuration") }</h2>
 						@TableUserConfiguration(userConfigurations)
 					}
 				}
@@ -73,7 +73,7 @@ templ ProfilePage(user user.User, popinMessages layout.PopinMessages, navItems [
 			// Favorite Spells Section
 			@ui.Section() {
 				@ui.Card("default") {
-					<h2 class="text-lg font-semibold mb-4">{ i18n.T(ctx, "page.profile.h2-spells-favorites") }</h2>
+					<h2 class="mb-4 text-lg font-semibold">{ i18n.T(ctx, "page.profile.h2-spells-favorites") }</h2>
 					@ListSpellClass(classes, spells)
 				}
 			}
@@ -202,11 +202,11 @@ templ UserSpectate(idUserShare string) {
 }
 
 templ ListSpellClass(classes []game.Class, spells []game.SpellByClass) {
-	<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+	<div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
 		for _, class := range(classes) {
-			<div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex flex-row items-center gap-4 bg-gray-50 dark:bg-gray-800">
+			<div class="flex flex-row gap-4 items-center p-4 bg-gray-50 rounded-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
 				<img
-					class="h-auto w-10 img-class shrink-0"
+					class="w-10 h-auto img-class shrink-0"
 					alt={ class.Name }
 					title={ class.Name }
 					src={ class.UrlImage + "F.svg" }
@@ -225,7 +225,7 @@ templ ListSpellClass(classes []game.Class, spells []game.SpellByClass) {
 
 templ SpellFavorite(s game.SpellByClass) {
 	<div
-		class="group relative cursor-pointer transition-all hover:scale-110"
+		class="relative transition-all cursor-pointer hover:scale-110 group"
 		hx-patch={ fmt.Sprintf("/profile/spell-favorite/%d/toggle-favorite", s.IdSpell) }
 		hx-swap="outerHTML"
 	>
@@ -234,7 +234,7 @@ templ SpellFavorite(s game.SpellByClass) {
 			src={ s.UrlImage }
 			class="h-12 img-class"
 		/>
-		<div class="absolute -top-[7px] -left-[7px] cursor-pointer transition-all group-hover:scale-110">
+		<div class="absolute transition-all cursor-pointer group-hover:scale-110 -top-[7px] -left-[7px]">
 			@icons.Heart(s.IsFavorite, "red", 20, 20)
 		</div>
 	</div>
