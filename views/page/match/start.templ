@@ -46,7 +46,7 @@ templ MatchPageTable(user user.User, popinMessages layout.PopinMessages, navItem
 			@ui.ButtonAction("success", "lg", templ.Attributes{
 				"type":      "submit",
 				"hx-get":    fmt.Sprintf("/match/%d/increase-round", match.Id),
-				"hx-target": "next table",
+				"hx-target": "#toggleable-container",
 				"class":     "w-full sm:w-auto",
 			}) {
 				{ i18n.T(ctx, "page.start-match.button.next-round") }
