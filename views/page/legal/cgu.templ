@@ -9,8 +9,8 @@ import (
 
 templ CGU(popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string) {
 	@layout.Layout(i18n.T(ctx, "page.cgu.title"), popinMessages, user.User{}, navItems, languages, pageSlug) {
-		<div class="grid place-content-center bg-white px-4 dark:bg-gray-900">
-			<h1 class="text-center text-2xl font-bold text-indigo-600 sm:text-3xl">{ i18n.T(ctx, "page.cgu.h1") }</h1>
+		<div class="grid place-content-center px-4 bg-white dark:bg-gray-900">
+			<h1 class="text-2xl font-bold text-center text-indigo-600 sm:text-3xl">{ i18n.T(ctx, "page.cgu.h1") }</h1>
 			<h2 class="text-lg font-semibold">1. Présentation des CGU </h2>
 			<p class="mb-4">
 				1.1 Round Timing est un fan-site proposé à l'adresse 
@@ -30,23 +30,23 @@ templ CGU(popinMessages layout.PopinMessages, navItems []layout.NavItem, languag
 			<p class="mb-4">3.2 Round Timing ne vous accorde qu'une licence limitée, non exclusive et non transférable d'accès et d'utilisation de son contenu. Cette licence est soumise au respect des règles prévues par les présentes CGU. </p>
 			<p class="mb-4">3.3 Pour accéder à la totalité du Service proposé par le Site, vous devez créer un compte Round Timing en cliquant sur "Connexion" situé sur la barre de navigation principale du site.</p>
 			<h2 class="text-lg font-semibold">4. Création de Compte </h2>
-			<h3 class="text-md font-medium">4.1 Caractéristiques </h3>
+			<h3 class="font-medium text-md">4.1 Caractéristiques </h3>
 			<p class="mb-4">4.1.1 Pour créer un Compte, vous devez être une personne physique, âgée de dix-huit (18) ans ou ayant atteint l'âge légal dans votre pays de résidence, ou avoir obtenu l'accord de votre représentant légal (parent ou tuteur) si vous êtes mineur.</p>
 			<p class="mb-4">4.1.2 Vous devez vous inscrire via un compte provenant des réseaux sociaux supportés (Google, Discord) </p>
 			<p class="mb-4">4.1.5 La gestion du Compte et des informations personnelles se fait uniquement sur <a href="https://round-timing.web-rows.ovh/profile" class="text-indigo-600 hover:underline">https://round-timing.web-rows.ovh/profile</a></p>
 			<p class="mb-4">4.1.6 La connexion via réseaux sociaux vous permettent d'accéder à l'ensemble du Service.</p>
 			<h2 class="text-lg font-semibold">4.3 Responsabilité / Sécurité </h2>
-			<h3 class="text-md font-medium">4.3.1 Sécurité</h3>
+			<h3 class="font-medium text-md">4.3.1 Sécurité</h3>
 			<p class="mb-4">
 				Pour garantir la sécurité de votre Compte et éviter ainsi le vol de Compte communément appelé le "hack de Compte", vous vous engagez à : 
-				<ul class="list-disc pl-5">
+				<ul class="pl-5 list-disc">
 					<li>Ne pas donner accès à votre Compte à un tiers. Le prêt, le partage, l'échange, le don, l'achat, le transfert et la vente de Compte sont interdits. Tout prêt, partage, échange, don, achat, transfert ou vente de Compte ne sera pas opposable à Round Timing et pourra donner lieu aux sanctions prévues à l'Article 8</li>
 					<li>Prendre toutes les mesures afin d'éviter qu'un tiers puisse accéder au Compte que vous avez activé, même à votre insu</li>
 					<li>Ne pas utiliser le Compte d'un tiers</li>
 					<li>Utiliser une boîte email personnelle et ne pas partager cet email</li>
 				</ul>
 			</p>
-			<h3 class="text-md font-medium">4.3.2 Responsabilité</h3>
+			<h3 class="font-medium text-md">4.3.2 Responsabilité</h3>
 			<p class="mb-4">4.3.2.1 La sécurité de votre Compte est de votre seule responsabilité et Round Timing ne pourra pas être tenue pour responsable des dommages que pourrait subir votre Compte ou votre ordinateur suite à la perte ou au partage des identifiants de votre Compte.</p>
 			<p class="mb-4">4.3.2.2 Round Timing ne pourra en aucune manière être reconnu responsable en cas de vol de compte ou de toutes altérations que pourra subir votre Compte.</p>
 			<p class="mb-4">4.3.2.3 Vous reconnaissez également que vous êtes présumé être l'utilisateur de votre Compte et le responsable des actions entreprises via votre Compte et sur votre Compte.</p>
@@ -87,7 +87,7 @@ templ CGU(popinMessages layout.PopinMessages, navItems []layout.NavItem, languag
 			<p class="mb-4">10.3 La responsabilité de Round Timing ne saurait être engagée dans les cas de force majeure prévus par la loi.</p>
 			<p class="mb-4">10.4 Round Timing se réserve le droit d'interrompre le Service définitivement, vous en serez alors averti par tous moyens.</p>
 			<p class="mb-4">10.5 Sauf mentions contraires prévues par la loi ou conditions particulières prévues expressément entre Round Timing et vous, vous reconnaissez et acceptez que : </p>
-			<ul class="list-disc pl-5 mb-4">
+			<ul class="pl-5 mb-4 list-disc">
 				<li>Le Site, son Service et son contenu sont fournis "en l'état"</li>
 				<li>L'utilisation de ceux-ci se fait sous votre entière responsabilité et à vos risques. Pour les utilisateurs mineurs, la responsabilité incombe à leurs représentants légaux.</li>
 				<li>Round Timing se dégage de toute responsabilité en cas d'utilisation du Service non conforme aux présentes CGU. Il ne serait être tenu responsable des dommages, directs ou indirects, des pertes de données ou profits, qui pourraient survenir en raison de l'utilisation ou de la non-utilisation du Service, de négligence ou de toute autre raison associée au Service.</li>

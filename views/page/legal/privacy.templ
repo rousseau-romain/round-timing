@@ -9,8 +9,8 @@ import (
 
 templ Privacy(popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string) {
 	@layout.Layout(i18n.T(ctx, "page.privacy.title"), popinMessages, user.User{}, navItems, languages, pageSlug) {
-		<div class="grid place-content-center bg-white px-4 dark:bg-gray-900">
-			<h1 class="text-center text-2xl font-bold text-indigo-600 sm:text-3xl">{ i18n.T(ctx, "page.privacy.h1") }</h1>
+		<div class="grid place-content-center px-4 bg-white dark:bg-gray-900">
+			<h1 class="text-2xl font-bold text-center text-indigo-600 sm:text-3xl">{ i18n.T(ctx, "page.privacy.h1") }</h1>
 			<div>
 				<h2 class="text-lg font-semibold">1. Collecte de l'information </h2>
 				<p class="mb-4">Nous recueillons des informations lorsque vous vous inscrivez sur notre site, lorsque vous vous connectez à votre compte et / ou lorsque vous vous déconnectez. Les informations recueillies incluent votre adresse e-mail. En outre, nous recevons et enregistrons automatiquement des informations à partir de votre ordinateur et navigateur, y compris votre adresse IP, votre matériel, et la page que vous demandez. </p>
@@ -23,7 +23,7 @@ templ Privacy(popinMessages layout.PopinMessages, navItems []layout.NavItem, lan
 					<li>Améliorer le support en cas de bugs / demandes d'aide</li>
 					<li>Vous contacter par e-mail</li>
 				</ul>
-				<h2 class="font-semibold text-lg">3. Divulgation à des tiers </h2>
+				<h2 class="text-lg font-semibold">3. Divulgation à des tiers </h2>
 				<p class="mb-4">Nous ne vendons, n'échangeons et ne transférons pas vos informations personnelles identifiables à des tiers. Cela ne comprend pas les tierce parties de confiance qui nous aident à exploiter notre site Web ou à mener nos affaires, tant que ces parties conviennent de garder ces informations confidentielles. Nous pensons qu'il est nécessaire de partager des informations afin d'enquêter, de prévenir ou de prendre des mesures concernant des activités illégales, fraudes présumées, situations impliquant des menaces potentielles à la sécurité physique de toute personne, violations de nos conditions d'utilisation, ou quand la loi nous y contraint. Les informations non-privées, cependant, peuvent être fournies à d'autres parties pour le marketing et la publicité. </p>
 				<h2 class="text-lg font-semibold">4. Protection des informations </h2>
 				<p class="mb-4">Nous mettons en œuvre une variété de mesures de sécurité pour préserver la sécurité de vos informations personnelles. Nous utilisons un cryptage à la pointe de la technologie pour protéger les informations sensibles transmises en ligne. Les ordinateurs et serveurs utilisés pour stocker des informations personnelles identifiables sont conservés dans un environnement sécurisé. </p>

@@ -24,17 +24,17 @@ templ StartMatchPage(user user.User, popinMessages layout.PopinMessages, navItem
 
 templ MatchPageTable(user user.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string, match matchModel.Match, players []matchModel.Player, playersSpells []matchModel.MatchPlayerSpell, isSpectator bool) {
 	// Header with match name and round
-	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+	<div class="flex flex-col gap-4 mb-6 sm:flex-row sm:justify-between sm:items-center">
 		<div>
 			@ui.PageHeader() {
 				{ match.Name }
 			}
 			<p class="text-gray-500 dark:text-gray-400">
 				{ i18n.T(ctx, "global.round") } n°
-				<span class="font-bold text-lg text-gray-900 dark:text-white">{ strconv.Itoa(match.Round) }</span>
+				<span class="text-lg font-bold text-gray-900 dark:text-white">{ strconv.Itoa(match.Round) }</span>
 			</p>
 		</div>
-		<div class="flex items-center gap-2">
+		<div class="flex gap-2 items-center">
 			@ui.ButtonExpandWidth(ui.GetContainerExpandedConfig(auth.UserConfigurationsFromContext(ctx)))
 			@ui.ButtonFullscreen()
 			@ui.ButtonCopy(fmt.Sprintf("%s/match/%d/spectate", config.PUBLIC_HOST_PORT, match.Id))
@@ -42,7 +42,7 @@ templ MatchPageTable(user user.User, popinMessages layout.PopinMessages, navItem
 	</div>
 	// Action buttons
 	@ui.Section() {
-		<div class="flex flex-wrap justify-center gap-3">
+		<div class="flex flex-wrap gap-3 justify-center">
 			@ui.ButtonAction("success", "lg", templ.Attributes{
 				"type":      "submit",
 				"hx-get":    fmt.Sprintf("/match/%d/increase-round", match.Id),
@@ -89,7 +89,7 @@ func toggleMasteryURL(matchId int, multipleMasteryEnabled int) string {
 
 templ Spell(mps matchModel.MatchPlayerSpell, isSpectator bool) {
 	<div
-		class="has-tooltip flex flex-col items-center"
+		class="flex flex-col items-center has-tooltip"
 		if !isSpectator {
 			hx-target="this"
 			skipConfirmation
@@ -114,7 +114,7 @@ templ Spell(mps matchModel.MatchPlayerSpell, isSpectator bool) {
 				templ.KV("border-cyan-500", mps.RoundBeforeRecovery >= 3),
 			}
 		>
-			<span class="tooltip rounded shadow-lg p-1 top-full -left-1/2 pointer-events-none">
+			<span class="top-full -left-1/2 p-1 rounded shadow-lg pointer-events-none tooltip">
 				<ul>
 					<li class="font-bold">{ mps.Spell.Name }</li>
 					<li>{ i18n.T(ctx, "page.start-match.delay-between-use") } : <span class="font-bold">{ strconv.Itoa(mps.Spell.Delay) }</span></li>
@@ -136,13 +136,13 @@ templ Spell(mps matchModel.MatchPlayerSpell, isSpectator bool) {
 
 templ Player(p matchModel.Player, playersSpells []matchModel.MatchPlayerSpell, isSpectator bool) {
 	@ui.TrColor(p.Team.Color) {
-		<td class="px-4 py-2" colspan="3">
-			<div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-				<div class="flex items-center gap-2 justify-center">
+		<td class="py-2 px-4" colspan="3">
+			<div class="flex flex-col gap-2 md:flex-row md:gap-4 md:items-center">
+				<div class="flex gap-2 justify-center items-center">
 					@ui.AvatarToggle(templ.Attributes{"title": p.Name, "alt": p.Class.Name, "src": p.Class.UrlImage + "F.svg"})
 					<span class="font-medium whitespace-nowrap">{ p.Name }</span>
 				</div>
-				<div class="flex gap-4 flex-wrap">
+				<div class="flex flex-wrap gap-4">
 					for _, ps := range playersSpells {
 						if ps.PlayerId == p.Id {
 							@Spell(ps, isSpectator)

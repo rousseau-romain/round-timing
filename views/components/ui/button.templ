@@ -82,7 +82,7 @@ templ ButtonLinkAction(variant string, size string, href string, attrs templ.Att
 // ButtonSubmit renders a submit-style button (primary blue)
 templ ButtonSubmit(text string) {
 	<button
-		class="inline-block shrink-0 rounded-md border border-blue-600 bg-blue-600 px-12 py-3 text-sm font-medium text-white transition hover:bg-transparent hover:text-blue-600 focus:ring-3 focus:outline-hidden dark:hover:bg-blue-700 dark:hover:text-white"
+		class="inline-block py-3 px-12 text-sm font-medium text-white bg-blue-600 rounded-md border border-blue-600 transition hover:text-blue-600 hover:bg-transparent shrink-0 dark:hover:bg-blue-700 dark:hover:text-white focus:ring-3 focus:outline-hidden"
 	>
 		{ text }
 	</button>
@@ -92,7 +92,7 @@ templ ButtonSubmit(text string) {
 templ ButtonOAuth(href string, provider string) {
 	<a
 		href={ templ.SafeURL(href) }
-		class="block w-full rounded-lg bg-indigo-600 px-5 py-3 text-sm font-medium text-white text-center"
+		class="block py-3 px-5 w-full text-sm font-medium text-center text-white bg-indigo-600 rounded-lg"
 	>
 		{ i18n.T(ctx, "page.signin.signin-button", i18n.M{"provider": provider}) }
 	</a>
@@ -122,11 +122,11 @@ templ ButtonToggle(textEnabled, textDisabled, hxPatch string, isEnabled bool) {
 // ButtonCopy renders a copy-to-clipboard button with an input field
 templ ButtonCopy(textToCopy string) {
 	<div
-		class="inline-flex items-center rounded-lg border bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 overflow-hidden"
+		class="inline-flex overflow-hidden items-center bg-gray-100 rounded-lg border border-gray-300 dark:bg-gray-700 dark:border-gray-600"
 		x-data="{ copied: false }"
 	>
 		<input
-			class="px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-mono border-none outline-none"
+			class="py-2 px-3 font-mono text-sm text-gray-700 bg-gray-100 border-none outline-none dark:text-gray-200 dark:bg-gray-700"
 			type="text"
 			value={ textToCopy }
 			readonly
@@ -134,7 +134,7 @@ templ ButtonCopy(textToCopy string) {
 		/>
 		<button
 			@click="$refs.input.select(); navigator.clipboard.writeText($refs.input.value); copied = true; setTimeout(() => copied = false, 2000)"
-			class="px-3 py-2 mr-2 bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500 hover:text-gray-800 dark:hover:text-white transition-colors rounded"
+			class="py-2 px-3 mr-2 text-gray-600 bg-gray-200 rounded transition-colors dark:text-gray-300 dark:bg-gray-600 hover:text-gray-800 hover:bg-gray-300 dark:hover:bg-gray-500 dark:hover:text-white"
 			type="button"
 		>
 			<div x-show="!copied">
@@ -158,7 +158,7 @@ templ ButtonFullscreen() {
 		x-data="{ isFullscreen: !!document.fullscreenElement }"
 		x-init="document.addEventListener('fullscreenchange', () => isFullscreen = !!document.fullscreenElement)"
 		@click="document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()"
-		class="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-800 dark:hover:text-white transition-colors"
+		class="p-2 text-gray-600 bg-gray-100 rounded-lg border border-gray-300 transition-colors dark:text-gray-300 dark:bg-gray-700 dark:border-gray-600 hover:text-gray-800 hover:bg-gray-200 dark:hover:bg-gray-600 dark:hover:text-white"
 		type="button"
 		title="Toggle fullscreen"
 	>
@@ -175,7 +175,7 @@ templ ButtonFullscreen() {
 // Works with ContainerToggleable component via HTMX swap + hx-on::load for container sync
 templ ButtonExpandWidth(configId int, isExpanded bool) {
 	<button
-		class="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-800 dark:hover:text-white transition-colors"
+		class="p-2 text-gray-600 bg-gray-100 rounded-lg border border-gray-300 transition-colors dark:text-gray-300 dark:bg-gray-700 dark:border-gray-600 hover:text-gray-800 hover:bg-gray-200 dark:hover:bg-gray-600 dark:hover:text-white"
 		type="button"
 		title="Toggle width"
 		hx-patch={ fmt.Sprintf("/profile/configuration/%d/toggle-container-expanded", configId) }

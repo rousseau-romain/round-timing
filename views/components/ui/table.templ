@@ -39,40 +39,40 @@ templ TableBody(attrs templ.Attributes) {
 
 // Th renders a table header cell.
 templ Th() {
-	<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">
+	<th class="py-2 px-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
 		{ children... }
 	</th>
 }
 
 // ThEmpty renders an empty table header cell (for action columns).
 templ ThEmpty() {
-	<th class="px-4 py-2"></th>
+	<th class="py-2 px-4"></th>
 }
 
 // Td renders a table data cell.
 templ Td() {
-	<td class="whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">
+	<td class="py-2 px-4 text-gray-700 whitespace-nowrap dark:text-gray-200">
 		{ children... }
 	</td>
 }
 
 // TdPrimary renders a primary table data cell (bolder text, typically first column).
 templ TdPrimary() {
-	<td class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 dark:text-white">
+	<td class="py-2 px-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
 		{ children... }
 	</td>
 }
 
 // TdAction renders a table cell for action buttons.
 templ TdAction() {
-	<td class="whitespace-nowrap px-4 py-2">
+	<td class="py-2 px-4 whitespace-nowrap">
 		{ children... }
 	</td>
 }
 
 // TdCenter renders a centered table data cell.
 templ TdCenter() {
-	<td class="text-center whitespace-nowrap px-4 py-2 text-gray-700 dark:text-gray-200">
+	<td class="py-2 px-4 text-center text-gray-700 whitespace-nowrap dark:text-gray-200">
 		{ children... }
 	</td>
 }
