@@ -25,6 +25,12 @@ live/tailwind:
 live:
 	make -j3 live/templ live/tailwind
 
+lint/tailwind:
+	npx rustywind --check-formatted views/
+
+fix/tailwind:
+	npx rustywind --write views/
+
 build/tailwind:
 	npx tailwindcss -i input.css -o public/tailwind.css --minify
 

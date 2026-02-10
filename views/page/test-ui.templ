@@ -10,10 +10,10 @@ import (
 
 templ testUIButtons() {
 	@ui.Card("default") {
-		<h2 class="text-lg font-semibold mb-4">Buttons</h2>
+		<h2 class="mb-4 text-lg font-semibold">Buttons</h2>
 		<div class="space-y-4">
 			<div>
-				<h3 class="text-sm font-medium mb-2">Variants</h3>
+				<h3 class="mb-2 text-sm font-medium">Variants</h3>
 				<div class="flex flex-wrap gap-2">
 					@ui.Button("primary", "md") {
 						primary
@@ -30,8 +30,8 @@ templ testUIButtons() {
 				</div>
 			</div>
 			<div>
-				<h3 class="text-sm font-medium mb-2">Sizes</h3>
-				<div class="flex flex-wrap items-center gap-2">
+				<h3 class="mb-2 text-sm font-medium">Sizes</h3>
+				<div class="flex flex-wrap gap-2 items-center">
 					@ui.Button("primary", "sm") {
 						small
 					}
@@ -49,7 +49,7 @@ templ testUIButtons() {
 
 templ testUIBadges() {
 	@ui.Card("default") {
-		<h2 class="text-lg font-semibold mb-4">Badges</h2>
+		<h2 class="mb-4 text-lg font-semibold">Badges</h2>
 		<div class="flex flex-wrap gap-2">
 			@ui.Badge("red", "") {
 				red
@@ -75,8 +75,8 @@ templ testUIBadges() {
 
 templ testUICards() {
 	@ui.Card("default") {
-		<h2 class="text-lg font-semibold mb-4">Cards</h2>
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+		<h2 class="mb-4 text-lg font-semibold">Cards</h2>
+		<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 			@ui.Card("default") {
 				<p class="font-medium">Card default</p>
 				<p class="text-sm text-gray-500 dark:text-gray-400">White bg with shadow</p>
@@ -99,7 +99,7 @@ templ testUICards() {
 
 templ testUITableDefault() {
 	@ui.Card("default") {
-		<h2 class="text-lg font-semibold mb-4">Table default</h2>
+		<h2 class="mb-4 text-lg font-semibold">Table default</h2>
 		@ui.Table("default") {
 			@ui.TableHead("default") {
 				@ui.Tr() {
@@ -159,7 +159,7 @@ templ testUITableDefault() {
 
 templ testUITableCompact() {
 	@ui.Card("default") {
-		<h2 class="text-lg font-semibold mb-4">Table compact</h2>
+		<h2 class="mb-4 text-lg font-semibold">Table compact</h2>
 		@ui.Table("compact") {
 			@ui.TableHead("compact") {
 				@ui.Tr() {
@@ -195,7 +195,7 @@ templ testUITableCompact() {
 
 templ testUIForms() {
 	@ui.Card("default") {
-		<h2 class="text-lg font-semibold mb-4">Form elements</h2>
+		<h2 class="mb-4 text-lg font-semibold">Form elements</h2>
 		<div class="space-y-4 max-w-md">
 			@forms.InputAction("text", "test-input", "Text input", templ.Attributes{
 				"placeholder": "Placeholder text",
@@ -215,7 +215,7 @@ templ testUIForms() {
 
 templ testUIPopinMessages() {
 	@ui.Card("default") {
-		<h2 class="text-lg font-semibold mb-4">Popin Messages</h2>
+		<h2 class="mb-4 text-lg font-semibold">Popin Messages</h2>
 		<div class="flex flex-wrap gap-2">
 			@ui.ButtonLink("success", "sm", "/test/ui?errorTitle=Success&errorMessages=This+is+a+success+message&type=success") {
 				Test Success

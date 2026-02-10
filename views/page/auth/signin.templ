@@ -11,22 +11,22 @@ import (
 
 templ SigninPage(navItems []layout.NavItem, languages []system.Language, pageSlug string, popinMessages layout.PopinMessages) {
 	@layout.Layout(i18n.T(ctx, "page.signin.title"), popinMessages, user.User{}, navItems, languages, pageSlug) {
-		<div class="mx-auto max-w-screen-xl px-4 py-16 sm:px-6 lg:px-8">
-			<div class="mb-4 mx-auto max-w-lg flex flex-col space-y-4">
-				<h1 class="text-center text-2xl font-bold text-indigo-600 sm:text-3xl">{ i18n.T(ctx, "page.signin.h1") }</h1>
+		<div class="py-16 px-4 mx-auto max-w-screen-xl sm:px-6 lg:px-8">
+			<div class="flex flex-col mx-auto mb-4 space-y-4 max-w-lg">
+				<h1 class="text-2xl font-bold text-center text-indigo-600 sm:text-3xl">{ i18n.T(ctx, "page.signin.h1") }</h1>
 				@ui.ButtonOAuth("/auth/discord", "Discord")
 				@ui.ButtonOAuth("/auth/google", "Google")
 			</div>
-			<h1 class="text-center text-lg font-medium">{ i18n.T(ctx, "page.signin.connect-with-email") }</h1>
-			<div class="mx-auto max-w-lg flex flex-col space-y-4">
+			<h1 class="text-lg font-medium text-center">{ i18n.T(ctx, "page.signin.connect-with-email") }</h1>
+			<div class="flex flex-col mx-auto space-y-4 max-w-lg">
 				<form
 					hx-post="/signin"
 					hx-target-error="#popinMessages"
-					class="mt-8 grid grid-cols-6 gap-6"
+					class="grid grid-cols-6 gap-6 mt-8"
 				>
 					@forms.Input("email", "Email", "email", "global.email", true)
 					@forms.Input("password", "Password", "password", "global.password", true)
-					<div class="col-span-6 sm:flex sm:items-center sm:gap-4">
+					<div class="col-span-6 sm:flex sm:gap-4 sm:items-center">
 						@ui.ButtonSubmit(i18n.T(ctx, "page.signin.signin-button", i18n.M{"provider": i18n.T(ctx, "global.email")}))
 						<p class="mt-4 text-sm text-gray-500 sm:mt-0 dark:text-gray-400">
 							{ i18n.T(ctx, "page.signin.no-account") }

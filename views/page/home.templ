@@ -21,10 +21,10 @@ templ HomePage(user user.User, popinMessage layout.PopinMessages, navItems []lay
 					@templ.Raw(i18n.T(ctx, "page.home.discover", i18n.M{"name": "<strong>Round Timing</strong>"}))
 				</p>
 				<h2 class="mb-3 text-2xl font-semibold">{ i18n.T(ctx, "page.home.h2") }</h2>
-				<ul class="list-disc mb-4 list-inside">
+				<ul class="mb-4 list-disc list-inside">
 					<li class="mb-2">
 						<strong>{ i18n.T(ctx, "page.home.list-title") }</strong>
-						<ul class="list-disc ml-6 list-inside">
+						<ul class="ml-6 list-disc list-inside">
 							<li>{ i18n.T(ctx, "page.home.list-features.f1") }</li>
 							<li>{ i18n.T(ctx, "page.home.list-features.f2") }</li>
 							<li>{ i18n.T(ctx, "page.home.list-features.f3") }</li>

@@ -15,5 +15,8 @@
     },
     "editor.quickSuggestions": {
         "strings": true
+    },
+    "headwind.classRegex": {
+        "templ": "\\bclass\\s*=\\s*\"([^\"]+)\""
     }
 }

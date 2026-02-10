@@ -9,12 +9,12 @@ import (
 )
 
 templ Footer() {
-	<footer class="mt-4 bg-white dark:bg-gray-900 border-t border-gray-100">
-		<div class="mx-auto max-w-screen-xl px-4 pt-6 pb-6 sm:px-6 lg:px-8 lg:pt-8">
-			<div class="grid grid-cols-1 lg:grid-cols-3 md:grid-cols-2 gap-8">
+	<footer class="mt-4 bg-white border-t border-gray-100 dark:bg-gray-900">
+		<div class="max-w-screen-xl px-4 pt-6 pb-6 mx-auto sm:px-6 lg:px-8 lg:pt-8">
+			<div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
 				<div class="m-auto">
 					<div class="flex justify-center text-indigo-600 sm:justify-start dark:text-indigo-300">
-						<div class="m-auto flex">
+						<div class="flex m-auto">
 							<svg
 								class="hover:animate-spin fill-sky-600"
 								width="30px"
@@ -34,17 +34,17 @@ templ Footer() {
 						</div>
 					</div>
 					<p
-						class="mt-6 max-w-md text-center leading-relaxed text-gray-500 sm:max-w-xs sm:text-left dark:text-gray-400"
+						class="max-w-md mt-6 leading-relaxed text-center text-gray-500 sm:max-w-xs sm:text-left dark:text-gray-400"
 					>
 						{ i18n.T(ctx, "global.footer.p-contact") }
 					</p>
-					<ul class="mt-8 flex justify-center gap-6 sm:justify-start md:gap-8">
+					<ul class="flex justify-center gap-6 mt-8 sm:justify-start md:gap-8">
 						<li>
 							<a
 								href={ templ.SafeURL("mailto:" + constants.MailContact) }
 								rel="noreferrer"
 								target="_blank"
-								class="flex text-indigo-700 transition hover:text-indigo-700/75 dark:text-indigo-500 dark:hover:text-indigo-500/75"
+								class="flex text-indigo-700 transition dark:text-indigo-500 dark:hover:text-indigo-500/75 hover:text-indigo-700/75"
 							>
 								<span class="sr-only">Email</span>
 								<svg class="size-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -64,7 +64,7 @@ templ Footer() {
 					<ul class="mt-8 space-y-4 text-sm">
 						<li>
 							<a
-								class="text-gray-700 transition hover:text-gray-700/75 dark:text-white dark:hover:text-white/75"
+								class="text-gray-700 transition dark:text-white dark:hover:text-white/75 hover:text-gray-700/75"
 								href="/match"
 							>
 								{ i18n.T(ctx, "global.footer.about-us.l-match") }
@@ -72,7 +72,7 @@ templ Footer() {
 						</li>
 						<li>
 							<a
-								class="text-gray-700 transition hover:text-gray-700/75 dark:text-white dark:hover:text-white/75"
+								class="text-gray-700 transition dark:text-white dark:hover:text-white/75 hover:text-gray-700/75"
 								href="/profile"
 							>
 								{ i18n.T(ctx, "global.footer.about-us.l-profil") }
@@ -85,7 +85,7 @@ templ Footer() {
 					<ul class="mt-8 space-y-4 text-sm">
 						<li>
 							<a
-								class="text-gray-700 transition hover:text-gray-700/75 dark:text-white dark:hover:text-white/75"
+								class="text-gray-700 transition dark:text-white dark:hover:text-white/75 hover:text-gray-700/75"
 								href="/cgu"
 							>
 								{ i18n.T(ctx, "global.footer.other-link.l-cgu") }
@@ -93,7 +93,7 @@ templ Footer() {
 						</li>
 						<li>
 							<a
-								class="text-gray-700 transition hover:text-gray-700/75 dark:text-white dark:hover:text-white/75"
+								class="text-gray-700 transition dark:text-white dark:hover:text-white/75 hover:text-gray-700/75"
 								href="/privacy"
 							>
 								{ i18n.T(ctx, "global.footer.other-link.l-privacy") }
@@ -103,19 +103,19 @@ templ Footer() {
 				</div>
 			</div>
 		</div>
-		<div class="border-t border-gray-100 pt-6 pb-2 px-2 dark:border-gray-800">
+		<div class="px-2 pt-6 pb-2 border-t border-gray-100 dark:border-gray-800">
 			<div class="text-center sm:flex sm:justify-between">
 				<p class="text-sm text-gray-500 dark:text-gray-400">
 					<span class="block sm:inline">{ i18n.T(ctx, "global.footer.other-link.rights") }</span>
 					<a
-						class="inline-block text-indigo-600 underline transition hover:text-indigo-600/75 dark:text-indigo-500 dark:hover:text-indigo-500/75"
+						class="inline-block text-indigo-600 underline transition dark:text-indigo-500 dark:hover:text-indigo-500/75 hover:text-indigo-600/75"
 						href="/cgu"
 					>
 						{ i18n.T(ctx, "global.footer.other-link.l-cgu") }
 					</a>
 					<span>&middot;</span>
 					<a
-						class="inline-block text-indigo-600 underline transition hover:text-indigo-600/75 dark:text-indigo-500 dark:hover:text-indigo-500/75"
+						class="inline-block text-indigo-600 underline transition dark:text-indigo-500 dark:hover:text-indigo-500/75 hover:text-indigo-600/75"
 						href="/privacy"
 					>
 						{ i18n.T(ctx, "global.footer.other-link.l-privacy") }
