@@ -427,7 +427,7 @@ func (h *Handler) HandleMatchNextRound(w http.ResponseWriter, r *http.Request) {
 	}
 
 	notify.Notify(matchId)
-	pageMatch.PlayerTable(m, players, spellsPlayers, false).Render(r.Context(), w)
+	pageMatch.MatchPageTable(user, h.Error, h.GetPageNavCustom(r, user, m), h.Languages, r.URL.Path, m, players, spellsPlayers, false).Render(r.Context(), w)
 }
 
 func (h *Handler) HandleUsePlayerSpell(w http.ResponseWriter, r *http.Request) {
