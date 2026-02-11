@@ -6,6 +6,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/rousseau-romain/round-timing/model/game"
+	httpError "github.com/rousseau-romain/round-timing/pkg/httperror"
 	"github.com/rousseau-romain/round-timing/service/auth"
 	"github.com/rousseau-romain/round-timing/views/page"
 )
@@ -19,7 +20,8 @@ func (h *Handler) HandleToggleSpellFavorite(w http.ResponseWriter, r *http.Reque
 
 	err := game.ToggleIsFavoriteSpell(r.Context(), user.Id, idSpell)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		logger.Error(err.Error())
+		httpError.InternalError(w)
 		return
 	}
 
@@ -27,7 +29,8 @@ func (h *Handler) HandleToggleSpellFavorite(w http.ResponseWriter, r *http.Reque
 
 	spellFavorite, err := game.GetFavoriteSpellByIdUserAndIdSpell(r.Context(), user.IdLanguage, user.Id, idSpell)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		logger.Error(err.Error())
+		httpError.InternalError(w)
 		return
 	}
 

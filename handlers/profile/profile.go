@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/handlers"
+	httpError "github.com/rousseau-romain/round-timing/pkg/httperror"
 	"github.com/rousseau-romain/round-timing/service/auth"
 	"github.com/rousseau-romain/round-timing/model/game"
 	matchModel "github.com/rousseau-romain/round-timing/model/match"
@@ -31,28 +32,28 @@ func (h *Handler) HandleProfile(w http.ResponseWriter, r *http.Request) {
 	idUserShares, err := userModel.GetUsersSpectateByIdUser(r.Context(), user.Id)
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpError.InternalError(w)
 		return
 	}
 
 	classes, err := game.GetClasses(r.Context(), user.IdLanguage)
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpError.InternalError(w)
 		return
 	}
 
 	spells, err := game.GetFavoriteSpellsByIdUser(r.Context(), user.IdLanguage, user.Id)
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpError.InternalError(w)
 		return
 	}
 
 	userConfigurations, err := userModel.GetAllConfigurationByIdUser(r.Context(), user.IdLanguage, user.Id)
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpError.InternalError(w)
 		return
 	}
 
@@ -71,7 +72,7 @@ func (h *Handler) HandleProfileToggleUserConfiguration(w http.ResponseWriter, r 
 		err := userModel.SetUserConfiguration(r.Context(), user.Id, idConfiguration, value)
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			httpError.InternalError(w)
 			return
 		}
 		logger.Info("user configuration set", "configurationId", idConfiguration, "value", value)
@@ -79,7 +80,7 @@ func (h *Handler) HandleProfileToggleUserConfiguration(w http.ResponseWriter, r 
 		err := userModel.ToggleUserConfiguration(r.Context(), user.Id, idConfiguration, user.IdLanguage)
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			httpError.InternalError(w)
 			return
 		}
 		logger.Info("user configuration toggled", "configurationId", idConfiguration)
@@ -88,7 +89,7 @@ func (h *Handler) HandleProfileToggleUserConfiguration(w http.ResponseWriter, r 
 	userConfiguration, err := userModel.GetConfigurationByIdConfigurationIdUser(r.Context(), user.IdLanguage, user.Id, idConfiguration)
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpError.InternalError(w)
 		return
 	}
 
@@ -105,7 +106,7 @@ func (h *Handler) HandleToggleContainerExpanded(w http.ResponseWriter, r *http.R
 	err := userModel.ToggleUserConfiguration(r.Context(), user.Id, idConfiguration, user.IdLanguage)
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpError.InternalError(w)
 		return
 	}
 	logger.Info("container expanded toggled", "configurationId", idConfiguration)
@@ -113,7 +114,7 @@ func (h *Handler) HandleToggleContainerExpanded(w http.ResponseWriter, r *http.R
 	configs, err := userModel.GetAllConfigurationByIdUser(r.Context(), user.IdLanguage, user.Id)
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpError.InternalError(w)
 		return
 	}
 
@@ -139,7 +140,7 @@ func (h *Handler) HandleProfileAddSpectate(w http.ResponseWriter, r *http.Reques
 
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpError.InternalError(w)
 	}
 
 	if !userSpectateExist {
@@ -157,7 +158,7 @@ func (h *Handler) HandleProfileAddSpectate(w http.ResponseWriter, r *http.Reques
 
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpError.InternalError(w)
 	}
 
 	if IsAlreadyUsersSpectate {
@@ -177,7 +178,7 @@ func (h *Handler) HandleProfileAddSpectate(w http.ResponseWriter, r *http.Reques
 
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpError.InternalError(w)
 		return
 	}
 
@@ -198,7 +199,7 @@ func (h *Handler) HandleProfileDeleteSpectate(w http.ResponseWriter, r *http.Req
 
 	if err := userModel.DeleteUserSpectate(r.Context(), user.Id, r.FormValue("idUserShare")); err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpError.InternalError(w)
 		return
 	}
 

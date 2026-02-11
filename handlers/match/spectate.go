@@ -12,6 +12,7 @@ import (
 	matchModel "github.com/rousseau-romain/round-timing/model/match"
 	userModel "github.com/rousseau-romain/round-timing/model/user"
 	"github.com/rousseau-romain/round-timing/pkg/constants"
+	httpError "github.com/rousseau-romain/round-timing/pkg/httperror"
 	"github.com/rousseau-romain/round-timing/pkg/notify"
 	"github.com/rousseau-romain/round-timing/service/auth"
 	pageMatch "github.com/rousseau-romain/round-timing/views/page/match"
@@ -37,35 +38,35 @@ func (h *Handler) HandleSpectateMatch(w http.ResponseWriter, r *http.Request) {
 	matchFromUser, err := matchModel.GetLastMatchByUserId(r.Context(), user.Id)
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpError.InternalError(w)
 		return
 	}
 
 	match, err := matchModel.GetMatch(r.Context(), matchId)
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpError.InternalError(w)
 		return
 	}
 
 	players, err := matchModel.GetPlayersByIdMatch(r.Context(), user.IdLanguage, matchId)
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpError.InternalError(w)
 		return
 	}
 
 	userConfigurationFavoriteSpells, err := userModel.GetConfigurationByKeyAndIdUser(r.Context(), user.IdLanguage, user.Id, constants.ConfigKeyHideNonFavoriteSpells)
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpError.InternalError(w)
 		return
 	}
 
 	spellsPlayers, err := matchModel.GetSpellsPlayersByIdMatch(r.Context(), user.IdLanguage, matchId, user.Id, userConfigurationFavoriteSpells.Value == "true")
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpError.InternalError(w)
 		return
 	}
 
