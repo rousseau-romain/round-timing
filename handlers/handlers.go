@@ -77,6 +77,15 @@ func (h *Handler) GetPageNavCustom(r *http.Request, user userModel.User, match m
 	return pageNav
 }
 
+func RespondWithError(w http.ResponseWriter, r *http.Request, logger *slog.Logger, err error, userMessage string, status int) {
+	logger.Error(err.Error())
+	if r.Header.Get("HX-Request") == "true" {
+		RenderComponentError(userMessage, []string{userMessage}, status, w, r)
+	} else {
+		http.Error(w, userMessage, status)
+	}
+}
+
 func RenderComponentError(title string, message []string, httpCode int, w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(httpCode)
 	layout.PopinMessage(layout.PopinMessages{

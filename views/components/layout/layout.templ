@@ -9,6 +9,7 @@ import (
 	"github.com/rousseau-romain/round-timing/config"
 	"github.com/rousseau-romain/round-timing/model/system"
 	"github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/pkg/csrftoken"
 	"github.com/rousseau-romain/round-timing/service/auth"
 	"github.com/rousseau-romain/round-timing/views/components/icons"
 )
@@ -29,6 +30,7 @@ type PopinMessages struct {
 }
 
 templ Layout(title string, popinMessages PopinMessages, user user.User, navItems []NavItem, languages []system.Language, pageSlug string) {
+	@templ.Raw("<!DOCTYPE html>")
 	<html
 		class={ templ.KV("dark", getConfigValue(auth.UserConfigurationsFromContext(ctx), "dark_mode") == "dark") }
 		data-dark-mode={ getConfigValue(auth.UserConfigurationsFromContext(ctx), "dark_mode") }
@@ -51,6 +53,8 @@ templ Layout(title string, popinMessages PopinMessages, user user.User, navItems
 			}
 			<script src="/public/script/htmx-2.0.8/ext/response-targets.js"></script>
 			<script src="/public/script/htmx-2.0.8/ext/ws.js"></script>
+			<script id="csrf-data" data-token={ csrftoken.FromContext(ctx) }></script>
+			<script src="/public/script/csrf.js"></script>
 			<script src="/public/script/theme-mode.js"></script>
 			@Nav(user, navItems, languages, pageSlug)
 			<div class="min-h-screen" id="content" hx-ext="response-targets">
@@ -175,24 +179,12 @@ templ MobileMenu(user user.User, navItems []NavItem) {
 }
 
 templ PopinMessage(popinMessages PopinMessages) {
-	if len(popinMessages.Messages) > 0 {
+	if popinMessages.Title != "" || len(popinMessages.Messages) > 0 {
 		<div
-			x-data="{
-				open: true,
-				close() {
-					this.open = false;
-					const url = new URL(window.location);
-					if (url.searchParams.has('errorTitle') || url.searchParams.has('errorMessages')) {
-						url.searchParams.delete('errorTitle');
-						url.searchParams.delete('errorMessages');
-						window.history.replaceState({}, document.title, url);
-						location.reload();
-					}
-				}
-			}"
+			x-data="{ open: true }"
 			x-show="open"
 			x-cloak
-			@click="close()"
+			@click="open = false"
 			class="absolute top-0 right-0 flex justify-center w-screen h-screen bg-gray-800 cursor-pointer place-items-center bg-opacity-40 popin-message"
 		>
 			<div
@@ -207,7 +199,7 @@ templ PopinMessage(popinMessages PopinMessages) {
 					templ.KV("border-sky-500 bg-sky-50 text-sky-700 dark:bg-sky-900 dark:border-sky-600", popinMessages.Type == "info"),
 				}
 			>
-				<div class="absolute cursor-pointer top-2 right-2 close" @click="close()">
+				<div class="absolute cursor-pointer top-2 right-2 close" @click="open = false">
 					<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 						<line x1="5" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
 						<line x1="19" y1="5" x2="5" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>

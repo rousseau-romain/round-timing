@@ -7,9 +7,9 @@ import (
 
 	"github.com/rousseau-romain/round-timing/config"
 	"github.com/rousseau-romain/round-timing/handlers"
-	"github.com/rousseau-romain/round-timing/service/auth"
 	matchModel "github.com/rousseau-romain/round-timing/model/match"
 	userModel "github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/service/auth"
 	"github.com/rousseau-romain/round-timing/views/components/layout"
 	pageView "github.com/rousseau-romain/round-timing/views/page"
 	"github.com/rousseau-romain/round-timing/views/page/legal"
@@ -52,9 +52,14 @@ func (h *Handler) HandleHome(w http.ResponseWriter, r *http.Request) {
 	user, _ := auth.UserFromRequest(r)
 	pageNav := handlers.GetPageNavDefault(r)
 
+	title, messages, msgType := auth.GetFlash(w, r)
+	if msgType == "" {
+		msgType = "error"
+	}
 	h.Error = layout.PopinMessages{
-		Title:    r.URL.Query().Get("errorTitle"),
-		Messages: strings.Split(r.URL.Query().Get("errorMessages"), ","),
+		Title:    title,
+		Messages: messages,
+		Type:     msgType,
 	}
 
 	if user.Id != 0 {

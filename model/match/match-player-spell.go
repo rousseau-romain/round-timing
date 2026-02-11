@@ -2,7 +2,6 @@ package match
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/rousseau-romain/round-timing/model/game"
 	"github.com/rousseau-romain/round-timing/pkg/constants"
@@ -85,12 +84,7 @@ func GetSpellsPlayersByIdMatch(ctx context.Context, idLanguage, idMatch, idUser 
 
 	}
 
-	masteryClause := "m.multiple_mastery_enabled = 0 AND (s.id NOT IN ("
-	for _, id := range constants.MasteryIdSpells {
-		masteryClause += fmt.Sprintf("%d, ", id)
-	}
-	masteryClause = masteryClause[:len(masteryClause)-2]
-	masteryClause += "))"
+	masteryPlaceholder, masteryArgs := sqlhelper.InClause(constants.MasteryIdSpells)
 
 	sql := `
 		SELECT
@@ -115,15 +109,16 @@ func GetSpellsPlayersByIdMatch(ctx context.Context, idLanguage, idMatch, idUser 
 			mps.match_id = ?
 			AND (
 				(
-					` + masteryClause + `
+					m.multiple_mastery_enabled = 0 AND (s.id NOT IN ` + masteryPlaceholder + `)
 				)
 				OR (m.multiple_mastery_enabled = 1)
 			)
 		)
 		ORDER BY mps.player_id DESC, IF(fs.id_spell IS NULL , 1, 2) DESC, fs.id ASC ,s.id ASC
 	`
-	// why can't use ?
-	rows, err := db.QueryContext(ctx, sql, idLanguage, idUser, idMatch)
+	args := []interface{}{idLanguage, idUser, idMatch}
+	args = append(args, masteryArgs...)
+	rows, err := db.QueryContext(ctx, sql, args...)
 	if err != nil {
 		return nil, err
 	}

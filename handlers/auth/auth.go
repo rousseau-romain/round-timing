@@ -1,10 +1,8 @@
 package auth
 
 import (
-	"fmt"
 	"net/http"
 	"net/mail"
-	"net/url"
 	"strings"
 	"time"
 
@@ -15,11 +13,14 @@ import (
 	"github.com/rousseau-romain/round-timing/handlers"
 	"github.com/rousseau-romain/round-timing/model/system"
 	userModel "github.com/rousseau-romain/round-timing/model/user"
+	httpError "github.com/rousseau-romain/round-timing/pkg/httperror"
 	"github.com/rousseau-romain/round-timing/pkg/lang"
 	"github.com/rousseau-romain/round-timing/pkg/password"
 	serviceAuth "github.com/rousseau-romain/round-timing/service/auth"
 	authPage "github.com/rousseau-romain/round-timing/views/page/auth"
 )
+
+const authFailedMessage = "Authentication failed"
 
 type Handler struct {
 	*handlers.Handler
@@ -42,16 +43,14 @@ func (h *Handler) HandleProviderLogin(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Request) {
 	user, err := gothic.CompleteUserAuth(w, r)
 	if err != nil {
-		fmt.Fprintln(w, err)
-		h.Slog.Error(err.Error())
+		handlers.RespondWithError(w, r, h.Slog, err, authFailedMessage, http.StatusInternalServerError)
 		return
 	}
 
 	userAlreadyExists, err := userModel.UserExistsByOauth2Id(r.Context(), user.UserID)
 
 	if err != nil {
-		h.Slog.Error(err.Error())
-		fmt.Fprintln(w, err)
+		handlers.RespondWithError(w, r, h.Slog, err, authFailedMessage, http.StatusInternalServerError)
 		return
 	}
 
@@ -61,8 +60,7 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 		providerLoginName, err := userModel.UserExistsByEmail(r.Context(), user.Email)
 
 		if err != nil {
-			fmt.Fprintln(w, err)
-			logger.Error(err.Error())
+			handlers.RespondWithError(w, r, logger, err, authFailedMessage, http.StatusInternalServerError)
 			return
 		}
 
@@ -77,15 +75,15 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 
 			h.Auth.RemoveUserSession(w, r, h.Slog)
 
-			w.Header().Set("Location", fmt.Sprintf("/?errorTitle=%s&errorMessages=%s", url.QueryEscape(errorTitle), url.QueryEscape(errorMessage)))
-			w.WriteHeader(http.StatusTemporaryRedirect)
+			serviceAuth.SetFlash(w, r, errorTitle, []string{errorMessage}, "error")
+			http.Redirect(w, r, "/", http.StatusSeeOther)
 			return
 		}
 		locale := lang.GetPreferred(r)
 
 		idLanguage, err := system.GetLanguagesIdByCode(r.Context(), locale)
 		if err != nil {
-			fmt.Fprintln(w, err)
+			handlers.RespondWithError(w, r, logger, err, authFailedMessage, http.StatusInternalServerError)
 			return
 		}
 		_, err = userModel.CreateUser(r.Context(), userModel.UserCreate{
@@ -95,7 +93,7 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 			IdLanguage:    idLanguage,
 		})
 		if err != nil {
-			fmt.Fprintln(w, err)
+			handlers.RespondWithError(w, r, logger, err, authFailedMessage, http.StatusInternalServerError)
 			return
 		}
 
@@ -104,7 +102,7 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 
 	err = h.Auth.StoreUserSession(w, r, h.Slog, user)
 	if err != nil {
-		fmt.Fprintln(w, err)
+		handlers.RespondWithError(w, r, h.Slog, err, authFailedMessage, http.StatusInternalServerError)
 		return
 	}
 
@@ -118,8 +116,7 @@ func (h *Handler) HandleSignupEmail(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		h.Slog.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		handlers.RespondWithError(w, r, h.Slog, err, "Invalid request", http.StatusBadRequest)
 		return
 	}
 
@@ -155,7 +152,7 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	provider, err := userModel.UserExistsByEmail(r.Context(), email)
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, "can't create user", http.StatusInternalServerError)
+		httpError.CantCreateUser(w)
 		return
 	}
 	if provider != "" {
@@ -171,7 +168,7 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	salt, err := password.GenerateSalt()
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, "can't create user", http.StatusInternalServerError)
+		httpError.CantCreateUser(w)
 		return
 	}
 
@@ -181,7 +178,7 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	idLanguage, err := system.GetLanguagesIdByCode(r.Context(), locale)
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, "can't create user", http.StatusInternalServerError)
+		httpError.CantCreateUser(w)
 		return
 	}
 
@@ -195,7 +192,7 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	_, err = userModel.CreateUser(r.Context(), user)
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, "can't create user", http.StatusInternalServerError)
+		httpError.CantCreateUser(w)
 		return
 	}
 
@@ -220,8 +217,7 @@ func generateToken(email string) (string, error) {
 func (h *Handler) HandleLoginEmail(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		h.Slog.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		handlers.RespondWithError(w, r, h.Slog, err, "Invalid request", http.StatusBadRequest)
 		return
 	}
 
