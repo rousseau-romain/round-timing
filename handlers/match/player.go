@@ -9,6 +9,7 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/rousseau-romain/round-timing/handlers"
 	matchModel "github.com/rousseau-romain/round-timing/model/match"
+	httpError "github.com/rousseau-romain/round-timing/pkg/httperror"
 	"github.com/rousseau-romain/round-timing/pkg/notify"
 	"github.com/rousseau-romain/round-timing/service/auth"
 	pageMatch "github.com/rousseau-romain/round-timing/views/page/match"
@@ -35,7 +36,7 @@ func (h *Handler) HandleUpdatePlayer(w http.ResponseWriter, r *http.Request) {
 		Name: &name,
 	})
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpError.InternalError(w)
 		logger.Error(err.Error())
 		return
 	}
@@ -70,7 +71,7 @@ func (h *Handler) HandleCreatePlayer(w http.ResponseWriter, r *http.Request) {
 	canCreatePlayerInTeam, err := matchModel.NumberPlayerInTeamByTeamId(r.Context(), idTeam)
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpError.InternalError(w)
 	}
 
 	if canCreatePlayerInTeam == MaxPlayerByTeam {
@@ -94,7 +95,7 @@ func (h *Handler) HandleCreatePlayer(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpError.InternalError(w)
 		return
 	}
 
@@ -113,7 +114,7 @@ func (h *Handler) HandleCreatePlayer(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpError.InternalError(w)
 		return
 	}
 
@@ -123,7 +124,7 @@ func (h *Handler) HandleCreatePlayer(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpError.InternalError(w)
 		return
 	}
 
@@ -143,14 +144,14 @@ func (h *Handler) HandleDeletePlayer(w http.ResponseWriter, r *http.Request) {
 	err := matchModel.DeleteMatchPlayersSpellsByPlayer(r.Context(), idPlayer)
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpError.InternalError(w)
 		return
 	}
 
 	err = matchModel.DeletePlayer(r.Context(), idPlayer)
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpError.InternalError(w)
 		return
 	}
 

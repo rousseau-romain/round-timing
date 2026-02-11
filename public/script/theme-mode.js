@@ -1,7 +1,5 @@
 function applyThemeMode(mode) {
 	const root = document.documentElement;
-	console.log("Applying theme mode:", mode);
-	console.log("root", root);
 	root.dataset.darkMode = mode;
 	if (mode === "dark") {
 		root.classList.add("dark");

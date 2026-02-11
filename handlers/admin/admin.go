@@ -6,6 +6,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/rousseau-romain/round-timing/handlers"
+	httpError "github.com/rousseau-romain/round-timing/pkg/httperror"
 	"github.com/rousseau-romain/round-timing/service/auth"
 	userModel "github.com/rousseau-romain/round-timing/model/user"
 	pageAdmin "github.com/rousseau-romain/round-timing/views/page/admin"
@@ -22,7 +23,7 @@ func (h *Handler) HandleListUser(w http.ResponseWriter, r *http.Request) {
 	users, err := userModel.GetUsers(r.Context())
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		httpError.InternalError(w)
 		return
 	}
 	pageAdmin.UserListPage(user, h.Error, handlers.GetPageNavDefault(r), h.Languages, r.URL.Path, user, users).Render(r.Context(), w)
@@ -43,7 +44,7 @@ func (h *Handler) HandleUserEnabled(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		httpError.InternalError(w)
 		return
 	}
 
@@ -52,7 +53,7 @@ func (h *Handler) HandleUserEnabled(w http.ResponseWriter, r *http.Request) {
 	userEnabled, err := userModel.GetUserById(r.Context(), idUser)
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		httpError.InternalError(w)
 		return
 	}
 

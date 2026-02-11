@@ -16,6 +16,7 @@ import (
 	"github.com/markbates/goth/providers/google"
 	"github.com/rousseau-romain/round-timing/config"
 	"github.com/rousseau-romain/round-timing/model/user"
+	httpError "github.com/rousseau-romain/round-timing/pkg/httperror"
 )
 
 type contextKey string
@@ -84,7 +85,7 @@ func (s *AuthService) StoreUserSession(w http.ResponseWriter, r *http.Request, s
 	err := session.Save(r, w)
 	if err != nil {
 		slog.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpError.InternalError(w)
 		return err
 	}
 
@@ -104,7 +105,7 @@ func (s *AuthService) RemoveUserSession(w http.ResponseWriter, r *http.Request, 
 	session, err := gothic.Store.Get(r, SessionName)
 	if err != nil {
 		slog.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpError.InternalError(w)
 		return
 	}
 

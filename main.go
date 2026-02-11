@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/gorilla/csrf"
 	"github.com/rousseau-romain/round-timing/config"
 	"github.com/rousseau-romain/round-timing/handlers"
 	"github.com/rousseau-romain/round-timing/i18n/locales"
@@ -59,5 +60,33 @@ func run() error {
 
 	router := routes.Setup(handler, authService, versionLogger)
 
-	return http.ListenAndServe(":2468", middleware.Language(router, authService, versionLogger))
+	csrfMiddleware := csrf.Protect(
+		[]byte(config.CSRF_KEY),
+		csrf.Secure(config.COOKIES_AUTH_IS_SECURE),
+		csrf.Path("/"),
+		csrf.SameSite(csrf.SameSiteLaxMode),
+		csrf.ErrorHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			versionLogger.Warn("CSRF validation failed",
+				"method", r.Method,
+				"path", r.URL.Path,
+				"reason", csrf.FailureReason(r),
+				"hasCSRFHeader", r.Header.Get("X-CSRF-Token") != "",
+			)
+			http.Error(w, "Forbidden - invalid CSRF token", http.StatusForbidden)
+		})),
+	)
+
+	inner := csrfMiddleware(middleware.WithCSRFToken(middleware.Language(router, authService, versionLogger)))
+
+	// gorilla/csrf v1.7.3 defaults to assuming HTTPS. When running on plain
+	// HTTP (Secure=false), we must signal this via PlaintextHTTPRequest so
+	// the Origin/Referer checks use the correct scheme.
+	var chain http.Handler = inner
+	if !config.COOKIES_AUTH_IS_SECURE {
+		chain = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			inner.ServeHTTP(w, csrf.PlaintextHTTPRequest(r))
+		})
+	}
+
+	return http.ListenAndServe(":2468", chain)
 }

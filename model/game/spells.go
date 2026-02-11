@@ -2,9 +2,6 @@ package game
 
 import (
 	"context"
-	"fmt"
-	"strconv"
-	"strings"
 
 	"github.com/rousseau-romain/round-timing/pkg/sqlhelper"
 )
@@ -24,10 +21,7 @@ type Spell struct {
 }
 
 func GetSpellsByIdClass(ctx context.Context, idLanguage int, idClass []int, idsToExclude []int) ([]Spell, error) {
-	var strIdClass []string
-	for _, id := range idClass {
-		strIdClass = append(strIdClass, strconv.Itoa(id))
-	}
+	classPlaceholder, classArgs := sqlhelper.InClause(idClass)
 
 	sql := `
 		SELECT
@@ -44,17 +38,18 @@ func GetSpellsByIdClass(ctx context.Context, idLanguage int, idClass []int, idsT
 			s.is_ending_caster
 		FROM spell s
 		JOIN spell_translation st ON st.id_spell = s.id AND st.id_language = ?
-		WHERE id_class IN (` + strings.Join(strIdClass, ",") + `)
+		WHERE id_class IN ` + classPlaceholder + `
 	`
 
+	args := []interface{}{idLanguage}
+	args = append(args, classArgs...)
+
 	if len(idsToExclude) > 0 {
-		var strIdsToExclude []string
-		for _, id := range idsToExclude {
-			strIdsToExclude = append(strIdsToExclude, strconv.Itoa(id))
-		}
-		sql = sql + fmt.Sprintf("AND s.id NOT IN (%s)", strings.Join(strIdsToExclude, ","))
+		excludePlaceholder, excludeArgs := sqlhelper.InClause(idsToExclude)
+		sql = sql + "AND s.id NOT IN " + excludePlaceholder
+		args = append(args, excludeArgs...)
 	}
-	rows, err := db.QueryContext(ctx, sql, idLanguage)
+	rows, err := db.QueryContext(ctx, sql, args...)
 	if err != nil {
 		return nil, err
 	}

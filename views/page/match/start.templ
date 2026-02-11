@@ -34,7 +34,7 @@ templ MatchPageTable(user user.User, popinMessages layout.PopinMessages, navItem
 				<span class="text-lg font-bold text-gray-900 dark:text-white">{ strconv.Itoa(match.Round) }</span>
 			</p>
 		</div>
-		<div class="flex gap-2 items-center">
+		<div class="flex items-center gap-2">
 			@ui.ButtonExpandWidth(ui.GetContainerExpandedConfig(auth.UserConfigurationsFromContext(ctx)))
 			@ui.ButtonFullscreen()
 			@ui.ButtonCopy(fmt.Sprintf("%s/match/%d/spectate", config.PUBLIC_HOST_PORT, match.Id))
@@ -42,7 +42,7 @@ templ MatchPageTable(user user.User, popinMessages layout.PopinMessages, navItem
 	</div>
 	// Action buttons
 	@ui.Section() {
-		<div class="flex flex-wrap gap-3 justify-center">
+		<div class="flex flex-wrap justify-center gap-3">
 			@ui.ButtonAction("success", "lg", templ.Attributes{
 				"type":      "submit",
 				"hx-get":    fmt.Sprintf("/match/%d/increase-round", match.Id),
@@ -76,8 +76,8 @@ templ MatchPageTable(user user.User, popinMessages layout.PopinMessages, navItem
 	}
 }
 
-func styleName(color, name string) string {
-	return fmt.Sprintf(`<span class="font-bold text-center" style="color: %s">%s</span>`, color, name)
+templ SpellName(color string, name string) {
+	<span class="font-bold text-center" style={ templ.SafeCSS("color: " + color) }>{ name }</span>
 }
 
 func toggleMasteryURL(matchId int, multipleMasteryEnabled int) string {
@@ -105,7 +105,7 @@ templ Spell(mps matchModel.MatchPlayerSpell, isSpectator bool) {
 			}
 		}
 	>
-		@templ.Raw(styleName(mps.Spell.Color, mps.Spell.ShortName))
+		@SpellName(mps.Spell.Color, mps.Spell.ShortName)
 		<div
 			class={
 				"relative border-2 rounded w-fit m-auto",
@@ -114,7 +114,7 @@ templ Spell(mps matchModel.MatchPlayerSpell, isSpectator bool) {
 				templ.KV("border-cyan-500", mps.RoundBeforeRecovery >= 3),
 			}
 		>
-			<span class="top-full -left-1/2 p-1 rounded shadow-lg pointer-events-none tooltip">
+			<span class="p-1 rounded shadow-lg pointer-events-none top-full -left-1/2 tooltip">
 				<ul>
 					<li class="font-bold">{ mps.Spell.Name }</li>
 					<li>{ i18n.T(ctx, "page.start-match.delay-between-use") } : <span class="font-bold">{ strconv.Itoa(mps.Spell.Delay) }</span></li>
@@ -136,9 +136,9 @@ templ Spell(mps matchModel.MatchPlayerSpell, isSpectator bool) {
 
 templ Player(p matchModel.Player, playersSpells []matchModel.MatchPlayerSpell, isSpectator bool) {
 	@ui.TrColor(p.Team.Color) {
-		<td class="py-2 px-4" colspan="3">
+		<td class="px-4 py-2" colspan="3">
 			<div class="flex flex-col gap-2 md:flex-row md:gap-4 md:items-center">
-				<div class="flex gap-2 justify-center items-center">
+				<div class="flex items-center justify-center gap-2">
 					@ui.AvatarToggle(templ.Attributes{"title": p.Name, "alt": p.Class.Name, "src": p.Class.UrlImage + "F.svg"})
 					<span class="font-medium whitespace-nowrap">{ p.Name }</span>
 				</div>

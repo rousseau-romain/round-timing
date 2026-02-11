@@ -5,6 +5,7 @@ import (
 
 	"github.com/gorilla/mux"
 	userModel "github.com/rousseau-romain/round-timing/model/user"
+	httpError "github.com/rousseau-romain/round-timing/pkg/httperror"
 	"github.com/rousseau-romain/round-timing/pkg/lang"
 	"github.com/rousseau-romain/round-timing/service/auth"
 )
@@ -16,7 +17,11 @@ func (h *Handler) HandlePlayerLanguage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	code := vars["code"]
-	idLanguage := lang.SupportedLanguages[code]
+	idLanguage, ok := lang.SupportedLanguages[code]
+	if !ok {
+		http.Error(w, "Unsupported language", http.StatusBadRequest)
+		return
+	}
 
 	userUpdate := userModel.UserUpdate{
 		IdLanguage: &idLanguage,
@@ -25,7 +30,7 @@ func (h *Handler) HandlePlayerLanguage(w http.ResponseWriter, r *http.Request) {
 	err := userModel.UpdateUser(r.Context(), user.Id, userUpdate)
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		httpError.InternalError(w)
 		return
 	}
 
