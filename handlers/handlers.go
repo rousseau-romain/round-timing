@@ -46,13 +46,20 @@ func GetPageNavDefault(r *http.Request) []layout.NavItem {
 	}
 }
 
+func matchNavUrl(match matchModel.Match) string {
+	if match.Round >= 1 {
+		return fmt.Sprintf("match/%d/start", match.Id)
+	}
+	return fmt.Sprintf("match/%d", match.Id)
+}
+
 func (h *Handler) GetPageNavCustom(r *http.Request, user userModel.User, match matchModel.Match) []layout.NavItem {
 	var pageNav = GetPageNavDefault(r)
 	if user.Id != 0 {
 		if match.Id != 0 {
 			pageNav = append(pageNav, layout.NavItem{
 				Name: fmt.Sprintf("Match %s (%d)", match.Name, match.Id),
-				Url:  fmt.Sprintf("match/%d", match.Id),
+				Url:  matchNavUrl(match),
 			})
 		} else {
 			lastMatch, err := matchModel.GetLastMatchByUserId(r.Context(), user.Id)
@@ -63,7 +70,7 @@ func (h *Handler) GetPageNavCustom(r *http.Request, user userModel.User, match m
 			if lastMatch.Id != 0 {
 				pageNav = append(pageNav, layout.NavItem{
 					Name: i18n.T(r.Context(), "global.header.last-match", i18n.M{"name": lastMatch.Name, "id": lastMatch.Id}),
-					Url:  fmt.Sprintf("match/%d", lastMatch.Id),
+					Url:  matchNavUrl(lastMatch),
 				})
 			}
 		}
