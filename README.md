@@ -2,7 +2,7 @@
 
 You nedd to have:
 
-- brew
+- golang-migrate gnupg
 - docker v27.3.1
 - docker-compose v2.30.3
 - go v1.25.6 (brew install go)
@@ -21,10 +21,10 @@ Run these commands first(you need the key for the ecryption):
 
 ```bash
 make db/decrypt
-make db_start
-make db_init
-make db/encrypt
 make install
+make db_init
+make db_start
+make db/encrypt
 make live
 ```
 

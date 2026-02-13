@@ -18,5 +18,6 @@
     },
     "headwind.classRegex": {
         "templ": "\\bclass\\s*=\\s*\"([^\"]+)\""
-    }
+    },
+    "go.goroot":"$GOROOT"
 }
