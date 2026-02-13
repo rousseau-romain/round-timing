@@ -9,7 +9,7 @@ import (
 
 templ Privacy(popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string) {
 	@layout.Layout(i18n.T(ctx, "page.privacy.title"), popinMessages, user.User{}, navItems, languages, pageSlug) {
-		<div class="grid place-content-center px-4 bg-white dark:bg-gray-900">
+		<div class="grid px-4 bg-white place-content-center dark:bg-gray-900">
 			<h1 class="text-2xl font-bold text-center text-indigo-600 sm:text-3xl">{ i18n.T(ctx, "page.privacy.h1") }</h1>
 			<div>
 				<h2 class="text-lg font-semibold">1. Collecte de l'information </h2>

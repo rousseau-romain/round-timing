@@ -31,7 +31,7 @@ templ testUIButtons() {
 			</div>
 			<div>
 				<h3 class="mb-2 text-sm font-medium">Sizes</h3>
-				<div class="flex flex-wrap gap-2 items-center">
+				<div class="flex flex-wrap items-center gap-2">
 					@ui.Button("primary", "sm") {
 						small
 					}
@@ -196,7 +196,7 @@ templ testUITableCompact() {
 templ testUIForms() {
 	@ui.Card("default") {
 		<h2 class="mb-4 text-lg font-semibold">Form elements</h2>
-		<div class="space-y-4 max-w-md">
+		<div class="max-w-md space-y-4">
 			@forms.InputAction("text", "test-input", "Text input", templ.Attributes{
 				"placeholder": "Placeholder text",
 			})

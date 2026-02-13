@@ -12,13 +12,13 @@ templ Input(inputType string, id string, name string, labelKey string, required 
 			{ i18n.T(ctx, labelKey) }
 		</label>
 		<input
-			type={ inputType }
+				type={ inputType }
 			id={ id }
 			name={ name }
 			if required {
 				required
 			}
-			class="mt-1 w-full text-sm text-gray-700 bg-white rounded-md border-gray-200 dark:text-gray-200 dark:bg-gray-800 dark:border-gray-700 shadow-xs"
+			class="w-full mt-1 text-sm text-gray-700 bg-white border-gray-200 rounded-md shadow-xs dark:text-gray-200 dark:bg-gray-800 dark:border-gray-700"
 		/>
 	</div>
 }
@@ -36,7 +36,7 @@ templ InputAction(inputType string, name string, labelName string, attrs templ.A
 		type={ inputType }
 		name={ name }
 		id={ name }
-		class="rounded-md border-gray-300 shadow-sm sm:text-sm dark:text-gray-200 dark:bg-gray-800 dark:border-gray-600 focus:border-indigo-500 focus:ring-indigo-500"
+		class="border-gray-300 rounded-md shadow-sm sm:text-sm dark:text-gray-200 dark:bg-gray-800 dark:border-gray-600 focus:border-indigo-500 focus:ring-indigo-500"
 		{ attrs... }
 	/>
 }
@@ -57,7 +57,7 @@ templ InputHalf(inputType string, id string, name string, labelKey string, requi
 			if required {
 				required
 			}
-			class="mt-1 w-full text-sm text-gray-700 bg-white rounded-md border-gray-200 dark:text-gray-200 dark:bg-gray-800 dark:border-gray-700 shadow-xs"
+			class="w-full mt-1 text-sm text-gray-700 bg-white border-gray-200 rounded-md shadow-xs dark:text-gray-200 dark:bg-gray-800 dark:border-gray-700"
 		/>
 	</div>
 }
@@ -81,7 +81,7 @@ templ Select(id string, name string, labelKey string, options []SelectOption, re
 			if required {
 				required
 			}
-			class="mt-1 w-full text-sm text-gray-700 bg-white rounded-md border-gray-200 dark:text-gray-200 dark:bg-gray-800 dark:border-gray-700 shadow-xs"
+			class="w-full mt-1 text-sm text-gray-700 bg-white border-gray-200 rounded-md shadow-xs dark:text-gray-200 dark:bg-gray-800 dark:border-gray-700"
 		>
 			for _, opt := range options {
 				<option value={ opt.Value } selected?={ opt.Selected }>{ opt.Label }</option>
@@ -102,7 +102,7 @@ templ SelectHalf(id string, name string, labelKey string, options []SelectOption
 			if required {
 				required
 			}
-			class="mt-1 w-full text-sm text-gray-700 bg-white rounded-md border-gray-200 dark:text-gray-200 dark:bg-gray-800 dark:border-gray-700 shadow-xs"
+			class="w-full mt-1 text-sm text-gray-700 bg-white border-gray-200 rounded-md shadow-xs dark:text-gray-200 dark:bg-gray-800 dark:border-gray-700"
 		>
 			for _, opt := range options {
 				<option value={ opt.Value } selected?={ opt.Selected }>{ opt.Label }</option>
@@ -124,7 +124,7 @@ templ Textarea(id string, name string, labelKey string, rows int, required bool)
 			if required {
 				required
 			}
-			class="mt-1 w-full text-sm text-gray-700 bg-white rounded-md border-gray-200 dark:text-gray-200 dark:bg-gray-800 dark:border-gray-700 shadow-xs"
+			class="w-full mt-1 text-sm text-gray-700 bg-white border-gray-200 rounded-md shadow-xs dark:text-gray-200 dark:bg-gray-800 dark:border-gray-700"
 		></textarea>
 	</div>
 }
@@ -132,13 +132,13 @@ templ Textarea(id string, name string, labelKey string, rows int, required bool)
 // Checkbox renders a checkbox with label
 templ Checkbox(id string, name string, labelKey string, checked bool) {
 	<div class="col-span-6">
-		<label for={ id } class="flex gap-2 items-center cursor-pointer">
+		<label for={ id } class="flex items-center gap-2 cursor-pointer">
 			<input
 				type="checkbox"
 				id={ id }
 				name={ name }
 				checked?={ checked }
-				class="text-indigo-600 rounded border-gray-300 dark:bg-gray-800 dark:border-gray-600 focus:ring-indigo-500"
+				class="text-indigo-600 border-gray-300 rounded dark:bg-gray-800 dark:border-gray-600 focus:ring-indigo-500"
 			/>
 			<span class="text-sm font-medium text-gray-700 dark:text-gray-200">
 				{ i18n.T(ctx, labelKey) }
@@ -155,13 +155,13 @@ templ CheckboxGroup(legendKey string, options []SelectOption, name string) {
 		</legend>
 		<div class="space-y-2">
 			for _, opt := range options {
-				<label class="flex gap-2 items-center cursor-pointer">
+				<label class="flex items-center gap-2 cursor-pointer">
 					<input
 						type="checkbox"
 						name={ name }
 						value={ opt.Value }
 						checked?={ opt.Selected }
-						class="text-indigo-600 rounded border-gray-300 dark:bg-gray-800 dark:border-gray-600 focus:ring-indigo-500"
+						class="text-indigo-600 border-gray-300 rounded dark:bg-gray-800 dark:border-gray-600 focus:ring-indigo-500"
 					/>
 					<span class="text-sm text-gray-700 dark:text-gray-200">{ opt.Label }</span>
 				</label>
@@ -178,7 +178,7 @@ templ Radio(legendKey string, options []SelectOption, name string, required bool
 		</legend>
 		<div class="space-y-2">
 			for _, opt := range options {
-				<label class="flex gap-2 items-center cursor-pointer">
+				<label class="flex items-center gap-2 cursor-pointer">
 					<input
 						type="radio"
 						name={ name }

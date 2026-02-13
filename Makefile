@@ -38,12 +38,8 @@ build/templ:
 	go tool templ generate
 
 install:
-	brew install golang-migrate gnupg
 	go mod tidy
 	npm install
-
-	@echo 'add "go.goroot:"$$GOROOT" to settings.json VsCode'
-	@echo 'after run "make db_init' 
 
 # DB commands
 db/encrypt:
