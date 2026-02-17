@@ -61,7 +61,7 @@ func init() {
 		log.Println("No .env file found, using environment variables")
 	}
 
-	VERSION = "v1.7.0"
+	VERSION = "v1.8.0"
 	COMMIT = "unknown"
 	BUILD_TIME = "unknown"
 	VCS_MODIFIED = "false"
