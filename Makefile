@@ -89,3 +89,25 @@ monitoring_start:
 
 monitoring_stop:
 	docker-compose stop loki promtail grafana
+
+# Release commands
+release:
+	./scripts/release.sh auto
+
+release/major:
+	./scripts/release.sh major
+
+release/minor:
+	./scripts/release.sh minor
+
+release/patch:
+	./scripts/release.sh patch
+
+release/push:
+	git push origin master --tags
+
+release/github:
+	goreleaser release --clean
+
+changelog:
+	git cliff -o CHANGELOG.md
