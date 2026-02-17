@@ -1,0 +1,25 @@
+version: 2
+
+builds:
+  - skip: true
+
+changelog:
+  use: git-cliff
+  sort: ""
+  filters:
+    exclude:
+      - "^chore: release"
+
+release:
+  github:
+    owner: rousseau-romain
+    name: round-timing
+
+archives:
+  - meta: true
+
+checksum:
+  disable: true
+
+signs:
+  - artifacts: none

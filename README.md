@@ -9,6 +9,11 @@ You nedd to have:
 - node v23.2.0 (nvm is better)
 - npm 10.9.0
 
+Optional (for releasing):
+
+- git-cliff (changelog generation)
+- goreleaser (GitHub releases)
+
 ## Run
 
 Create your `.env` based on `env.template` you can run:
@@ -67,6 +72,32 @@ make migration_up
 ```
 
 If not you can debug and fix !
+
+## Release
+
+### Prerequisites
+
+```bash
+# Arch Linux
+yay -S git-cliff goreleaser-bin
+```
+
+### Usage
+
+```bash
+make release          # auto-detect bump type from conventional commits, update CHANGELOG.md, commit, tag
+make release/major    # force major bump
+make release/minor    # force minor bump
+make release/patch    # force patch bump
+make release/push     # git push origin master --tags
+make release/github   # create GitHub release (requires GITHUB_TOKEN)
+make changelog        # regenerate full CHANGELOG.md
+```
+
+The `release` target analyzes commits since the last tag:
+- `BREAKING CHANGE` or `!:` → major bump
+- `feat:` → minor bump
+- `fix:` → patch bump
 
 ## Deploy
 
