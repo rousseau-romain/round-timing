@@ -12,18 +12,18 @@ live/go:
 	@go run github.com/air-verse/air@v1.64.0 \
 		--build.cmd "go build -o tmp/main" --build.entrypoint "tmp/main" --build.delay "1000" \
 		--build.exclude_dir "node_modules,tmp,vendor" \
-		--build.include_ext "go,yaml" \
+		--build.include_ext "go,yaml,js,css" \
 		--build.stop_on_error "false" \
 		--misc.clean_on_exit true
 
 live/templ:
-	@go tool templ generate -watch -proxy="http://127.0.0.1:2468" -cmd="./scripts/run-with-log.sh" --open-browser=false
+	@go tool templ generate -watch -proxy="http://127.0.0.1:2468" --open-browser=false
 
 live/tailwind:
 	@npx tailwindcss -i input.css -o public/tailwind.css --watch
 
 live:
-	make -j3 live/templ live/tailwind
+	make -j3 live/go live/templ live/tailwind
 
 lint/tailwind:
 	npx rustywind --check-formatted views/

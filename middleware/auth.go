@@ -11,6 +11,7 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	matchModel "github.com/rousseau-romain/round-timing/model/match"
 	"github.com/rousseau-romain/round-timing/model/system"
+	tournamentModel "github.com/rousseau-romain/round-timing/model/tournament"
 	userModel "github.com/rousseau-romain/round-timing/model/user"
 	"github.com/rousseau-romain/round-timing/pkg/constants"
 	httpError "github.com/rousseau-romain/round-timing/pkg/httperror"
@@ -198,6 +199,54 @@ func RequireAuthAndHisMatch(handlerFunc http.HandlerFunc, authService *auth.Auth
 			logger.Info("User is not the owner of the match", "userId", user.Id, "userMatchId", userMatch.Id)
 			w.WriteHeader(http.StatusUnauthorized)
 			page.ForbidenPage(errorMessage, []layout.NavItem{}, languages, r.URL.Path, user).Render(r.Context(), w)
+			return
+		}
+
+		handlerFunc(w, auth.RequestWithUser(r, user))
+	}
+}
+
+// getTournamentAndOwner extracts tournamentId from URL vars, validates the tournament exists, and returns its owner ID.
+func getTournamentAndOwner(w http.ResponseWriter, r *http.Request, logger *slog.Logger, user userModel.User) (int, int, bool) {
+	vars := mux.Vars(r)
+	tournamentId, _ := strconv.Atoi(vars["idTournament"])
+
+	ownerId, err := tournamentModel.GetTournamentOwnerId(r.Context(), tournamentId)
+	if err != nil {
+		languages, _ := system.GetLanguages(r.Context())
+		logger.Error("Tournament not found", "tournamentId", tournamentId)
+		w.WriteHeader(http.StatusNotFound)
+		page.NotFoundPage(fmt.Sprintf("Tournament id (%d) not found", tournamentId), []layout.NavItem{}, languages, r.URL.Path, user).Render(r.Context(), w)
+		return 0, 0, false
+	}
+
+	return tournamentId, ownerId, true
+}
+
+// RequireAuthAndHisTournament requires user to be authenticated and the owner of the tournament.
+func RequireAuthAndHisTournament(handlerFunc http.HandlerFunc, authService *auth.AuthService, logger *slog.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		user, err := authService.GetAuthenticateUserFromRequest(r, logger)
+		if err != nil {
+			http.Redirect(w, r, "/signin", http.StatusTemporaryRedirect)
+			return
+		}
+		logger = logger.With("userId", user.Id)
+
+		if !enabledUserIfWhiteListed(r.Context(), w, r, logger, user) {
+			return
+		}
+
+		tournamentId, ownerId, ok := getTournamentAndOwner(w, r, logger, user)
+		if !ok {
+			return
+		}
+
+		if ownerId != user.Id {
+			languages, _ := system.GetLanguages(r.Context())
+			logger.Info("User is not the owner of the tournament", "userId", user.Id, "tournamentId", tournamentId)
+			w.WriteHeader(http.StatusUnauthorized)
+			page.ForbidenPage(fmt.Sprintf("You don't have the permission to view this tournament (%d)", tournamentId), []layout.NavItem{}, languages, r.URL.Path, user).Render(r.Context(), w)
 			return
 		}
 

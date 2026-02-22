@@ -10,6 +10,7 @@ import (
 	handlersAdmin "github.com/rousseau-romain/round-timing/handlers/admin"
 	handlersAuth "github.com/rousseau-romain/round-timing/handlers/auth"
 	handlersMatch "github.com/rousseau-romain/round-timing/handlers/match"
+	handlersTournament "github.com/rousseau-romain/round-timing/handlers/tournament"
 	handlersPage "github.com/rousseau-romain/round-timing/handlers/page"
 	handlersProfile "github.com/rousseau-romain/round-timing/handlers/profile"
 	"github.com/rousseau-romain/round-timing/service/auth"
@@ -23,6 +24,7 @@ func Setup(handler *handlers.Handler, authService *auth.AuthService, logger *slo
 	authH := &handlersAuth.Handler{Handler: handler}
 	pageH := &handlersPage.Handler{Handler: handler}
 	profileH := &handlersProfile.Handler{Handler: handler}
+	tournamentH := &handlersTournament.Handler{Handler: handler}
 
 	registerPublicRoutes(r)
 	registerPageRoutes(r, pageH, authService, logger)
@@ -30,6 +32,7 @@ func Setup(handler *handlers.Handler, authService *auth.AuthService, logger *slo
 	registerProfileRoutes(r, profileH, authService, logger)
 	registerAuthRoutes(r, authH, authService, logger)
 	registerAdminRoutes(r, adminH, authService, logger)
+	registerTournamentRoutes(r, tournamentH, authService, logger)
 	registerErrorRoutes(r, pageH, authService, logger)
 
 	r.NotFoundHandler = http.HandlerFunc(pageH.HandleNotFound)
