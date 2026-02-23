@@ -10,7 +10,7 @@ import (
 
 templ Footer() {
 	<footer class="mt-4 bg-white border-t border-gray-100 dark:bg-gray-900">
-		<div class="max-w-screen-xl px-4 pt-6 pb-6 mx-auto sm:px-6 lg:px-8 lg:pt-8">
+		<div class="px-4 pt-6 pb-6 mx-auto max-w-screen-xl sm:px-6 lg:px-8 lg:pt-8">
 			<div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
 				<div class="m-auto">
 					<div class="flex justify-center text-indigo-600 sm:justify-start dark:text-indigo-300">
@@ -34,11 +34,11 @@ templ Footer() {
 						</div>
 					</div>
 					<p
-						class="max-w-md mt-6 leading-relaxed text-center text-gray-500 sm:max-w-xs sm:text-left dark:text-gray-400"
+						class="mt-6 max-w-md leading-relaxed text-center text-gray-500 sm:max-w-xs sm:text-left dark:text-gray-400"
 					>
 						{ i18n.T(ctx, "global.footer.p-contact") }
 					</p>
-					<ul class="flex justify-center gap-6 mt-8 sm:justify-start md:gap-8">
+					<ul class="flex gap-6 justify-center mt-8 sm:justify-start md:gap-8">
 						<li>
 							<a
 								href={ templ.SafeURL("mailto:" + constants.MailContact) }

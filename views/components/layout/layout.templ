@@ -76,8 +76,8 @@ type NavItem struct {
 
 templ Nav(user user.User, navItems []NavItem, languages []system.Language, pageSlug string) {
 	<header class="bg-white dark:bg-gray-900">
-		<div class="max-w-screen-xl px-4 mx-auto sm:px-6 lg:px-8">
-			<div class="flex items-center justify-between h-16">
+		<div class="px-4 mx-auto max-w-screen-xl sm:px-6 lg:px-8">
+			<div class="flex justify-between items-center h-16">
 				<div class="md:flex md:gap-12 md:items-center">
 					<a class="block text-sky-600 dark:text-sky-600" href="/">
 						<span class="sr-only">Home</span>
@@ -100,7 +100,7 @@ templ Nav(user user.User, navItems []NavItem, languages []system.Language, pageS
 				</div>
 				<div class="hidden md:block">
 					<nav aria-label="Global">
-						<ul class="flex items-center gap-6 text-sm">
+						<ul class="flex gap-6 items-center text-sm">
 							for _, nav := range navItems {
 								<li class="block">
 									<a href={ templ.SafeURL("/" + nav.Url) } class="text-gray-500 transition dark:text-white dark:hover:text-white/75 hover:text-gray-500/75">{ nav.Name }</a>
@@ -109,11 +109,11 @@ templ Nav(user user.User, navItems []NavItem, languages []system.Language, pageS
 						</ul>
 					</nav>
 				</div>
-				<div class="flex items-center gap-4">
+				<div class="flex gap-4 items-center">
 					<div class="sm:flex sm:gap-4">
 						if user.Email != "" {
 							<a href="/profile">
-								<div class="w-10 h-10 p-1 bg-gray-200 rounded-full dark:bg-gray-700">
+								<div class="p-1 w-10 h-10 bg-gray-200 rounded-full dark:bg-gray-700">
 									@icons.User("currentColor", 32, 32)
 								</div>
 							</a>
@@ -130,13 +130,13 @@ templ Nav(user user.User, navItems []NavItem, languages []system.Language, pageS
 						} else {
 							if pageSlug != "/signin" && pageSlug != "/signup" {
 								<a
-									class="px-5 text-sm font-medium text-white rounded-md shadow py-2.5 bg-sky-600 dark:hover:bg-sky-500"
+									class="py-2.5 px-5 text-sm font-medium text-white rounded-md shadow bg-sky-600 dark:hover:bg-sky-500"
 									href="/signin"
 								>
 									{ i18n.T(ctx, "global.signin") }
 								</a>
-								<div class="relative w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
-									<svg class="absolute w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+								<div class="overflow-hidden relative w-10 h-10 bg-gray-100 rounded-full dark:bg-gray-600">
+									<svg class="absolute -left-1 w-12 h-12 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
 								</div>
 							}
 						}
@@ -145,7 +145,7 @@ templ Nav(user user.User, navItems []NavItem, languages []system.Language, pageS
 						<button
 							id="button-burger-menu"
 							@click="menuOpen = !menuOpen"
-							class="p-2 text-gray-600 transition bg-gray-100 rounded dark:text-white dark:bg-gray-800 dark:hover:text-white/75 hover:text-gray-600/75"
+							class="p-2 text-gray-600 bg-gray-100 rounded transition dark:text-white dark:bg-gray-800 dark:hover:text-white/75 hover:text-gray-600/75"
 						>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
@@ -172,7 +172,7 @@ templ MobileMenu(user user.User, navItems []NavItem) {
 	<ul class="space-y-1 border dark:border-gray-700">
 		for _, nav := range navItems {
 			<li class="block">
-				<a href={ templ.SafeURL("/" + nav.Url) } class="block px-4 py-2 text-sm font-medium text-gray-500 rounded-lg dark:text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200">{ nav.Name }</a>
+				<a href={ templ.SafeURL("/" + nav.Url) } class="block py-2 px-4 text-sm font-medium text-gray-500 rounded-lg dark:text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200">{ nav.Name }</a>
 			</li>
 		}
 	</ul>
@@ -185,7 +185,7 @@ templ PopinMessage(popinMessages PopinMessages) {
 			x-show="open"
 			x-cloak
 			@click="open = false"
-			class="absolute top-0 right-0 flex justify-center w-screen h-screen bg-gray-800 cursor-pointer place-items-center bg-opacity-40 popin-message"
+			class="flex absolute top-0 right-0 justify-center place-items-center w-screen h-screen bg-gray-800 bg-opacity-40 cursor-pointer popin-message"
 		>
 			<div
 				role="alert"
@@ -199,7 +199,7 @@ templ PopinMessage(popinMessages PopinMessages) {
 					templ.KV("border-sky-500 bg-sky-50 text-sky-700 dark:bg-sky-900 dark:border-sky-600", popinMessages.Type == "info"),
 				}
 			>
-				<div class="absolute cursor-pointer top-2 right-2 close" @click="open = false">
+				<div class="absolute top-2 right-2 cursor-pointer close" @click="open = false">
 					<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 						<line x1="5" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
 						<line x1="19" y1="5" x2="5" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
@@ -248,12 +248,12 @@ templ PopinMessage(popinMessages PopinMessages) {
 templ PopinSelectLanguage(user user.User, languages []system.Language) {
 	<div
 		id="popin-language"
-		class="absolute top-0 right-0 flex justify-center w-screen h-screen bg-gray-800 cursor-pointer place-items-center bg-opacity-40"
+		class="flex absolute top-0 right-0 justify-center place-items-center w-screen h-screen bg-gray-800 bg-opacity-40 cursor-pointer"
 		x-show="open"
 		x-cloak
 		@click="open = false"
 	>
-		<section class="z-20 border shadow-2xl w-max rounded-3xl dark:bg-gray-800 dark:border-gray-600 h-max bg-slate-50" @click.stop>
+		<section class="z-20 w-max rounded-3xl border shadow-2xl dark:bg-gray-800 dark:border-gray-600 h-max bg-slate-50" @click.stop>
 			<div class="p-8 text-center">
 				<h2 class="mt-6 text-3xl font-bold dark:text-white">{ i18n.T(ctx, "global.header.select-language") }</h2>
 				<ul>
@@ -261,7 +261,7 @@ templ PopinSelectLanguage(user user.User, languages []system.Language) {
 						<li>
 							<button
 								type="submit"
-								class="inline-block w-full bg-transparent border rounded-lg sm:w-auto dark:border-gray-600"
+								class="inline-block w-full bg-transparent rounded-lg border sm:w-auto dark:border-gray-600"
 								hx-patch={ fmt.Sprintf("/user/%d/locale/%s", user.Id, l.Locale) }
 							>
 								<img alt="flag" class="w-20 transition-all cursor-pointer hover:scale-105" src={ fmt.Sprintf("/public/img/flag/%d.svg", l.Id) }/>

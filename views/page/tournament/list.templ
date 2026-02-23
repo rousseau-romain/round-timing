@@ -222,7 +222,7 @@ templ ArchivedSectionToggle() {
 
 templ ArchivedTournamentSection(tournaments []tournamentModel.Tournament) {
 	<div id="archived-section">
-		<div class="flex items-center gap-4 mb-2">
+		<div class="flex gap-4 items-center mb-2">
 			<h2 class="text-lg font-semibold">{ i18n.T(ctx, "page.tournament-list.archived-title") }</h2>
 			@ui.ButtonAction("outline", "sm", templ.Attributes{
 				"hx-get":    "/tournament/archived/hide",
@@ -280,7 +280,7 @@ templ TournamentListPage(u user.User, popinMessages layout.PopinMessages, navIte
 						"class":       "w-full p-3",
 					})
 				</div>
-				<div class="flex items-end gap-4">
+				<div class="flex gap-4 items-end">
 					@forms.InputAction("number", "number_player_by_team", i18n.T(ctx, "page.tournament-list.players-per-team"), templ.Attributes{
 						"value": "1",
 						"min":   "1",

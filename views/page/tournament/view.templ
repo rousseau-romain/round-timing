@@ -15,7 +15,7 @@ import (
 )
 
 templ TeamCard(t tournamentModel.Team) {
-	<div class="flex items-center justify-between gap-2 px-3 py-2 bg-white border rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-900">
+	<div class="flex gap-2 justify-between items-center py-2 px-3 bg-white rounded-lg border shadow-sm dark:bg-gray-900 dark:border-gray-700">
 		<span class="font-medium">{ t.Name }</span>
 		@ui.ButtonAction("danger", "sm", templ.Attributes{
 			"hx-delete": fmt.Sprintf("/tournament/team/%d", t.Id),
@@ -28,7 +28,7 @@ templ TeamCard(t tournamentModel.Team) {
 }
 
 templ PlayerCard(p tournamentModel.Player) {
-	<div class="flex items-center justify-between gap-2 px-3 py-2 bg-white border rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-900">
+	<div class="flex gap-2 justify-between items-center py-2 px-3 bg-white rounded-lg border shadow-sm dark:bg-gray-900 dark:border-gray-700">
 		<span class="font-medium">{ p.Name }</span>
 		@ui.ButtonAction("danger", "sm", templ.Attributes{
 			"hx-delete": fmt.Sprintf("/tournament/player/%d", p.Id),
@@ -42,14 +42,14 @@ templ PlayerCard(p tournamentModel.Player) {
 
 templ PlayersPool(players []tournamentModel.Player) {
 	if len(players) > 0 {
-		<div class="flex flex-wrap gap-2 p-3 mb-4 border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+		<div class="flex flex-wrap gap-2 p-3 mb-4 bg-gray-50 rounded-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
 			for _, p := range players {
 				<div
 					id={ fmt.Sprintf("player-chip-%d", p.Id) }
 					draggable="true"
 					data-player-id={ fmt.Sprintf("%d", p.Id) }
 					ondragstart="onPlayerDragStart(event, this)"
-					class="px-3 text-sm font-medium bg-white border border-gray-300 rounded-lg shadow-sm select-none py-1.5 cursor-grab hover:border-indigo-400 hover:bg-indigo-50 dark:bg-gray-700 dark:border-gray-600 dark:hover:border-indigo-500"
+					class="py-1.5 px-3 text-sm font-medium bg-white rounded-lg border border-gray-300 shadow-sm select-none dark:bg-gray-700 dark:border-gray-600 hover:bg-indigo-50 hover:border-indigo-400 cursor-grab dark:hover:border-indigo-500"
 				>
 					{ p.Name }
 				</div>
@@ -61,7 +61,7 @@ templ PlayersPool(players []tournamentModel.Player) {
 templ TeamCompositionCard(team tournamentModel.Team, teamPlayers []tournamentModel.TeamPlayerWithNames, players []tournamentModel.Player) {
 	<div
 		id={ fmt.Sprintf("team-composition-%d", team.Id) }
-		class="p-4 transition-colors bg-white border-2 border-gray-200 border-dashed rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-900 min-h-20"
+		class="p-4 bg-white rounded-lg border-2 border-gray-200 border-dashed shadow-sm transition-colors dark:bg-gray-900 dark:border-gray-700 min-h-20"
 		data-team-id={ fmt.Sprintf("%d", team.Id) }
 		data-player-ids={ teamPlayerIdsAttr(teamPlayers) }
 		ondragover="onTeamDragOver(event, this)"
@@ -71,7 +71,7 @@ templ TeamCompositionCard(team tournamentModel.Team, teamPlayers []tournamentMod
 		<h4 class="mb-2 font-medium">{ team.Name }</h4>
 		<div class="flex flex-wrap gap-2">
 			for _, tp := range teamPlayers {
-				<span class="inline-flex items-center gap-1 px-2 py-1 text-sm text-indigo-700 bg-indigo-100 rounded dark:bg-indigo-800 dark:text-indigo-200">
+				<span class="inline-flex gap-1 items-center py-1 px-2 text-sm text-indigo-700 bg-indigo-100 rounded dark:text-indigo-200 dark:bg-indigo-800">
 					{ tp.PlayerName }
 					<button
 						type="button"
@@ -152,7 +152,7 @@ templ MatchesSection(t tournamentModel.Tournament, matches []tournamentModel.Tou
 				<h2>{ i18n.T(ctx, "page.tournament.view.add-match") }</h2>
 				if len(availableTeams) >= 2 {
 					<form
-						class="flex flex-wrap items-end gap-2 mb-4"
+						class="flex flex-wrap gap-2 items-end mb-4"
 						hx-post={ fmt.Sprintf("/tournament/%d/match", t.Id) }
 						hx-target="#matches-section"
 						hx-swap="outerHTML"
@@ -253,7 +253,7 @@ templ bracketRounds(rounds [][]tournamentModel.TournamentMatchWithNames, tournam
 									}
 								</div>
 								if !isByeMatch(m) {
-									<div class="border-t my-0.5 dark:border-gray-700"></div>
+									<div class="my-0.5 border-t dark:border-gray-700"></div>
 								}
 								<div class={ "bracket-team", templ.KV("winner", m.WinnerName != "" && m.WinnerName == m.Team2Name) }>
 									<span>
@@ -319,7 +319,7 @@ templ MatchRow(m tournamentModel.TournamentMatchWithNames, idTournament int, rea
 					name="bo_format"
 					min="1"
 					value={ fmt.Sprintf("%d", m.BoFormat) }
-					class="p-1 text-sm text-center border rounded w-14 dark:bg-gray-800 dark:border-gray-600"
+					class="p-1 w-14 text-sm text-center rounded border dark:bg-gray-800 dark:border-gray-600"
 					hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/bo", idTournament, m.Id) }
 					hx-target="#matches-section"
 					hx-swap="outerHTML"
@@ -344,47 +344,47 @@ templ MatchRow(m tournamentModel.TournamentMatchWithNames, idTournament int, rea
 		}
 		@ui.TdCompact() {
 			<div class="flex flex-col gap-1">
-				<div class="flex items-center gap-1">
-					<span class="text-xs text-gray-500 w-16 truncate">{ m.Team1Name }</span>
+				<div class="flex gap-1 items-center">
+					<span class="w-16 text-xs text-gray-500 truncate">{ m.Team1Name }</span>
 					if !readOnly {
 						<button
 							hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id) }
 							hx-vals={ `{"team":"1","delta":"-1"}` }
 							hx-target="#matches-section"
 							hx-swap="outerHTML"
-							class="px-2 py-0.5 text-sm border rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+							class="py-0.5 px-2 text-sm rounded border hover:bg-gray-100 dark:hover:bg-gray-700"
 						>-</button>
 					}
-					<span class="w-6 text-center text-sm font-medium">{ fmt.Sprintf("%d", m.KillsTeam1) }</span>
+					<span class="w-6 text-sm font-medium text-center">{ fmt.Sprintf("%d", m.KillsTeam1) }</span>
 					if !readOnly {
 						<button
 							hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id) }
 							hx-vals={ `{"team":"1","delta":"1"}` }
 							hx-target="#matches-section"
 							hx-swap="outerHTML"
-							class="px-2 py-0.5 text-sm border rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+							class="py-0.5 px-2 text-sm rounded border hover:bg-gray-100 dark:hover:bg-gray-700"
 						>+</button>
 					}
 				</div>
-				<div class="flex items-center gap-1">
-					<span class="text-xs text-gray-500 w-16 truncate">{ m.Team2Name }</span>
+				<div class="flex gap-1 items-center">
+					<span class="w-16 text-xs text-gray-500 truncate">{ m.Team2Name }</span>
 					if !readOnly {
 						<button
 							hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id) }
 							hx-vals={ `{"team":"2","delta":"-1"}` }
 							hx-target="#matches-section"
 							hx-swap="outerHTML"
-							class="px-2 py-0.5 text-sm border rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+							class="py-0.5 px-2 text-sm rounded border hover:bg-gray-100 dark:hover:bg-gray-700"
 						>-</button>
 					}
-					<span class="w-6 text-center text-sm font-medium">{ fmt.Sprintf("%d", m.KillsTeam2) }</span>
+					<span class="w-6 text-sm font-medium text-center">{ fmt.Sprintf("%d", m.KillsTeam2) }</span>
 					if !readOnly {
 						<button
 							hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id) }
 							hx-vals={ `{"team":"2","delta":"1"}` }
 							hx-target="#matches-section"
 							hx-swap="outerHTML"
-							class="px-2 py-0.5 text-sm border rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+							class="py-0.5 px-2 text-sm rounded border hover:bg-gray-100 dark:hover:bg-gray-700"
 						>+</button>
 					}
 				</div>
@@ -393,14 +393,14 @@ templ MatchRow(m tournamentModel.TournamentMatchWithNames, idTournament int, rea
 		@ui.TdCompact() {
 			if !readOnly && m.Status != "finished" {
 				<form
-					class="flex items-center gap-1"
+					class="flex gap-1 items-center"
 					hx-post={ fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id) }
 					hx-target="#matches-section"
 					hx-swap="outerHTML"
 				>
-					<input type="number" name="score_team1" min="0" value={ fmt.Sprintf("%d", m.ScoreTeam1) } class="w-12 p-1 text-sm text-center border rounded dark:bg-gray-800 dark:border-gray-600"/>
+					<input type="number" name="score_team1" min="0" value={ fmt.Sprintf("%d", m.ScoreTeam1) } class="p-1 w-12 text-sm text-center rounded border dark:bg-gray-800 dark:border-gray-600"/>
 					<span class="text-gray-500">-</span>
-					<input type="number" name="score_team2" min="0" value={ fmt.Sprintf("%d", m.ScoreTeam2) } class="w-12 p-1 text-sm text-center border rounded dark:bg-gray-800 dark:border-gray-600"/>
+					<input type="number" name="score_team2" min="0" value={ fmt.Sprintf("%d", m.ScoreTeam2) } class="p-1 w-12 text-sm text-center rounded border dark:bg-gray-800 dark:border-gray-600"/>
 					@ui.ButtonAction("primary", "sm", templ.Attributes{"type": "submit"}) {
 						{ i18n.T(ctx, "page.tournament.match.add-score") }
 					}
@@ -425,9 +425,9 @@ templ MatchRow(m tournamentModel.TournamentMatchWithNames, idTournament int, rea
 templ TournamentViewPage(u user.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string, t tournamentModel.Tournament, teams []tournamentModel.Team, players []tournamentModel.Player, teamPlayers []tournamentModel.TeamPlayerWithNames) {
 	@layout.Layout(i18n.T(ctx, "page.tournament.view.title", i18n.M{"name": t.Name}), popinMessages, u, navItems, languages, pageSlug) {
 		@ui.Container("default") {
-			<div class="flex items-center justify-between mb-6">
+			<div class="flex justify-between items-center mb-6">
 				<h1>{ t.Name }</h1>
-				<div class="flex items-center gap-2">
+				<div class="flex gap-2 items-center">
 					// @StatusBadge(t.Status)
 					@ui.Badge("gray", "") {
 						{ t.StageType }
@@ -441,7 +441,7 @@ templ TournamentViewPage(u user.User, popinMessages layout.PopinMessages, navIte
 			@ui.Section() {
 				<h2>{ i18n.T(ctx, "page.tournament.view.teams") }</h2>
 				<form
-					class="flex items-end gap-2 mb-4"
+					class="flex gap-2 items-end mb-4"
 					hx-post="/tournament/team"
 					hx-swap="afterbegin"
 					hx-target="#team-grid"
@@ -470,7 +470,7 @@ templ TournamentViewPage(u user.User, popinMessages layout.PopinMessages, navIte
 			@ui.Section() {
 				<h2>{ i18n.T(ctx, "page.tournament.view.players") }</h2>
 				<form
-					class="flex items-end gap-2 mb-4"
+					class="flex gap-2 items-end mb-4"
 					hx-post="/tournament/player"
 					hx-swap="afterbegin"
 					hx-target="#player-grid"
@@ -514,9 +514,9 @@ templ TournamentViewPage(u user.User, popinMessages layout.PopinMessages, navIte
 templ TournamentMatchsPage(u user.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string, t tournamentModel.Tournament, matches []tournamentModel.TournamentMatchWithNames, teams []tournamentModel.Team) {
 	@layout.Layout(i18n.T(ctx, "page.tournament.view.title", i18n.M{"name": t.Name})+" - "+i18n.T(ctx, "page.tournament.view.matches"), popinMessages, u, navItems, languages, pageSlug) {
 		@ui.Container("default") {
-			<div class="flex items-center justify-between mb-6">
+			<div class="flex justify-between items-center mb-6">
 				<h1>{ t.Name } - { i18n.T(ctx, "page.tournament.view.matches") }</h1>
-				<div class="flex items-center gap-2">
+				<div class="flex gap-2 items-center">
 					@TournamentStatusBadgeDiv(t.Id)
 					@ui.ButtonLink("outline", "md", fmt.Sprintf("/tournament/%d", t.Id)) {
 						{ i18n.T(ctx, "page.tournament.view.configuration") }

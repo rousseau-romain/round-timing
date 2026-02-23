@@ -8,6 +8,7 @@ You nedd to have:
 - go v1.25.6 (brew install go)
 - node v23.2.0 (nvm is better)
 - npm 10.9.0
+- fswatch
 
 Optional (for releasing):
 

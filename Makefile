@@ -23,13 +23,16 @@ live/tailwind:
 	@npx tailwindcss -i input.css -o public/tailwind.css --watch
 
 live:
-	make -j3 live/go live/templ live/tailwind
+	make -j4 live/go live/templ live/tailwind live/fix/tailwind
 
 lint/tailwind:
 	npx rustywind --check-formatted views/
 
 fix/tailwind:
 	npx rustywind --write views/
+
+live/fix/tailwind:
+	@fswatch -0 -e '.*_templ\.go$$' --include '\.templ$$' -r views/ | xargs -0 -n1 npx rustywind --write
 
 build/tailwind:
 	npx tailwindcss -i input.css -o public/tailwind.css --minify
