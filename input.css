@@ -181,7 +181,11 @@ tr.htmx-swapping td {
 }
 
 .bracket-team {
-  @apply flex items-center justify-between px-2 py-1;
+  @apply flex items-center gap-2 px-2 py-1;
+}
+
+.bracket-team > span:first-child {
+  @apply flex-1 min-w-0 truncate;
 }
 
 .bracket-team.winner {
@@ -190,6 +194,40 @@ tr.htmx-swapping td {
 
 .bracket-score {
   @apply text-xs tabular-nums;
+}
+
+.bracket-score-input {
+  @apply w-8 p-0 text-xs text-center tabular-nums bg-transparent border-0 border-b border-gray-300 rounded-none dark:border-gray-600 dark:bg-transparent dark:text-gray-200;
+  box-shadow: none;
+}
+.bracket-score-input:focus {
+  @apply border-indigo-500 ring-0 outline-none;
+}
+.bracket-kills {
+  @apply flex items-center gap-0.5 text-xs text-red-400 dark:text-red-400;
+}
+.bracket-kills button {
+  @apply px-1 rounded text-red-300 hover:bg-red-50 hover:text-red-500 dark:text-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-300;
+  line-height: 1;
+}
+.bracket-kills span {
+  @apply tabular-nums w-4 text-center;
+}
+.bracket-kills-text {
+  @apply text-xs tabular-nums text-red-400 dark:text-red-400;
+}
+.bracket-score {
+  @apply flex items-center gap-0.5 text-xs font-semibold text-indigo-500 dark:text-indigo-400;
+}
+.bracket-score button {
+  @apply px-1 rounded text-indigo-300 hover:bg-indigo-50 hover:text-indigo-500 dark:text-indigo-500 dark:hover:bg-indigo-900/30 dark:hover:text-indigo-300;
+  line-height: 1;
+}
+.bracket-score span {
+  @apply tabular-nums w-4 text-center;
+}
+.bracket-score-text {
+  @apply text-xs font-semibold tabular-nums text-indigo-500 dark:text-indigo-400;
 }
 
 .bracket-drop-zone {

@@ -35,6 +35,7 @@ func registerTournamentRoutes(r *mux.Router, handler *handlersTournament.Handler
 	r.Handle("/tournament/{idTournament:[0-9]+}/matchs", middleware.RequireAuthAndHisTournament(handler.HandleViewTournamentMatchs, authService, logger)).Methods("GET")
 	r.Handle("/tournament/{idTournament:[0-9]+}/match", middleware.RequireAuthAndHisTournament(handler.HandleCreateMatch, authService, logger)).Methods("POST")
 	r.Handle("/tournament/{idTournament:[0-9]+}/match/{idMatch:[0-9]+}/score", middleware.RequireAuthAndHisTournament(handler.HandleUpdateMatchScore, authService, logger)).Methods("POST")
+	r.Handle("/tournament/{idTournament:[0-9]+}/match/{idMatch:[0-9]+}/score", middleware.RequireAuthAndHisTournament(handler.HandleIncrementMatchScore, authService, logger)).Methods("PATCH")
 	r.Handle("/tournament/{idTournament:[0-9]+}/match/{idMatch:[0-9]+}/bo", middleware.RequireAuthAndHisTournament(handler.HandleEditMatchBo, authService, logger)).Methods("PATCH")
 	r.Handle("/tournament/{idTournament:[0-9]+}/match/{idMatch:[0-9]+}/kills", middleware.RequireAuthAndHisTournament(handler.HandleUpdateMatchKills, authService, logger)).Methods("PATCH")
 	r.Handle("/tournament/{idTournament:[0-9]+}/match/{idMatch:[0-9]+}", middleware.RequireAuthAndHisTournament(handler.HandleDeleteMatch, authService, logger)).Methods("DELETE")

@@ -297,3 +297,14 @@ func IncrementMatchKills(ctx context.Context, idMatch int, team int, delta int) 
 	_, err := db.ExecContext(ctx, query, delta, idMatch)
 	return err
 }
+
+func IncrementMatchScore(ctx context.Context, idMatch int, team int, delta int) error {
+	col := "score_team1"
+	if team == 2 {
+		col = "score_team2"
+	}
+	query := fmt.Sprintf(
+		"UPDATE tournament_match SET %s = GREATEST(0, %s + ?) WHERE id = ?", col, col)
+	_, err := db.ExecContext(ctx, query, delta, idMatch)
+	return err
+}

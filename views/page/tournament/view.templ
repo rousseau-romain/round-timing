@@ -167,7 +167,7 @@ templ MatchesSection(t tournamentModel.Tournament, matches []tournamentModel.Tou
 						@forms.InputAction("number", "bo_format", "BO", templ.Attributes{
 							"value": "1",
 							"min":   "1",
-							"class": "w-16 p-3",
+							"class": "p-3",
 						})
 						@ui.ButtonAction("primary", "sm", templ.Attributes{"type": "submit"}) {
 							{ i18n.T(ctx, "page.tournament.view.create-match") }
@@ -187,10 +187,7 @@ templ MatchesSection(t tournamentModel.Tournament, matches []tournamentModel.Tou
 								{ i18n.T(ctx, "page.tournament.view.round") }
 							}
 							@ui.ThCompact() {
-								{ i18n.T(ctx, "page.tournament.view.team-1") }
-							}
-							@ui.ThCompact() {
-								{ i18n.T(ctx, "page.tournament.view.team-2") }
+								{ i18n.T(ctx, "page.tournament.view.teams") }
 							}
 							@ui.ThCompact() {
 								BO
@@ -199,15 +196,14 @@ templ MatchesSection(t tournamentModel.Tournament, matches []tournamentModel.Tou
 								{ i18n.T(ctx, "page.tournament.view.score") }
 							}
 							@ui.ThCompact() {
+								{ i18n.T(ctx, "page.tournament.view.kills") }
+							}
+							@ui.ThCompact() {
 								{ i18n.T(ctx, "page.tournament.status.label") }
 							}
 							@ui.ThCompact() {
 								{ i18n.T(ctx, "page.tournament.view.winner") }
 							}
-							@ui.ThCompact() {
-								{ i18n.T(ctx, "page.tournament.view.kills") }
-							}
-							@ui.ThEmpty()
 							@ui.ThEmpty()
 						}
 					}
@@ -304,7 +300,41 @@ templ bracketRounds(rounds [][]tournamentModel.TournamentMatchWithNames, tournam
 										}
 									</span>
 									if !isByeMatch(m) {
-										<span class="bracket-score">{ fmt.Sprintf("%d", m.ScoreTeam1) }</span>
+										if isMatchScoreEditable(m, readOnly) {
+											<div class="bracket-kills">
+												<button
+													hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id) }
+													hx-vals={ `{"team":"1","delta":"-1"}` }
+													hx-target="#matches-section"
+													hx-swap="outerHTML"
+												>-</button>
+												<span>{ fmt.Sprintf("%d", m.KillsTeam1) }</span>
+												<button
+													hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id) }
+													hx-vals={ `{"team":"1","delta":"1"}` }
+													hx-target="#matches-section"
+													hx-swap="outerHTML"
+												>+</button>
+											</div>
+											<div class="bracket-score">
+												<button
+													hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id) }
+													hx-vals={ `{"team":"1","delta":"-1"}` }
+													hx-target="#matches-section"
+													hx-swap="outerHTML"
+												>-</button>
+												<span>{ fmt.Sprintf("%d", m.ScoreTeam1) }</span>
+												<button
+													hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id) }
+													hx-vals={ `{"team":"1","delta":"1"}` }
+													hx-target="#matches-section"
+													hx-swap="outerHTML"
+												>+</button>
+											</div>
+										} else {
+											<span class="bracket-kills-text">{ fmt.Sprintf("%d", m.KillsTeam1) }</span>
+											<span class="bracket-score-text">{ fmt.Sprintf("%d", m.ScoreTeam1) }</span>
+										}
 									}
 								</div>
 								if !isByeMatch(m) {
@@ -350,7 +380,41 @@ templ bracketRounds(rounds [][]tournamentModel.TournamentMatchWithNames, tournam
 										}
 									</span>
 									if !isByeMatch(m) {
-										<span class="bracket-score">{ fmt.Sprintf("%d", m.ScoreTeam2) }</span>
+										if isMatchScoreEditable(m, readOnly) {
+											<div class="bracket-kills">
+												<button
+													hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id) }
+													hx-vals={ `{"team":"2","delta":"-1"}` }
+													hx-target="#matches-section"
+													hx-swap="outerHTML"
+												>-</button>
+												<span>{ fmt.Sprintf("%d", m.KillsTeam2) }</span>
+												<button
+													hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id) }
+													hx-vals={ `{"team":"2","delta":"1"}` }
+													hx-target="#matches-section"
+													hx-swap="outerHTML"
+												>+</button>
+											</div>
+											<div class="bracket-score">
+												<button
+													hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id) }
+													hx-vals={ `{"team":"2","delta":"-1"}` }
+													hx-target="#matches-section"
+													hx-swap="outerHTML"
+												>-</button>
+												<span>{ fmt.Sprintf("%d", m.ScoreTeam2) }</span>
+												<button
+													hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id) }
+													hx-vals={ `{"team":"2","delta":"1"}` }
+													hx-target="#matches-section"
+													hx-swap="outerHTML"
+												>+</button>
+											</div>
+										} else {
+											<span class="bracket-kills-text">{ fmt.Sprintf("%d", m.KillsTeam2) }</span>
+											<span class="bracket-score-text">{ fmt.Sprintf("%d", m.ScoreTeam2) }</span>
+										}
 									}
 								</div>
 							</div>
@@ -391,10 +455,10 @@ templ MatchRow(m tournamentModel.TournamentMatchWithNames, idTournament int, rea
 			{ fmt.Sprintf("R%d", m.Round) }
 		}
 		@ui.TdCompact() {
-			{ m.Team1Name }
-		}
-		@ui.TdCompact() {
-			{ m.Team2Name }
+			<div class="flex flex-col gap-1">
+				<span>{ m.Team1Name }</span>
+				<span>{ m.Team2Name }</span>
+			</div>
 		}
 		@ui.TdCompact() {
 			if !readOnly && m.Status != "finished" {
@@ -414,23 +478,55 @@ templ MatchRow(m tournamentModel.TournamentMatchWithNames, idTournament int, rea
 			}
 		}
 		@ui.TdCompact() {
-			{ fmt.Sprintf("%d - %d", m.ScoreTeam1, m.ScoreTeam2) }
-		}
-		@ui.TdCompact() {
-			@MatchStatusBadge(m.Status)
-		}
-		@ui.TdCompact() {
-			if m.WinnerName != "" {
-				<span class="font-semibold text-green-600 dark:text-green-400">{ m.WinnerName }</span>
-			} else {
-				<span class="text-gray-400">-</span>
-			}
+			<div class="flex flex-col gap-1">
+				<div class="flex gap-1 items-center">
+					if !readOnly && m.Status != "finished" {
+						<button
+							hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id) }
+							hx-vals={ `{"team":"1","delta":"-1"}` }
+							hx-target="#matches-section"
+							hx-swap="outerHTML"
+							class="py-0.5 px-2 text-sm rounded border hover:bg-gray-100 dark:hover:bg-gray-700"
+						>-</button>
+					}
+					<span class="w-6 text-sm font-medium text-center">{ fmt.Sprintf("%d", m.ScoreTeam1) }</span>
+					if !readOnly && m.Status != "finished" {
+						<button
+							hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id) }
+							hx-vals={ `{"team":"1","delta":"1"}` }
+							hx-target="#matches-section"
+							hx-swap="outerHTML"
+							class="py-0.5 px-2 text-sm rounded border hover:bg-gray-100 dark:hover:bg-gray-700"
+						>+</button>
+					}
+				</div>
+				<div class="flex gap-1 items-center">
+					if !readOnly && m.Status != "finished" {
+						<button
+							hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id) }
+							hx-vals={ `{"team":"2","delta":"-1"}` }
+							hx-target="#matches-section"
+							hx-swap="outerHTML"
+							class="py-0.5 px-2 text-sm rounded border hover:bg-gray-100 dark:hover:bg-gray-700"
+						>-</button>
+					}
+					<span class="w-6 text-sm font-medium text-center">{ fmt.Sprintf("%d", m.ScoreTeam2) }</span>
+					if !readOnly && m.Status != "finished" {
+						<button
+							hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id) }
+							hx-vals={ `{"team":"2","delta":"1"}` }
+							hx-target="#matches-section"
+							hx-swap="outerHTML"
+							class="py-0.5 px-2 text-sm rounded border hover:bg-gray-100 dark:hover:bg-gray-700"
+						>+</button>
+					}
+				</div>
+			</div>
 		}
 		@ui.TdCompact() {
 			<div class="flex flex-col gap-1">
 				<div class="flex gap-1 items-center">
-					<span class="w-16 text-xs text-gray-500 truncate">{ m.Team1Name }</span>
-					if !readOnly {
+					if !readOnly && m.Status != "finished" {
 						<button
 							hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id) }
 							hx-vals={ `{"team":"1","delta":"-1"}` }
@@ -440,7 +536,7 @@ templ MatchRow(m tournamentModel.TournamentMatchWithNames, idTournament int, rea
 						>-</button>
 					}
 					<span class="w-6 text-sm font-medium text-center">{ fmt.Sprintf("%d", m.KillsTeam1) }</span>
-					if !readOnly {
+					if !readOnly && m.Status != "finished" {
 						<button
 							hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id) }
 							hx-vals={ `{"team":"1","delta":"1"}` }
@@ -451,8 +547,7 @@ templ MatchRow(m tournamentModel.TournamentMatchWithNames, idTournament int, rea
 					}
 				</div>
 				<div class="flex gap-1 items-center">
-					<span class="w-16 text-xs text-gray-500 truncate">{ m.Team2Name }</span>
-					if !readOnly {
+					if !readOnly && m.Status != "finished" {
 						<button
 							hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id) }
 							hx-vals={ `{"team":"2","delta":"-1"}` }
@@ -462,7 +557,7 @@ templ MatchRow(m tournamentModel.TournamentMatchWithNames, idTournament int, rea
 						>-</button>
 					}
 					<span class="w-6 text-sm font-medium text-center">{ fmt.Sprintf("%d", m.KillsTeam2) }</span>
-					if !readOnly {
+					if !readOnly && m.Status != "finished" {
 						<button
 							hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id) }
 							hx-vals={ `{"team":"2","delta":"1"}` }
@@ -475,20 +570,13 @@ templ MatchRow(m tournamentModel.TournamentMatchWithNames, idTournament int, rea
 			</div>
 		}
 		@ui.TdCompact() {
-			if !readOnly && m.Status != "finished" {
-				<form
-					class="flex gap-1 items-center"
-					hx-post={ fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id) }
-					hx-target="#matches-section"
-					hx-swap="outerHTML"
-				>
-					<input type="number" name="score_team1" min="0" value={ fmt.Sprintf("%d", m.ScoreTeam1) } class="p-1 w-12 text-sm text-center rounded border dark:bg-gray-800 dark:border-gray-600"/>
-					<span class="text-gray-500">-</span>
-					<input type="number" name="score_team2" min="0" value={ fmt.Sprintf("%d", m.ScoreTeam2) } class="p-1 w-12 text-sm text-center rounded border dark:bg-gray-800 dark:border-gray-600"/>
-					@ui.ButtonAction("primary", "sm", templ.Attributes{"type": "submit"}) {
-						{ i18n.T(ctx, "page.tournament.match.add-score") }
-					}
-				</form>
+			@MatchStatusBadge(m.Status)
+		}
+		@ui.TdCompact() {
+			if m.WinnerName != "" {
+				<span class="font-semibold text-green-600 dark:text-green-400">{ m.WinnerName }</span>
+			} else {
+				<span class="text-gray-400">-</span>
 			}
 		}
 		if !readOnly && m.Round == currentRound {
@@ -671,7 +759,7 @@ func canGenerateNextRound(matches []tournamentModel.TournamentMatchWithNames) bo
 		}
 	}
 	roundIdx := maxR - 1
-	expectedSlots := (round1Count + (1<<roundIdx) - 1) / (1 << roundIdx)
+	expectedSlots := (round1Count + (1 << roundIdx) - 1) / (1 << roundIdx)
 
 	actualCount := 0
 	winners := 0
@@ -734,7 +822,7 @@ func buildFullBracketRounds(matches []tournamentModel.TournamentMatchWithNames) 
 	result := make([][]tournamentModel.TournamentMatchWithNames, totalRounds)
 	for roundIdx := 0; roundIdx < totalRounds; roundIdx++ {
 		// Expected slots for this round: ceil(round1Count / 2^roundIdx)
-		expectedSlots := (round1Count + (1<<roundIdx) - 1) / (1 << roundIdx)
+		expectedSlots := (round1Count + (1 << roundIdx) - 1) / (1 << roundIdx)
 
 		// Index existing matches by position
 		byPosition := map[int]tournamentModel.TournamentMatchWithNames{}
@@ -774,6 +862,10 @@ func maxRound(matches []tournamentModel.TournamentMatchWithNames) int {
 
 func isByeMatch(m tournamentModel.TournamentMatchWithNames) bool {
 	return m.Status == "finished" && (m.Team1Name == "" || m.Team2Name == "")
+}
+
+func isMatchScoreEditable(m tournamentModel.TournamentMatchWithNames, readOnly bool) bool {
+	return !readOnly && m.Id != 0 && m.Status != "finished" && !isByeMatch(m)
 }
 
 func matchFlexWeight(rounds [][]tournamentModel.TournamentMatchWithNames, roundIdx int, position int) int {
