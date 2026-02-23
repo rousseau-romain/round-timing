@@ -189,6 +189,7 @@ pt:
         player-name: "Nome do jogador"
         team-composition: "Composição das equipes"
         bracket: "Chaveamento"
+        available-teams: "Equipas disponíveis"
         add-match: "Adicionar partida"
         team-1: "Equipe 1"
         team-2: "Equipe 2"

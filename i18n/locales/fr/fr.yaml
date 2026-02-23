@@ -189,6 +189,7 @@ fr:
         player-name: "Nom du joueur"
         team-composition: "Composition des équipes"
         bracket: "Arbre du tournoi"
+        available-teams: "Équipes disponibles"
         add-match: "Ajouter un match"
         team-1: "Équipe 1"
         team-2: "Équipe 2"

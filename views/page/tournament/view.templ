@@ -120,7 +120,7 @@ templ MatchesSection(t tournamentModel.Tournament, matches []tournamentModel.Tou
 		if len(matches) > 0 {
 			@ui.Section() {
 				<h2>{ i18n.T(ctx, "page.tournament.view.bracket") }</h2>
-				@BracketView(t, matches)
+				@BracketView(t, matches, availableTeams)
 			}
 		}
 		if !isTournamentReadOnly(t) {
@@ -146,6 +146,10 @@ templ MatchesSection(t tournamentModel.Tournament, matches []tournamentModel.Tou
 						}
 					</div>
 				}
+			}
+			<!-- Available Teams Pool -->
+			if len(availableTeams) > 0 && len(matches) > 0 {
+				@AvailableTeamsPool(availableTeams)
 			}
 			<!-- Create Match -->
 			@ui.Section() {
@@ -215,14 +219,36 @@ templ MatchesSection(t tournamentModel.Tournament, matches []tournamentModel.Tou
 				}
 			}
 		}
+		if !isTournamentReadOnly(t) && len(matches) > 0 {
+			<script src="/public/script/tournament-bracket-dnd.js"></script>
+		}
 	</div>
 }
 
-templ BracketView(t tournamentModel.Tournament, matches []tournamentModel.TournamentMatchWithNames) {
-	@bracketRounds(buildFullBracketRounds(matches), t.Status, t.StageType)
+templ AvailableTeamsPool(teams []tournamentModel.Team) {
+	@ui.Section() {
+		<h3 class="mb-2">{ i18n.T(ctx, "page.tournament.view.available-teams") }</h3>
+		<div class="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+			for _, t := range teams {
+				<div
+					draggable="true"
+					data-team-id={ fmt.Sprintf("%d", t.Id) }
+					data-team-name={ t.Name }
+					ondragstart="onBracketTeamDragStart(event, this)"
+					class="py-1.5 px-3 text-sm font-medium bg-white rounded-lg border border-gray-300 shadow-sm select-none dark:bg-gray-700 dark:border-gray-600 hover:bg-green-50 hover:border-green-400 cursor-grab dark:hover:border-green-500"
+				>
+					{ t.Name }
+				</div>
+			}
+		</div>
+	}
 }
 
-templ bracketRounds(rounds [][]tournamentModel.TournamentMatchWithNames, tournamentStatus string, stageType string) {
+templ BracketView(t tournamentModel.Tournament, matches []tournamentModel.TournamentMatchWithNames, availableTeams []tournamentModel.Team) {
+	@bracketRounds(buildFullBracketRounds(matches), t.Status, t.StageType, availableTeams, isTournamentReadOnly(t), t.Id)
+}
+
+templ bracketRounds(rounds [][]tournamentModel.TournamentMatchWithNames, tournamentStatus string, stageType string, availableTeams []tournamentModel.Team, readOnly bool, idTournament int) {
 	<div class="bracket">
 		for roundNum, roundMatches := range rounds {
 			<div class="bracket-round">
@@ -241,9 +267,38 @@ templ bracketRounds(rounds [][]tournamentModel.TournamentMatchWithNames, tournam
 								<div class={ "bracket-team", templ.KV("winner", m.WinnerName != "" && m.WinnerName == m.Team1Name) }>
 									<span>
 										if m.Team1Name != "" {
-											{ m.Team1Name }
+											if m.WinnerName == m.Team1Name {
+												if teamId, ok := isTeamAvailable(availableTeams, m.Team1Name); ok && !readOnly {
+													<span
+														draggable="true"
+														data-team-id={ fmt.Sprintf("%d", teamId) }
+														data-team-name={ m.Team1Name }
+														ondragstart="onBracketTeamDragStart(event, this)"
+														class="px-1 -mx-1 rounded transition-colors hover:bg-green-100 cursor-grab dark:hover:bg-green-900"
+													>
+														{ m.Team1Name }
+													</span>
+												} else {
+													{ m.Team1Name }
+												}
+											} else {
+												{ m.Team1Name }
+											}
 										} else if isByeMatch(m) {
 											<span class="italic text-gray-400">BYE</span>
+										} else if m.Id == 0 && !readOnly {
+											<span
+												class="py-0.5 px-2 text-gray-400 rounded bracket-drop-zone"
+												data-round={ fmt.Sprintf("%d", m.Round) }
+												data-position={ fmt.Sprintf("%d", m.Position) }
+												data-slot="1"
+												data-tournament-id={ fmt.Sprintf("%d", idTournament) }
+												ondragover="onBracketSlotDragOver(event, this)"
+												ondragleave="onBracketSlotDragLeave(event, this)"
+												ondrop="handleBracketSlotDrop(event, this)"
+											>
+												TBD
+											</span>
 										} else {
 											<span class="text-gray-400">TBD</span>
 										}
@@ -258,9 +313,38 @@ templ bracketRounds(rounds [][]tournamentModel.TournamentMatchWithNames, tournam
 								<div class={ "bracket-team", templ.KV("winner", m.WinnerName != "" && m.WinnerName == m.Team2Name) }>
 									<span>
 										if m.Team2Name != "" {
-											{ m.Team2Name }
+											if m.WinnerName == m.Team2Name {
+												if teamId, ok := isTeamAvailable(availableTeams, m.Team2Name); ok && !readOnly {
+													<span
+														draggable="true"
+														data-team-id={ fmt.Sprintf("%d", teamId) }
+														data-team-name={ m.Team2Name }
+														ondragstart="onBracketTeamDragStart(event, this)"
+														class="px-1 -mx-1 rounded transition-colors hover:bg-green-100 cursor-grab dark:hover:bg-green-900"
+													>
+														{ m.Team2Name }
+													</span>
+												} else {
+													{ m.Team2Name }
+												}
+											} else {
+												{ m.Team2Name }
+											}
 										} else if isByeMatch(m) {
 											<span class="italic text-gray-400">BYE</span>
+										} else if m.Id == 0 && !readOnly {
+											<span
+												class="py-0.5 px-2 text-gray-400 rounded bracket-drop-zone"
+												data-round={ fmt.Sprintf("%d", m.Round) }
+												data-position={ fmt.Sprintf("%d", m.Position) }
+												data-slot="2"
+												data-tournament-id={ fmt.Sprintf("%d", idTournament) }
+												ondragover="onBracketSlotDragOver(event, this)"
+												ondragleave="onBracketSlotDragLeave(event, this)"
+												ondrop="handleBracketSlotDrop(event, this)"
+											>
+												TBD
+											</span>
 										} else {
 											<span class="text-gray-400">TBD</span>
 										}
@@ -560,6 +644,15 @@ func getTeamPlayersByTeamId(allTeamPlayers []tournamentModel.TeamPlayerWithNames
 
 func isTournamentReadOnly(t tournamentModel.Tournament) bool {
 	return t.IsArchived == 1
+}
+
+func isTeamAvailable(teams []tournamentModel.Team, name string) (int, bool) {
+	for _, t := range teams {
+		if t.Name == name {
+			return t.Id, true
+		}
+	}
+	return 0, false
 }
 
 func canGenerateNextRound(matches []tournamentModel.TournamentMatchWithNames) bool {

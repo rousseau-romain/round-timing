@@ -192,6 +192,12 @@ tr.htmx-swapping td {
   @apply text-xs tabular-nums;
 }
 
+.bracket-drop-zone {
+  transition: outline 0.15s, background-color 0.15s;
+  min-width: 3rem;
+  text-align: center;
+}
+
 /* --- Bracket connectors --- */
 
 /* Outgoing: top of pair — horizontal right + vertical down */

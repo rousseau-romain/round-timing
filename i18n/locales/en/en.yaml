@@ -189,6 +189,7 @@ en:
         player-name: "Player name"
         team-composition: "Team composition"
         bracket: "Bracket"
+        available-teams: "Available teams"
         add-match: "Add match"
         team-1: "Team 1"
         team-2: "Team 2"
