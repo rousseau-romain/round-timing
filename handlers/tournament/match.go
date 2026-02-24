@@ -372,6 +372,77 @@ func (h *Handler) HandleEditMatchBo(w http.ResponseWriter, r *http.Request) {
 	pageTournament.MatchesSection(t, matches, availableTeams).Render(r.Context(), w)
 }
 
+func nextMatchStatus(current string) string {
+	switch current {
+	case "pending":
+		return "in_progress"
+	case "in_progress":
+		return "finished"
+	case "finished":
+		return "in_progress"
+	default:
+		return "pending"
+	}
+}
+
+func (h *Handler) HandleUpdateMatchStatus(w http.ResponseWriter, r *http.Request) {
+	user, _ := auth.UserFromRequest(r)
+	logger := h.Slog.With("userId", user.Id)
+	vars := mux.Vars(r)
+	idMatch, _ := strconv.Atoi(vars["idMatch"])
+	idTournament, _ := strconv.Atoi(vars["idTournament"])
+
+	m, err := tournamentModel.GetTournamentMatch(r.Context(), idMatch)
+	if err != nil {
+		logger.Error(err.Error())
+		httpError.InternalError(w)
+		return
+	}
+
+	newStatus := nextMatchStatus(m.Status)
+
+	if newStatus == "pending" {
+		// Going back to pending: clear winner
+		if err := tournamentModel.UpdateMatchWinner(r.Context(), idMatch, nil, newStatus); err != nil {
+			logger.Error(err.Error())
+			httpError.InternalError(w)
+			return
+		}
+	} else {
+		if err := tournamentModel.UpdateMatchStatus(r.Context(), idMatch, newStatus); err != nil {
+			logger.Error(err.Error())
+			httpError.InternalError(w)
+			return
+		}
+	}
+
+	logger.Info("match status updated", "matchId", idMatch, "status", newStatus)
+
+	matches, err := tournamentModel.GetMatchesByTournament(r.Context(), idTournament)
+	if err != nil {
+		logger.Error(err.Error())
+		httpError.InternalError(w)
+		return
+	}
+
+	availableTeams, err := tournamentModel.GetAvailableTeamsForTournament(r.Context(), idTournament, user.Id)
+	if err != nil {
+		logger.Error(err.Error())
+		httpError.InternalError(w)
+		return
+	}
+
+	t, err := tournamentModel.GetTournament(r.Context(), idTournament)
+	if err != nil {
+		logger.Error(err.Error())
+		httpError.InternalError(w)
+		return
+	}
+
+	w.Header().Set("HX-Trigger", "tournamentStatusChanged")
+	pageTournament.MatchesSection(t, matches, availableTeams).Render(r.Context(), w)
+}
+
 func (h *Handler) generateNextRound(w http.ResponseWriter, r *http.Request, shuffle bool) {
 	user, _ := auth.UserFromRequest(r)
 	logger := h.Slog.With("userId", user.Id)

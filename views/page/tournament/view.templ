@@ -105,6 +105,18 @@ templ MatchStatusBadge(status string) {
 	}
 }
 
+templ MatchStatusBadgeClickable(status string, idTournament int, idMatch int) {
+	<button
+		type="button"
+		class="cursor-pointer"
+		hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/status", idTournament, idMatch) }
+		hx-target="#matches-section"
+		hx-swap="outerHTML"
+	>
+		@MatchStatusBadge(status)
+	</button>
+}
+
 templ TournamentStatusBadgeDiv(idTournament int) {
 	<div
 		id="tournament-status-badge"
@@ -570,7 +582,11 @@ templ MatchRow(m tournamentModel.TournamentMatchWithNames, idTournament int, rea
 			</div>
 		}
 		@ui.TdCompact() {
-			@MatchStatusBadge(m.Status)
+			if !readOnly && m.Round == currentRound {
+				@MatchStatusBadgeClickable(m.Status, idTournament, m.Id)
+			} else {
+				@MatchStatusBadge(m.Status)
+			}
 		}
 		@ui.TdCompact() {
 			if m.WinnerName != "" {

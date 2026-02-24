@@ -298,6 +298,11 @@ func IncrementMatchKills(ctx context.Context, idMatch int, team int, delta int) 
 	return err
 }
 
+func UpdateMatchStatus(ctx context.Context, idMatch int, status string) error {
+	_, err := db.ExecContext(ctx, "UPDATE tournament_match SET status = ? WHERE id = ?", status, idMatch)
+	return err
+}
+
 func IncrementMatchScore(ctx context.Context, idMatch int, team int, delta int) error {
 	col := "score_team1"
 	if team == 2 {
