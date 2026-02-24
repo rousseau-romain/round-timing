@@ -1,0 +1,1013 @@
+package tournament
+
+import (
+	"fmt"
+	"strings"
+
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/rousseau-romain/round-timing/model/system"
+	tournamentModel "github.com/rousseau-romain/round-timing/model/tournament"
+	"github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/views/components/forms"
+	"github.com/rousseau-romain/round-timing/views/components/icons"
+	"github.com/rousseau-romain/round-timing/views/components/layout"
+	"github.com/rousseau-romain/round-timing/views/components/ui"
+)
+
+templ TeamCard(t tournamentModel.Team) {
+	<div class="flex gap-2 justify-between items-center py-2 px-3 bg-white rounded-lg border shadow-sm dark:bg-gray-900 dark:border-gray-700">
+		<span class="font-medium">{ t.Name }</span>
+		@ui.ButtonAction("danger", "sm", templ.Attributes{
+			"hx-delete": fmt.Sprintf("/tournament/team/%d", t.Id),
+			"hx-target": "closest div",
+			"hx-swap":   "outerHTML swap:0.3s",
+		}) {
+			@icons.Trash()
+		}
+	</div>
+}
+
+templ PlayerCard(p tournamentModel.Player) {
+	<div class="flex gap-2 justify-between items-center py-2 px-3 bg-white rounded-lg border shadow-sm dark:bg-gray-900 dark:border-gray-700">
+		<span class="font-medium">{ p.Name }</span>
+		@ui.ButtonAction("danger", "sm", templ.Attributes{
+			"hx-delete": fmt.Sprintf("/tournament/player/%d", p.Id),
+			"hx-target": "closest div",
+			"hx-swap":   "outerHTML swap:0.3s",
+		}) {
+			@icons.Trash()
+		}
+	</div>
+}
+
+templ PlayersPool(players []tournamentModel.Player) {
+	if len(players) > 0 {
+		<div class="flex flex-wrap gap-2 p-3 mb-4 bg-gray-50 rounded-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+			for _, p := range players {
+				<div
+					id={ fmt.Sprintf("player-chip-%d", p.Id) }
+					draggable="true"
+					data-player-id={ fmt.Sprintf("%d", p.Id) }
+					ondragstart="onPlayerDragStart(event, this)"
+					class="py-1.5 px-3 text-sm font-medium bg-white rounded-lg border border-gray-300 shadow-sm select-none dark:bg-gray-700 dark:border-gray-600 hover:bg-indigo-50 hover:border-indigo-400 cursor-grab dark:hover:border-indigo-500"
+				>
+					{ p.Name }
+				</div>
+			}
+		</div>
+	}
+}
+
+templ TeamCompositionCard(team tournamentModel.Team, teamPlayers []tournamentModel.TeamPlayerWithNames, players []tournamentModel.Player) {
+	<div
+		id={ fmt.Sprintf("team-composition-%d", team.Id) }
+		class="p-4 bg-white rounded-lg border-2 border-gray-200 border-dashed shadow-sm transition-colors dark:bg-gray-900 dark:border-gray-700 min-h-20"
+		data-team-id={ fmt.Sprintf("%d", team.Id) }
+		data-player-ids={ teamPlayerIdsAttr(teamPlayers) }
+		ondragover="onTeamDragOver(event, this)"
+		ondragleave="onTeamDragLeave(event, this)"
+		ondrop="handlePlayerDrop(event, parseInt(this.dataset.teamId), this)"
+	>
+		<h4 class="mb-2 font-medium">{ team.Name }</h4>
+		<div class="flex flex-wrap gap-2">
+			for _, tp := range teamPlayers {
+				<span class="inline-flex gap-1 items-center py-1 px-2 text-sm text-indigo-700 bg-indigo-100 rounded dark:text-indigo-200 dark:bg-indigo-800">
+					{ tp.PlayerName }
+					<button
+						type="button"
+						class="ml-1 font-bold text-red-500 hover:text-red-700"
+						hx-delete={ fmt.Sprintf("/tournament/team/%d/player/%d", team.Id, tp.Id) }
+						hx-target="closest span"
+						hx-swap="outerHTML"
+					>
+						&times;
+					</button>
+				</span>
+			}
+		</div>
+	</div>
+}
+
+templ BracketIncrementControl(endpoint string, team int, value int, cssClass string) {
+	<div class={ cssClass }>
+		<button
+			hx-patch={ endpoint }
+			hx-vals={ fmt.Sprintf(`{"team":"%d","delta":"-1"}`, team) }
+			hx-target="#matches-section"
+			hx-swap="outerHTML"
+		>-</button>
+		<span>{ fmt.Sprintf("%d", value) }</span>
+		<button
+			hx-patch={ endpoint }
+			hx-vals={ fmt.Sprintf(`{"team":"%d","delta":"1"}`, team) }
+			hx-target="#matches-section"
+			hx-swap="outerHTML"
+		>+</button>
+	</div>
+}
+
+templ TableIncrementControl(endpoint string, team int, value int) {
+	<div class="flex gap-1 items-center">
+		<button
+			hx-patch={ endpoint }
+			hx-vals={ fmt.Sprintf(`{"team":"%d","delta":"-1"}`, team) }
+			hx-target="#matches-section"
+			hx-swap="outerHTML"
+			class="py-0.5 px-2 text-sm rounded border hover:bg-gray-100 dark:hover:bg-gray-700"
+		>-</button>
+		<span class="w-6 text-sm font-medium text-center">{ fmt.Sprintf("%d", value) }</span>
+		<button
+			hx-patch={ endpoint }
+			hx-vals={ fmt.Sprintf(`{"team":"%d","delta":"1"}`, team) }
+			hx-target="#matches-section"
+			hx-swap="outerHTML"
+			class="py-0.5 px-2 text-sm rounded border hover:bg-gray-100 dark:hover:bg-gray-700"
+		>+</button>
+	</div>
+}
+
+templ MatchStatusBadge(status string) {
+	switch status {
+		case "pending":
+			@ui.Badge("gray", "") {
+				{ i18n.T(ctx, "page.tournament.match.status.pending") }
+			}
+		case "in_progress":
+			@ui.Badge("indigo", "") {
+				{ i18n.T(ctx, "page.tournament.match.status.in-progress") }
+			}
+		case "finished":
+			@ui.Badge("green", "") {
+				{ i18n.T(ctx, "page.tournament.match.status.finished") }
+			}
+	}
+}
+
+templ MatchStatusBadgeClickable(status string, idTournament int, idMatch int) {
+	<button
+		type="button"
+		class="cursor-pointer"
+		hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/status", idTournament, idMatch) }
+		hx-target="#matches-section"
+		hx-swap="outerHTML"
+	>
+		@MatchStatusBadge(status)
+	</button>
+}
+
+templ TournamentStatusBadgeDiv(idTournament int) {
+	<div
+		id="tournament-status-badge"
+		hx-get={ fmt.Sprintf("/tournament/%d/status-badge", idTournament) }
+		hx-trigger="load, tournamentStatusChanged from:body"
+		hx-swap="innerHTML"
+	></div>
+}
+
+templ MatchesSection(t tournamentModel.Tournament, matches []tournamentModel.TournamentMatchWithNames, availableTeams []tournamentModel.Team) {
+	<div id="matches-section">
+		<!-- Bracket View -->
+		if len(matches) > 0 {
+			@ui.Section() {
+				<h2>{ i18n.T(ctx, "page.tournament.view.bracket") }</h2>
+				@BracketView(t, matches, availableTeams)
+			}
+		}
+		if !isTournamentReadOnly(t) {
+			<!-- Generate Next Round -->
+			if len(matches) > 0 && canGenerateNextRound(matches) {
+				@ui.Section() {
+					<div class="flex gap-2">
+						@ui.ButtonAction("success", "md", templ.Attributes{
+							"hx-post":         fmt.Sprintf("/tournament/%d/generate-next-round", t.Id),
+							"hx-target":       "#matches-section",
+							"hx-swap":         "outerHTML",
+							"hx-target-error": "#popinMessages",
+						}) {
+							{ i18n.T(ctx, "page.tournament.view.generate-next-round") }
+						}
+						@ui.ButtonAction("outline", "md", templ.Attributes{
+							"hx-post":         fmt.Sprintf("/tournament/%d/generate-next-round-ordered", t.Id),
+							"hx-target":       "#matches-section",
+							"hx-swap":         "outerHTML",
+							"hx-target-error": "#popinMessages",
+						}) {
+							{ i18n.T(ctx, "page.tournament.view.generate-next-round-ordered") }
+						}
+					</div>
+				}
+			}
+			<!-- Available Teams Pool -->
+			if len(availableTeams) > 0 && len(matches) > 0 {
+				@AvailableTeamsPool(availableTeams)
+			}
+			<!-- Create Match -->
+			@ui.Section() {
+				<h2>{ i18n.T(ctx, "page.tournament.view.add-match") }</h2>
+				if len(availableTeams) >= 2 {
+					<form
+						class="flex flex-wrap gap-2 items-end mb-4"
+						hx-post={ fmt.Sprintf("/tournament/%d/match", t.Id) }
+						hx-target="#matches-section"
+						hx-swap="outerHTML"
+						hx-target-error="#popinMessages"
+					>
+						@forms.Select("id_team1", "id_team1", "page.tournament.view.team-1", teamSelectOptions(availableTeams), true)
+						@forms.Select("id_team2", "id_team2", "page.tournament.view.team-2", teamSelectOptions(availableTeams), true)
+						@forms.InputAction("number", "bo_format", "BO", templ.Attributes{
+							"value": "1",
+							"min":   "1",
+							"class": "p-3",
+						})
+						@ui.ButtonAction("primary", "sm", templ.Attributes{"type": "submit"}) {
+							{ i18n.T(ctx, "page.tournament.view.create-match") }
+						}
+					</form>
+				}
+			}
+		}
+		<!-- Match List -->
+		if len(matches) > 0 {
+			@ui.Section() {
+				<h2>{ i18n.T(ctx, "page.tournament.view.all-matches") }</h2>
+				@ui.Table("compact") {
+					@ui.TableHead("compact") {
+						@ui.Tr() {
+							@ui.ThCompact() {
+								{ i18n.T(ctx, "page.tournament.view.round") }
+							}
+							@ui.ThCompact() {
+								{ i18n.T(ctx, "page.tournament.view.teams") }
+							}
+							@ui.ThCompact() {
+								BO
+							}
+							@ui.ThCompact() {
+								{ i18n.T(ctx, "page.tournament.view.score") }
+							}
+							@ui.ThCompact() {
+								{ i18n.T(ctx, "page.tournament.view.kills") }
+							}
+							@ui.ThCompact() {
+								{ i18n.T(ctx, "page.tournament.status.label") }
+							}
+							@ui.ThCompact() {
+								{ i18n.T(ctx, "page.tournament.view.winner") }
+							}
+							@ui.ThEmpty()
+						}
+					}
+					@ui.TableBody(templ.Attributes{}) {
+						for _, m := range matches {
+							@MatchRow(m, t.Id, isTournamentReadOnly(t), maxRound(matches))
+						}
+					}
+				}
+			}
+		}
+		if !isTournamentReadOnly(t) && len(matches) > 0 {
+			<script src="/public/script/tournament-bracket-dnd.js"></script>
+		}
+	</div>
+}
+
+templ AvailableTeamsPool(teams []tournamentModel.Team) {
+	@ui.Section() {
+		<h3 class="mb-2">{ i18n.T(ctx, "page.tournament.view.available-teams") }</h3>
+		<div class="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+			for _, t := range teams {
+				<div
+					draggable="true"
+					data-team-id={ fmt.Sprintf("%d", t.Id) }
+					data-team-name={ t.Name }
+					ondragstart="onBracketTeamDragStart(event, this)"
+					class="py-1.5 px-3 text-sm font-medium bg-white rounded-lg border border-gray-300 shadow-sm select-none dark:bg-gray-700 dark:border-gray-600 hover:bg-green-50 hover:border-green-400 cursor-grab dark:hover:border-green-500"
+				>
+					{ t.Name }
+				</div>
+			}
+		</div>
+	}
+}
+
+templ BracketView(t tournamentModel.Tournament, matches []tournamentModel.TournamentMatchWithNames, availableTeams []tournamentModel.Team) {
+	@bracketRounds(buildFullBracketRounds(matches), t.Status, t.StageType, availableTeams, isTournamentReadOnly(t), t.Id)
+}
+
+templ bracketRounds(rounds [][]tournamentModel.TournamentMatchWithNames, tournamentStatus string, stageType string, availableTeams []tournamentModel.Team, readOnly bool, idTournament int) {
+	<div class="bracket">
+		for roundNum, roundMatches := range rounds {
+			<div class="bracket-round">
+				<div class="bracket-round-header">
+					<div class="flex gap-1 justify-center items-center">
+						<span>
+							if roundLabelKey(roundNum, len(rounds), stageType) != "" {
+								{ i18n.T(ctx, roundLabelKey(roundNum, len(rounds), stageType)) }
+							} else {
+								{ fmt.Sprintf("%s %d", i18n.T(ctx, "global.round"), roundNum+1) }
+							}
+						</span>
+						if !readOnly && roundHasRealMatches(roundMatches) {
+							<input
+								type="number"
+								name="bo_format"
+								min="1"
+								value={ fmt.Sprintf("%d", roundBoFormat(roundMatches)) }
+								class="p-0.5 w-12 text-xs text-center rounded border dark:bg-gray-800 dark:border-gray-600"
+								hx-patch={ fmt.Sprintf("/tournament/%d/round/%d/bo", idTournament, roundNum+1) }
+								hx-target="#matches-section"
+								hx-swap="outerHTML"
+								hx-trigger="change"
+								title="BO format"
+							/>
+						} else if roundHasRealMatches(roundMatches) {
+							<span>
+								{ fmt.Sprintf("BO%d", roundBoFormat(roundMatches)) }
+							</span>
+						}
+					</div>
+				</div>
+				<div class="bracket-round-matches">
+					for i, m := range roundMatches {
+						<div class={ "bracket-match", matchConnectorClass(i, len(roundMatches)) } style={ matchContainerStyle(rounds, roundNum, m.Position) }>
+							<div style={ matchSpacerTopStyle(rounds, roundNum, m.Position) }></div>
+							<div class={ "bracket-match-card", m.Status }>
+								<div class={ "bracket-team", templ.KV("winner", m.WinnerName != "" && m.WinnerName == m.Team1Name) }>
+									<span>
+										if m.Team1Name != "" {
+											if m.WinnerName == m.Team1Name {
+												if teamId, ok := isTeamAvailable(availableTeams, m.Team1Name); ok && !readOnly {
+													<span
+														draggable="true"
+														data-team-id={ fmt.Sprintf("%d", teamId) }
+														data-team-name={ m.Team1Name }
+														ondragstart="onBracketTeamDragStart(event, this)"
+														class="px-1 -mx-1 rounded transition-colors hover:bg-green-100 cursor-grab dark:hover:bg-green-900"
+													>
+														{ m.Team1Name }
+													</span>
+												} else {
+													{ m.Team1Name }
+												}
+											} else {
+												{ m.Team1Name }
+											}
+										} else if isByeMatch(m) {
+											<span class="italic text-gray-400">BYE</span>
+										} else if m.Id == 0 && !readOnly {
+											<span
+												class="py-0.5 px-2 text-gray-400 rounded bracket-drop-zone"
+												data-round={ fmt.Sprintf("%d", m.Round) }
+												data-position={ fmt.Sprintf("%d", m.Position) }
+												data-slot="1"
+												data-tournament-id={ fmt.Sprintf("%d", idTournament) }
+												ondragover="onBracketSlotDragOver(event, this)"
+												ondragleave="onBracketSlotDragLeave(event, this)"
+												ondrop="handleBracketSlotDrop(event, this)"
+											>
+												TBD
+											</span>
+										} else {
+											<span class="text-gray-400">TBD</span>
+										}
+									</span>
+									if !isByeMatch(m) {
+										if isMatchScoreEditable(m, readOnly) {
+											@BracketIncrementControl(fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id), 1, m.KillsTeam1, "bracket-kills")
+											@BracketIncrementControl(fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id), 1, m.ScoreTeam1, "bracket-score")
+										} else {
+											<span class="bracket-kills-text">{ fmt.Sprintf("%d", m.KillsTeam1) }</span>
+											<span class="bracket-score-text">{ fmt.Sprintf("%d", m.ScoreTeam1) }</span>
+										}
+									}
+								</div>
+								if !isByeMatch(m) {
+									<div class="my-0.5 border-t dark:border-gray-700"></div>
+								}
+								<div class={ "bracket-team", templ.KV("winner", m.WinnerName != "" && m.WinnerName == m.Team2Name) }>
+									<span>
+										if m.Team2Name != "" {
+											if m.WinnerName == m.Team2Name {
+												if teamId, ok := isTeamAvailable(availableTeams, m.Team2Name); ok && !readOnly {
+													<span
+														draggable="true"
+														data-team-id={ fmt.Sprintf("%d", teamId) }
+														data-team-name={ m.Team2Name }
+														ondragstart="onBracketTeamDragStart(event, this)"
+														class="px-1 -mx-1 rounded transition-colors hover:bg-green-100 cursor-grab dark:hover:bg-green-900"
+													>
+														{ m.Team2Name }
+													</span>
+												} else {
+													{ m.Team2Name }
+												}
+											} else {
+												{ m.Team2Name }
+											}
+										} else if isByeMatch(m) {
+											<span class="italic text-gray-400">BYE</span>
+										} else if m.Id == 0 && !readOnly {
+											<span
+												class="py-0.5 px-2 text-gray-400 rounded bracket-drop-zone"
+												data-round={ fmt.Sprintf("%d", m.Round) }
+												data-position={ fmt.Sprintf("%d", m.Position) }
+												data-slot="2"
+												data-tournament-id={ fmt.Sprintf("%d", idTournament) }
+												ondragover="onBracketSlotDragOver(event, this)"
+												ondragleave="onBracketSlotDragLeave(event, this)"
+												ondrop="handleBracketSlotDrop(event, this)"
+											>
+												TBD
+											</span>
+										} else {
+											<span class="text-gray-400">TBD</span>
+										}
+									</span>
+									if !isByeMatch(m) {
+										if isMatchScoreEditable(m, readOnly) {
+											@BracketIncrementControl(fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id), 2, m.KillsTeam2, "bracket-kills")
+											@BracketIncrementControl(fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id), 2, m.ScoreTeam2, "bracket-score")
+										} else {
+											<span class="bracket-kills-text">{ fmt.Sprintf("%d", m.KillsTeam2) }</span>
+											<span class="bracket-score-text">{ fmt.Sprintf("%d", m.ScoreTeam2) }</span>
+										}
+									}
+								</div>
+							</div>
+							<div style={ matchSpacerBottomStyle(rounds, roundNum, m.Position) }></div>
+						</div>
+					}
+				</div>
+			</div>
+		}
+		if tournamentStatus == "finished" {
+			<div class="bracket-round">
+				<div class="bracket-round-header">
+					{ i18n.T(ctx, "page.tournament.view.winner") }
+				</div>
+				<div class="bracket-round-matches">
+					if len(rounds) > 0 && len(rounds[len(rounds)-1]) > 0 {
+						<div class="bracket-match bracket-match-solo" style={ winnerContainerStyle(rounds) }>
+							<div style={ winnerSpacerTopStyle(rounds) }></div>
+							<div class="bracket-match-card finished">
+								<div class="bracket-team winner">
+									<span>
+										🏆: { rounds[len(rounds)-1][0].WinnerName }
+									</span>
+								</div>
+							</div>
+							<div style={ winnerSpacerBottomStyle(rounds) }></div>
+						</div>
+					}
+				</div>
+			</div>
+		}
+	</div>
+}
+
+templ MatchRow(m tournamentModel.TournamentMatchWithNames, idTournament int, readOnly bool, currentRound int) {
+	<tr class="border-b dark:border-gray-700">
+		@ui.TdCompact() {
+			{ fmt.Sprintf("R%d", m.Round) }
+		}
+		@ui.TdCompact() {
+			<div class="flex flex-col gap-1">
+				<span>{ m.Team1Name }</span>
+				<span>{ m.Team2Name }</span>
+			</div>
+		}
+		@ui.TdCompact() {
+			if !readOnly && m.Status != "finished" {
+				<input
+					type="number"
+					name="bo_format"
+					min="1"
+					value={ fmt.Sprintf("%d", m.BoFormat) }
+					class="p-1 w-14 text-sm text-center rounded border dark:bg-gray-800 dark:border-gray-600"
+					hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/bo", idTournament, m.Id) }
+					hx-target="#matches-section"
+					hx-swap="outerHTML"
+					hx-trigger="change"
+				/>
+			} else {
+				{ fmt.Sprintf("BO%d", m.BoFormat) }
+			}
+		}
+		@ui.TdCompact() {
+			<div class="flex flex-col gap-1">
+				if !readOnly && m.Status != "finished" {
+					@TableIncrementControl(fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id), 1, m.ScoreTeam1)
+					@TableIncrementControl(fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id), 2, m.ScoreTeam2)
+				} else {
+					<span class="w-6 text-sm font-medium text-center">{ fmt.Sprintf("%d", m.ScoreTeam1) }</span>
+					<span class="w-6 text-sm font-medium text-center">{ fmt.Sprintf("%d", m.ScoreTeam2) }</span>
+				}
+			</div>
+		}
+		@ui.TdCompact() {
+			<div class="flex flex-col gap-1">
+				if !readOnly && m.Status != "finished" {
+					@TableIncrementControl(fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id), 1, m.KillsTeam1)
+					@TableIncrementControl(fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id), 2, m.KillsTeam2)
+				} else {
+					<span class="w-6 text-sm font-medium text-center">{ fmt.Sprintf("%d", m.KillsTeam1) }</span>
+					<span class="w-6 text-sm font-medium text-center">{ fmt.Sprintf("%d", m.KillsTeam2) }</span>
+				}
+			</div>
+		}
+		@ui.TdCompact() {
+			if !readOnly && m.Round == currentRound {
+				@MatchStatusBadgeClickable(m.Status, idTournament, m.Id)
+			} else {
+				@MatchStatusBadge(m.Status)
+			}
+		}
+		@ui.TdCompact() {
+			if m.WinnerName != "" {
+				<span class="font-semibold text-green-600 dark:text-green-400">{ m.WinnerName }</span>
+			} else {
+				<span class="text-gray-400">-</span>
+			}
+		}
+		if !readOnly && m.Round == currentRound {
+			@ui.TdCompact() {
+				@ui.ButtonAction("danger", "sm", templ.Attributes{
+					"hx-delete":            fmt.Sprintf("/tournament/%d/match/%d", idTournament, m.Id),
+					"hx-confirm":           i18n.T(ctx, "page.tournament.match.confirm-delete"),
+					"hx-target-error":      "#popinMessages",
+					"hx-on::after-request": fmt.Sprintf("if(event.detail.successful) htmx.ajax('GET', '/tournament/%d/matches-section', {target:'#matches-section', swap:'outerHTML'})", idTournament),
+				}) {
+					{ i18n.T(ctx, "global.buttons.delete") }
+				}
+			}
+		}
+	</tr>
+}
+
+templ TournamentViewPage(u user.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string, t tournamentModel.Tournament, teams []tournamentModel.Team, players []tournamentModel.Player, teamPlayers []tournamentModel.TeamPlayerWithNames) {
+	@layout.Layout(i18n.T(ctx, "page.tournament.view.title", i18n.M{"name": t.Name}), popinMessages, u, navItems, languages, pageSlug) {
+		@ui.Container("default") {
+			<div class="flex justify-between items-center mb-6">
+				<h1>{ t.Name }</h1>
+				<div class="flex gap-2 items-center">
+					@StatusBadge(t.Status)
+					@ui.Badge("gray", "") {
+						{ t.StageType }
+					}
+					</div>
+			</div>
+			<!-- Teams Section -->
+			@ui.Section() {
+				<h2>{ i18n.T(ctx, "page.tournament.view.teams") }</h2>
+				<form
+					class="flex gap-2 items-end mb-4"
+					hx-post="/tournament/team"
+					hx-swap="afterbegin"
+					hx-target="#team-grid"
+					hx-target-error="#popinMessages"
+					hx-on::after-request="if(event.detail.successful){ this.reset(); this.querySelector('input[type=text]').focus(); }"
+				>
+					<div class="flex-1">
+						@forms.InputAction("text", "name", "", templ.Attributes{
+							"placeholder": i18n.T(ctx, "page.tournament.view.team-name"),
+							"required":    true,
+							"class":       "w-full p-3",
+							"autofocus":   true,
+						})
+					</div>
+					@ui.ButtonAction("primary", "sm", templ.Attributes{"type": "submit"}) {
+						{ i18n.T(ctx, "page.tournament.view.add") }
+					}
+				</form>
+				<div id="team-grid" class="flex flex-wrap gap-3">
+					for _, team := range teams {
+						@TeamCard(team)
+					}
+				</div>
+			}
+			<!-- Players Section -->
+			@ui.Section() {
+				<h2>{ i18n.T(ctx, "page.tournament.view.players") }</h2>
+				<form
+					class="flex gap-2 items-end mb-4"
+					hx-post="/tournament/player"
+					hx-swap="afterbegin"
+					hx-target="#player-grid"
+					hx-target-error="#popinMessages"
+					hx-on::after-request="if(event.detail.successful){ this.reset(); this.querySelector('input[type=text]').focus(); }"
+				>
+					<div class="flex-1">
+						@forms.InputAction("text", "name", "", templ.Attributes{
+							"placeholder": i18n.T(ctx, "page.tournament.view.player-name"),
+							"required":    true,
+							"class":       "w-full p-3",
+						})
+					</div>
+					@ui.ButtonAction("primary", "sm", templ.Attributes{"type": "submit"}) {
+						{ i18n.T(ctx, "page.tournament.view.add") }
+					}
+				</form>
+				<div id="player-grid" class="flex flex-wrap gap-3">
+					for _, player := range players {
+						@PlayerCard(player)
+					}
+				</div>
+			}
+			<!-- Team Composition Section -->
+			if len(teams) > 0 {
+				@ui.Section() {
+					<h2>{ i18n.T(ctx, "page.tournament.view.team-composition") }</h2>
+					@PlayersPool(players)
+					<div class="flex flex-wrap gap-3">
+						for _, team := range teams {
+							@TeamCompositionCard(team, getTeamPlayersByTeamId(teamPlayers, team.Id), players)
+						}
+					</div>
+					<script src="/public/script/tournament-dnd.js"></script>
+				}
+			}
+			@ui.Section() {
+				@ui.ButtonLinkAction("primary", "lg", fmt.Sprintf("/tournament/%d/matchs", t.Id), templ.Attributes{
+					"class": "w-full text-center",
+				}) {
+					{ i18n.T(ctx, "page.tournament.view.see-bracket") }
+				}
+			}
+		}
+	}
+}
+
+templ TournamentMatchsPage(u user.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string, t tournamentModel.Tournament, matches []tournamentModel.TournamentMatchWithNames, teams []tournamentModel.Team) {
+	@layout.Layout(i18n.T(ctx, "page.tournament.view.title", i18n.M{"name": t.Name})+" - "+i18n.T(ctx, "page.tournament.view.matches"), popinMessages, u, navItems, languages, pageSlug) {
+		@ui.Container("default") {
+			<div class="flex justify-between items-center mb-6">
+				<h1>{ t.Name } - { i18n.T(ctx, "page.tournament.view.matches") }</h1>
+				<div class="flex gap-2 items-center">
+					@TournamentStatusBadgeDiv(t.Id)
+					@ui.ButtonLink("outline", "md", fmt.Sprintf("/tournament/%d", t.Id)) {
+						{ i18n.T(ctx, "page.tournament.view.configuration") }
+					}
+				</div>
+			</div>
+			@MatchesSection(t, matches, teams)
+		}
+	}
+}
+
+func teamPlayerIdsAttr(teamPlayers []tournamentModel.TeamPlayerWithNames) string {
+	ids := make([]string, len(teamPlayers))
+	for i, tp := range teamPlayers {
+		ids[i] = fmt.Sprintf("%d", tp.IdPlayer)
+	}
+	return strings.Join(ids, ",")
+}
+
+func teamSelectOptions(teams []tournamentModel.Team) []forms.SelectOption {
+	var options []forms.SelectOption
+	for i, t := range teams {
+		options = append(options, forms.SelectOption{
+			Value:    fmt.Sprintf("%d", t.Id),
+			Label:    t.Name,
+			Selected: i == 0,
+		})
+	}
+	return options
+}
+
+func getTeamPlayersByTeamId(allTeamPlayers []tournamentModel.TeamPlayerWithNames, teamId int) []tournamentModel.TeamPlayerWithNames {
+	var result []tournamentModel.TeamPlayerWithNames
+	for _, tp := range allTeamPlayers {
+		if tp.IdTeam == teamId {
+			result = append(result, tp)
+		}
+	}
+	return result
+}
+
+func isTournamentReadOnly(t tournamentModel.Tournament) bool {
+	return t.IsArchived == 1
+}
+
+func isTeamAvailable(teams []tournamentModel.Team, name string) (int, bool) {
+	for _, t := range teams {
+		if t.Name == name {
+			return t.Id, true
+		}
+	}
+	return 0, false
+}
+
+func canGenerateNextRound(matches []tournamentModel.TournamentMatchWithNames) bool {
+	maxR := 0
+	for _, m := range matches {
+		if m.Round > maxR {
+			maxR = m.Round
+		}
+	}
+
+	// Count matches in round 1 to calculate expected slots for current round
+	round1Count := 0
+	for _, m := range matches {
+		if m.Round == 1 {
+			round1Count++
+		}
+	}
+	roundIdx := maxR - 1
+	expectedSlots := (round1Count + (1 << roundIdx) - 1) / (1 << roundIdx)
+
+	actualCount := 0
+	winners := 0
+	for _, m := range matches {
+		if m.Round == maxR {
+			actualCount++
+			if m.Status != "finished" {
+				return false
+			}
+			if m.IdTeamWinner.Valid {
+				winners++
+			}
+		}
+	}
+
+	// All expected slots must be created and finished
+	if actualCount < expectedSlots {
+		return false
+	}
+
+	return winners >= 2
+}
+
+func groupMatchesByRound(matches []tournamentModel.TournamentMatchWithNames) [][]tournamentModel.TournamentMatchWithNames {
+	if len(matches) == 0 {
+		return nil
+	}
+	max := 0
+	for _, m := range matches {
+		if m.Round > max {
+			max = m.Round
+		}
+	}
+	rounds := make([][]tournamentModel.TournamentMatchWithNames, max)
+	for _, m := range matches {
+		rounds[m.Round-1] = append(rounds[m.Round-1], m)
+	}
+	return rounds
+}
+
+func buildFullBracketRounds(matches []tournamentModel.TournamentMatchWithNames) [][]tournamentModel.TournamentMatchWithNames {
+	if len(matches) == 0 {
+		return nil
+	}
+
+	existingRounds := groupMatchesByRound(matches)
+	round1Count := len(existingRounds[0])
+	if round1Count == 0 {
+		return existingRounds
+	}
+
+	// Calculate total number of rounds needed
+	totalRounds := 1
+	slots := round1Count
+	for slots > 1 {
+		slots = (slots + 1) / 2
+		totalRounds++
+	}
+
+	result := make([][]tournamentModel.TournamentMatchWithNames, totalRounds)
+	for roundIdx := 0; roundIdx < totalRounds; roundIdx++ {
+		// Expected slots for this round: ceil(round1Count / 2^roundIdx)
+		expectedSlots := (round1Count + (1 << roundIdx) - 1) / (1 << roundIdx)
+
+		// Index existing matches by position
+		byPosition := map[int]tournamentModel.TournamentMatchWithNames{}
+		if roundIdx < len(existingRounds) {
+			for _, m := range existingRounds[roundIdx] {
+				byPosition[m.Position] = m
+			}
+		}
+
+		// Fill with real matches or ghost matches
+		for pos := 0; pos < expectedSlots; pos++ {
+			if m, ok := byPosition[pos]; ok {
+				result[roundIdx] = append(result[roundIdx], m)
+			} else {
+				result[roundIdx] = append(result[roundIdx], tournamentModel.TournamentMatchWithNames{
+					TournamentMatch: tournamentModel.TournamentMatch{
+						Round:    roundIdx + 1,
+						Position: pos,
+						Status:   "pending",
+					},
+				})
+			}
+		}
+	}
+	return result
+}
+
+func maxRound(matches []tournamentModel.TournamentMatchWithNames) int {
+	max := 0
+	for _, m := range matches {
+		if m.Round > max {
+			max = m.Round
+		}
+	}
+	return max
+}
+
+func isByeMatch(m tournamentModel.TournamentMatchWithNames) bool {
+	return m.Status == "finished" && (m.Team1Name == "" || m.Team2Name == "")
+}
+
+func isMatchScoreEditable(m tournamentModel.TournamentMatchWithNames, readOnly bool) bool {
+	return !readOnly && m.Id != 0 && m.Status != "finished" && !isByeMatch(m)
+}
+
+func matchFlexWeight(rounds [][]tournamentModel.TournamentMatchWithNames, roundIdx int, position int) int {
+	if roundIdx == 0 {
+		return 1
+	}
+	prevRound := rounds[roundIdx-1]
+	feeder1Pos := position * 2
+	feeder2Pos := position*2 + 1
+	w := 0
+	for _, m := range prevRound {
+		if m.Position == feeder1Pos || m.Position == feeder2Pos {
+			w += matchFlexWeight(rounds, roundIdx-1, m.Position)
+		}
+	}
+	if w == 0 {
+		w = 1
+	}
+	return w
+}
+
+// absoluteCardCenter computes the absolute vertical center [0,1] of a match card within the bracket.
+func absoluteCardCenter(rounds [][]tournamentModel.TournamentMatchWithNames, roundIdx int, position int) float64 {
+	if roundIdx == 0 {
+		round := rounds[0]
+		for idx, m := range round {
+			if m.Position == position {
+				return (float64(idx) + 0.5) / float64(len(round))
+			}
+		}
+		return 0.5
+	}
+	feeder1Pos := position * 2
+	feeder2Pos := position*2 + 1
+	prevRound := rounds[roundIdx-1]
+	var c1, c2 float64
+	has1, has2 := false, false
+	for _, m := range prevRound {
+		switch m.Position {
+		case feeder1Pos:
+			c1 = absoluteCardCenter(rounds, roundIdx-1, m.Position)
+			has1 = true
+		case feeder2Pos:
+			c2 = absoluteCardCenter(rounds, roundIdx-1, m.Position)
+			has2 = true
+		}
+	}
+	if has1 && has2 {
+		return (c1 + c2) / 2
+	} else if has1 {
+		return c1
+	} else if has2 {
+		return c2
+	}
+	return 0.5
+}
+
+// matchCardPos returns the card position [0,1] within the match's flex container.
+func matchCardPos(rounds [][]tournamentModel.TournamentMatchWithNames, roundIdx int, position int) float64 {
+	absCenter := absoluteCardCenter(rounds, roundIdx, position)
+	round := rounds[roundIdx]
+	totalFlex := 0
+	cumFlex := 0
+	myWeight := 0
+	for _, m := range round {
+		totalFlex += matchFlexWeight(rounds, roundIdx, m.Position)
+	}
+	for _, m := range round {
+		w := matchFlexWeight(rounds, roundIdx, m.Position)
+		if m.Position == position {
+			myWeight = w
+			break
+		}
+		cumFlex += w
+	}
+	if myWeight == 0 || totalFlex == 0 {
+		return 0.5
+	}
+	containerStart := float64(cumFlex) / float64(totalFlex)
+	containerHeight := float64(myWeight) / float64(totalFlex)
+	pos := (absCenter - containerStart) / containerHeight
+	if pos < 0.05 {
+		pos = 0.05
+	} else if pos > 0.95 {
+		pos = 0.95
+	}
+	return pos
+}
+
+func matchContainerStyle(rounds [][]tournamentModel.TournamentMatchWithNames, roundIdx int, position int) string {
+	weight := matchFlexWeight(rounds, roundIdx, position)
+	pos := matchCardPos(rounds, roundIdx, position)
+	return fmt.Sprintf("flex: %d; --card-pos: %.2f%%", weight, pos*100)
+}
+
+func matchSpacerTopStyle(rounds [][]tournamentModel.TournamentMatchWithNames, roundIdx int, position int) string {
+	pos := matchCardPos(rounds, roundIdx, position)
+	v := int(pos * 1000)
+	if v < 1 {
+		v = 1
+	}
+	return fmt.Sprintf("flex: %d", v)
+}
+
+func matchSpacerBottomStyle(rounds [][]tournamentModel.TournamentMatchWithNames, roundIdx int, position int) string {
+	pos := matchCardPos(rounds, roundIdx, position)
+	v := int((1 - pos) * 1000)
+	if v < 1 {
+		v = 1
+	}
+	return fmt.Sprintf("flex: %d", v)
+}
+
+func matchConnectorClass(index, total int) string {
+	// Last match in an odd-count round has no pair → solo connector
+	if index == total-1 && total%2 != 0 {
+		return "bracket-match-solo"
+	}
+	// Even index = top of pair (connector goes down)
+	if index%2 == 0 {
+		return "bracket-match-top"
+	}
+	// Odd index = bottom of pair (connector goes up)
+	return "bracket-match-bottom"
+}
+
+func winnerContainerStyle(rounds [][]tournamentModel.TournamentMatchWithNames) string {
+	lastRoundIdx := len(rounds) - 1
+	finalMatch := rounds[lastRoundIdx][0]
+	pos := matchCardPos(rounds, lastRoundIdx, finalMatch.Position)
+	return fmt.Sprintf("flex: 1; --card-pos: %.2f%%", pos*100)
+}
+
+func winnerSpacerTopStyle(rounds [][]tournamentModel.TournamentMatchWithNames) string {
+	lastRoundIdx := len(rounds) - 1
+	finalMatch := rounds[lastRoundIdx][0]
+	pos := matchCardPos(rounds, lastRoundIdx, finalMatch.Position)
+	v := int(pos * 1000)
+	if v < 1 {
+		v = 1
+	}
+	return fmt.Sprintf("flex: %d", v)
+}
+
+func winnerSpacerBottomStyle(rounds [][]tournamentModel.TournamentMatchWithNames) string {
+	lastRoundIdx := len(rounds) - 1
+	finalMatch := rounds[lastRoundIdx][0]
+	pos := matchCardPos(rounds, lastRoundIdx, finalMatch.Position)
+	v := int((1 - pos) * 1000)
+	if v < 1 {
+		v = 1
+	}
+	return fmt.Sprintf("flex: %d", v)
+}
+
+func roundBoFormat(matches []tournamentModel.TournamentMatchWithNames) int {
+	for _, m := range matches {
+		if m.Id != 0 {
+			return m.BoFormat
+		}
+	}
+	return 1
+}
+
+func roundHasRealMatches(matches []tournamentModel.TournamentMatchWithNames) bool {
+	for _, m := range matches {
+		if m.Id != 0 {
+			return true
+		}
+	}
+	return false
+}
+
+func roundLabelKey(roundNum int, maxR int, stageType string) string {
+	if stageType != "elimination" {
+		return ""
+	}
+	// From last round to first: final, semi_final, quarter_final, round_16, round_32
+	stages := []string{
+		"page.tournament.view.stage.final",
+		"page.tournament.view.stage.semi_final",
+		"page.tournament.view.stage.quarter_final",
+		"page.tournament.view.stage.round_16",
+		"page.tournament.view.stage.round_32",
+	}
+	offset := maxR - 1 - roundNum
+	if offset < 0 || offset >= len(stages) {
+		return ""
+	}
+	return stages[offset]
+}

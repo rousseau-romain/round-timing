@@ -1,8 +1,22 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    './**/*.templ',
-  ],
+  content: {
+    files: ['./**/*.templ'],
+    extract: {
+      templ: (content) => {
+        // Default word extraction
+        const defaultMatches = content.match(/[^<>"'`\s]*[^<>"'`\s:]/g) || []
+        // Extract class values from templ.Attributes{"class": "..."} patterns
+        const attrMatches = []
+        const classPattern = /"class"\s*:\s*"([^"]+)"/g
+        let match
+        while ((match = classPattern.exec(content)) !== null) {
+          attrMatches.push(...match[1].split(/\s+/))
+        }
+        return [...defaultMatches, ...attrMatches]
+      },
+    },
+  },
   darkMode: 'class',
   // Safelist for dynamic classes generated at runtime (e.g., team colors)
   safelist: [

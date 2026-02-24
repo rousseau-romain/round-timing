@@ -1,0 +1,247 @@
+package tournament
+
+import (
+	"fmt"
+	"time"
+
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/rousseau-romain/round-timing/model/system"
+	tournamentModel "github.com/rousseau-romain/round-timing/model/tournament"
+	"github.com/rousseau-romain/round-timing/model/user"
+	"github.com/rousseau-romain/round-timing/views/components/forms"
+	"github.com/rousseau-romain/round-timing/views/components/layout"
+	"github.com/rousseau-romain/round-timing/views/components/ui"
+)
+
+func tournamentLink(t tournamentModel.Tournament) string {
+	if t.Status == "draft" {
+		return fmt.Sprintf("/tournament/%d", t.Id)
+	}
+	return fmt.Sprintf("/tournament/%d/matchs", t.Id)
+}
+
+templ TournamentRowCells(t tournamentModel.Tournament, isArchived bool) {
+	@ui.TdPrimary() {
+		{ t.Name }
+	}
+	@ui.Td() {
+		{ t.StageType }
+	}
+	@ui.Td() {
+		@StatusBadge(t.Status)
+	}
+	@ui.TdAction() {
+		@ui.ButtonLink("primary", "sm", tournamentLink(t)) {
+			{ i18n.T(ctx, "global.buttons.see") }
+		}
+	}
+	@ui.TdAction() {
+		if isArchived {
+			@ui.ButtonAction("outline", "sm", templ.Attributes{
+				"hx-patch":  fmt.Sprintf("/tournament/%d/unarchive", t.Id),
+				"hx-target": "#archived-section",
+				"hx-swap":   "outerHTML",
+			}) {
+				{ i18n.T(ctx, "page.tournament.unarchive") }
+			}
+		} else {
+			@ui.ButtonAction("outline", "sm", templ.Attributes{
+				"hx-patch":  fmt.Sprintf("/tournament/%d/archive", t.Id),
+				"hx-target": "#archived-section",
+				"hx-swap":   "outerHTML",
+			}) {
+				{ i18n.T(ctx, "page.tournament.archive") }
+			}
+		}
+	}
+	@ui.TdAction() {
+		@ui.ButtonAction("danger", "sm", templ.Attributes{
+			"hx-delete":  "/tournament/" + fmt.Sprintf("%d", t.Id),
+			"hx-confirm": i18n.T(ctx, "page.tournament.confirm-delete"),
+		}) {
+			{ i18n.T(ctx, "global.buttons.delete") }
+		}
+	}
+}
+
+templ TournamentRow(t tournamentModel.Tournament) {
+	<tr id={ fmt.Sprintf("tournament-row-%d", t.Id) }>
+		@TournamentRowCells(t, false)
+	</tr>
+}
+
+// TournamentRowOOB inserts a row into the active table via HTMX out-of-band swap.
+// The <tr> is wrapped in a hidden <table> to prevent the browser from stripping it
+// during HTML parsing (a <tr> outside a <table> is invalid and gets relocated).
+templ TournamentRowOOB(t tournamentModel.Tournament) {
+	<table style="display:none">
+		<tbody>
+			<tr hx-swap-oob="afterbegin:#active-tournament-tbody">
+				@TournamentRowCells(t, false)
+			</tr>
+		</tbody>
+	</table>
+}
+
+// UnarchiveTournamentResponse updates the archived section and inserts the row into the active table.
+templ UnarchiveTournamentResponse(t tournamentModel.Tournament, archivedTournaments []tournamentModel.Tournament) {
+	@ArchivedTournamentSection(archivedTournaments)
+	@TournamentRowOOB(t)
+}
+
+// ActiveTournamentRowOOBDelete removes an active tournament row via HTMX out-of-band delete.
+// Wrapped in a hidden table so the browser parses the <tr> correctly.
+templ ActiveTournamentRowOOBDelete(idTournament int) {
+	<table style="display:none">
+		<tbody>
+			<tr id={ fmt.Sprintf("tournament-row-%d", idTournament) } hx-swap-oob="delete"></tr>
+		</tbody>
+	</table>
+}
+
+// ArchiveTournamentResponse updates the archived section and removes the row from the active table.
+templ ArchiveTournamentResponse(t tournamentModel.Tournament, archivedTournaments []tournamentModel.Tournament) {
+	@ArchivedTournamentSection(archivedTournaments)
+	@ActiveTournamentRowOOBDelete(t.Id)
+}
+
+templ ArchivedTournamentRow(t tournamentModel.Tournament) {
+	<tr class="opacity-50">
+		@TournamentRowCells(t, true)
+	</tr>
+}
+
+templ StatusBadge(status string) {
+	switch status {
+		case "draft":
+			@ui.Badge("gray", "") {
+				{ i18n.T(ctx, "page.tournament.status.draft") }
+			}
+		case "groups":
+			@ui.Badge("indigo", "") {
+				{ i18n.T(ctx, "page.tournament.status.groups") }
+			}
+		case "in_progress":
+			@ui.Badge("yellow", "") {
+				{ i18n.T(ctx, "page.tournament.status.in-progress") }
+			}
+		case "finished":
+			@ui.Badge("green", "") {
+				{ i18n.T(ctx, "page.tournament.status.finished") }
+			}
+	}
+}
+
+templ TournamentTableHeader() {
+	@ui.TableHead("default") {
+		@ui.Tr() {
+			@ui.Th() {
+				{ i18n.T(ctx, "global.table.name") }
+			}
+			@ui.Th() {
+				{ i18n.T(ctx, "page.tournament-list.stage") }
+			}
+			@ui.Th() {
+				{ i18n.T(ctx, "page.tournament.status.label") }
+			}
+			@ui.ThEmpty()
+			@ui.ThEmpty()
+			@ui.ThEmpty()
+		}
+	}
+}
+
+templ TournamentTable(tournaments []tournamentModel.Tournament) {
+	@ui.Table("default") {
+		@TournamentTableHeader()
+		@ui.TableBody(templ.Attributes{
+			"id":        "active-tournament-tbody",
+			"hx-swap":   "outerHTML swap:0.5s",
+			"hx-target": "closest tr",
+		}) {
+			for _, t := range tournaments {
+				@TournamentRow(t)
+			}
+		}
+	}
+}
+
+templ ArchivedSectionToggle() {
+	<div id="archived-section">
+		@ui.ButtonAction("outline", "sm", templ.Attributes{
+			"hx-get":    "/tournament/archived",
+			"hx-target": "#archived-section",
+			"hx-swap":   "outerHTML",
+		}) {
+			{ i18n.T(ctx, "page.tournament-list.show-archived") }
+		}
+	</div>
+}
+
+templ ArchivedTournamentSection(tournaments []tournamentModel.Tournament) {
+	<div id="archived-section">
+		<div class="flex gap-4 items-center mb-2">
+			<h2 class="text-lg font-semibold">{ i18n.T(ctx, "page.tournament-list.archived-title") }</h2>
+			@ui.ButtonAction("outline", "sm", templ.Attributes{
+				"hx-get":    "/tournament/archived/hide",
+				"hx-target": "#archived-section",
+				"hx-swap":   "outerHTML",
+			}) {
+				{ i18n.T(ctx, "page.tournament-list.hide-archived") }
+			}
+		</div>
+		@ui.Table("default") {
+			@TournamentTableHeader()
+			@ui.TableBody(templ.Attributes{
+				"hx-swap":   "outerHTML swap:0.5s",
+				"hx-target": "closest tr",
+			}) {
+				for _, t := range tournaments {
+					@ArchivedTournamentRow(t)
+				}
+			}
+		}
+	</div>
+}
+
+templ TournamentListPage(u user.User, popinMessages layout.PopinMessages, navItems []layout.NavItem, languages []system.Language, pageSlug string, tournaments []tournamentModel.Tournament) {
+	@layout.Layout(i18n.T(ctx, "page.tournament-list.title"), popinMessages, u, navItems, languages, pageSlug) {
+		@ui.Container("default") {
+			<h1>{ i18n.T(ctx, "page.tournament-list.h1") }</h1>
+			<form
+				class="space-y-4"
+				hx-post="/tournament"
+				hx-swap="afterbegin"
+				hx-target="tbody"
+				hx-target-error="#popinMessages"
+			>
+				<div>
+					@forms.InputAction("text", "name", "", templ.Attributes{
+						"placeholder": i18n.T(ctx, "global.table.name"),
+						"required":    true,
+						"value":       i18n.T(ctx, "page.tournament-list.default-name") + " " + time.Now().Format("2006-01-02 15:04:05"),
+						"class":       "w-full p-3",
+					})
+				</div>
+				<div class="flex gap-4 items-end">
+					@forms.InputAction("number", "number_player_by_team", i18n.T(ctx, "page.tournament-list.players-per-team"), templ.Attributes{
+						"value": "1",
+						"min":   "1",
+						"class": "w-24 p-3",
+					})
+					@forms.Select("stage_type", "stage_type", "page.tournament-list.stage-type", []forms.SelectOption{
+						{Value: "groups", Label: i18n.T(ctx, "page.tournament.view.stage.groups"), Selected: true},
+						{Value: "elimination", Label: i18n.T(ctx, "page.tournament.view.stage.elimination")},
+					}, true)
+				</div>
+				@ui.ButtonAction("primary", "lg", templ.Attributes{"type": "submit", "class": "w-full sm:w-auto"}) {
+					{ i18n.T(ctx, "page.tournament-list.button-create") }
+				}
+			</form>
+			@TournamentTable(tournaments)
+			<div class="mt-6">
+				@ArchivedSectionToggle()
+			</div>
+		}
+	}
+}

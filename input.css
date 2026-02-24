@@ -78,9 +78,7 @@
   select,
   select[multiple],
   textarea {
-    @apply shadow-sm rounded-md block w-full sm:text-sm border-gray-300
-        focus:ring-orange-400 focus:border-orange-400 focus:outline-none focus:ring-inset
-        dark:focus:border-orange-400 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200;
+    @apply block w-full border-gray-300 rounded-md shadow-sm sm:text-sm focus:ring-orange-400 focus:border-orange-400 focus:outline-none focus:ring-inset dark:focus:border-orange-400 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200;
   }
 
   [type="checkbox"],
@@ -99,7 +97,7 @@
     @apply text-green-500 hover:text-green-700;
   }
   footer a {
-    @apply text-gray-500 hover:text-gray-700 font-bold;
+    @apply font-bold text-gray-500 hover:text-gray-700;
   }
 }
 
@@ -110,11 +108,11 @@
 @layer utilities {
   /* Tooltip */
   .tooltip {
-    @apply invisible absolute bg-gray-100 dark:bg-gray-700 text-black dark:text-white;
+    @apply absolute invisible text-black bg-gray-100 dark:bg-gray-700 dark:text-white;
   }
 
   .has-tooltip:hover .tooltip {
-    @apply visible z-50;
+    @apply z-50 visible;
   }
 }
 
@@ -126,3 +124,161 @@ tr.htmx-swapping td {
   opacity: 0;
   transition: opacity 1s ease-out;
 }
+
+/* ==========================================================================
+   Tournament Bracket
+   ========================================================================== */
+
+.bracket {
+  display: flex;
+  overflow-x: auto;
+  padding: 1rem 0;
+}
+
+.bracket-round {
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  flex-shrink: 0;
+  margin-right: 3rem;
+}
+
+.bracket-round:last-child {
+  margin-right: 0;
+}
+
+.bracket-round-header {
+  @apply px-2 pb-2 text-xs font-semibold text-center text-gray-500 dark:text-gray-400;
+}
+
+.bracket-round-matches {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.bracket-match {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  position: relative;
+  padding: 0.25rem 0;
+}
+
+.bracket-match-card {
+  @apply w-full p-2 text-sm bg-white border rounded-lg dark:bg-gray-900 dark:border-gray-700;
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+.bracket-match-card.finished {
+  @apply border-green-300 dark:border-green-700;
+}
+
+.bracket-match-card.in_progress {
+  @apply border-indigo-300 dark:border-indigo-700;
+}
+
+.bracket-team {
+  @apply flex items-center gap-2 px-2 py-1;
+}
+
+.bracket-team > span:first-child {
+  @apply flex-1 min-w-0 truncate;
+}
+
+.bracket-team.winner {
+  @apply font-bold text-green-600 dark:text-green-400;
+}
+
+.bracket-score {
+  @apply text-xs tabular-nums;
+}
+
+.bracket-score-input {
+  @apply w-8 p-0 text-xs text-center tabular-nums bg-transparent border-0 border-b border-gray-300 rounded-none dark:border-gray-600 dark:bg-transparent dark:text-gray-200;
+  box-shadow: none;
+}
+.bracket-score-input:focus {
+  @apply border-indigo-500 ring-0 outline-none;
+}
+.bracket-kills {
+  @apply flex items-center gap-0.5 text-xs text-red-400 dark:text-red-400;
+}
+.bracket-kills button {
+  @apply px-1 rounded text-red-300 hover:bg-red-50 hover:text-red-500 dark:text-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-300;
+  line-height: 1;
+}
+.bracket-kills span {
+  @apply tabular-nums w-4 text-center;
+}
+.bracket-kills-text {
+  @apply text-xs tabular-nums text-red-400 dark:text-red-400;
+}
+.bracket-score {
+  @apply flex items-center gap-0.5 text-xs font-semibold text-indigo-500 dark:text-indigo-400;
+}
+.bracket-score button {
+  @apply px-1 rounded text-indigo-300 hover:bg-indigo-50 hover:text-indigo-500 dark:text-indigo-500 dark:hover:bg-indigo-900/30 dark:hover:text-indigo-300;
+  line-height: 1;
+}
+.bracket-score span {
+  @apply tabular-nums w-4 text-center;
+}
+.bracket-score-text {
+  @apply text-xs font-semibold tabular-nums text-indigo-500 dark:text-indigo-400;
+}
+
+.bracket-drop-zone {
+  transition: outline 0.15s, background-color 0.15s;
+  min-width: 3rem;
+  text-align: center;
+}
+
+/* --- Bracket connectors --- */
+
+/* Outgoing: top of pair — horizontal right + vertical down */
+.bracket-round:not(:last-child) .bracket-match-top::after {
+  content: '';
+  position: absolute;
+  right: -3rem;
+  top: var(--card-pos, 50%);
+  width: 3rem;
+  height: 50%;
+  border-top: 2px solid var(--color-border);
+  border-right: 2px solid var(--color-border);
+}
+
+/* Outgoing: bottom of pair — horizontal right + vertical up */
+.bracket-round:not(:last-child) .bracket-match-bottom::after {
+  content: '';
+  position: absolute;
+  right: -3rem;
+  bottom: calc(100% - var(--card-pos, 50%));
+  width: 3rem;
+  height: 50%;
+  border-bottom: 2px solid var(--color-border);
+  border-right: 2px solid var(--color-border);
+}
+
+/* Outgoing: solo match (unpaired, already qualified) — goes up to next round match */
+.bracket-round:not(:last-child) .bracket-match-solo::after {
+  content: '';
+  position: absolute;
+  right: -3rem;
+  bottom: calc(100% - var(--card-pos, 50%));
+  width: 3rem;
+  height: 50%;
+  border-bottom: 2px solid var(--color-border);
+}
+
+/* Incoming: horizontal line from left into the match */
+/* .bracket-round:not(:first-child) .bracket-match::before {
+  content: '';
+  position: absolute;
+  left: -3rem;
+  top: 50%;
+  width: 3rem;
+  border-top: 2px solid var(--color-border);
+} */

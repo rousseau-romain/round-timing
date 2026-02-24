@@ -43,6 +43,10 @@ func GetPageNavDefault(r *http.Request) []layout.NavItem {
 			Name: i18n.T(r.Context(), "page.match-list.title"),
 			Url:  "match",
 		},
+		{
+			Name: i18n.T(r.Context(), "page.tournament-list.title"),
+			Url:  "tournament",
+		},
 	}
 }
 
