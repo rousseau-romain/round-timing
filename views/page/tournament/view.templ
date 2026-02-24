@@ -616,14 +616,11 @@ templ TournamentViewPage(u user.User, popinMessages layout.PopinMessages, navIte
 			<div class="flex justify-between items-center mb-6">
 				<h1>{ t.Name }</h1>
 				<div class="flex gap-2 items-center">
-					// @StatusBadge(t.Status)
+					@StatusBadge(t.Status)
 					@ui.Badge("gray", "") {
 						{ t.StageType }
 					}
-					@ui.ButtonLink("primary", "md", fmt.Sprintf("/tournament/%d/matchs", t.Id)) {
-						{ i18n.T(ctx, "page.tournament.view.matches") }
-					}
-				</div>
+					</div>
 			</div>
 			<!-- Teams Section -->
 			@ui.Section() {
@@ -693,6 +690,13 @@ templ TournamentViewPage(u user.User, popinMessages layout.PopinMessages, navIte
 						}
 					</div>
 					<script src="/public/script/tournament-dnd.js"></script>
+				}
+			}
+			@ui.Section() {
+				@ui.ButtonLinkAction("primary", "lg", fmt.Sprintf("/tournament/%d/matchs", t.Id), templ.Attributes{
+					"class": "w-full text-center",
+				}) {
+					{ i18n.T(ctx, "page.tournament.view.see-bracket") }
 				}
 			}
 		}

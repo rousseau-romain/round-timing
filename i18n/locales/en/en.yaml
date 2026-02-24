@@ -203,6 +203,7 @@ en:
         kills: "Kills"
         configuration: "Configuration"
         matches: "Matches"
+        see-bracket: "Tournament matches"
         stage:
           groups: "Groups"
           elimination: "Single elimination"

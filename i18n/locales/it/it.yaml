@@ -203,6 +203,7 @@ it:
         kills: "Kills"
         configuration: "Configurazione"
         matches: "Partite"
+        see-bracket: "Partite del torneo"
         stage:
           groups: "Gironi"
           elimination: "Eliminazione diretta"

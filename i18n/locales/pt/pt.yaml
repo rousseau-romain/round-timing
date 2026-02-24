@@ -203,6 +203,7 @@ pt:
         kills: "Kills"
         configuration: "Configuração"
         matches: "Partidas"
+        see-bracket: "Partidas do torneio"
         stage:
           groups: "Grupos"
           elimination: "Eliminação direta"

@@ -203,6 +203,7 @@ fr:
         kills: "Kills"
         configuration: "Configuration"
         matches: "Matchs"
+        see-bracket: "Matchs du tournoi"
         stage:
           groups: "Poules"
           elimination: "Élimination directe"
