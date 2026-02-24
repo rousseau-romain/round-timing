@@ -20,23 +20,31 @@ func tournamentLink(t tournamentModel.Tournament) string {
 	return fmt.Sprintf("/tournament/%d/matchs", t.Id)
 }
 
-templ TournamentRow(t tournamentModel.Tournament) {
-	<tr id={ fmt.Sprintf("tournament-row-%d", t.Id) }>
-		@ui.TdPrimary() {
-			{ t.Name }
+templ TournamentRowCells(t tournamentModel.Tournament, isArchived bool) {
+	@ui.TdPrimary() {
+		{ t.Name }
+	}
+	@ui.Td() {
+		{ t.StageType }
+	}
+	@ui.Td() {
+		@StatusBadge(t.Status)
+	}
+	@ui.TdAction() {
+		@ui.ButtonLink("primary", "sm", tournamentLink(t)) {
+			{ i18n.T(ctx, "global.buttons.see") }
 		}
-		@ui.Td() {
-			{ t.StageType }
-		}
-		@ui.Td() {
-			@StatusBadge(t.Status)
-		}
-		@ui.TdAction() {
-			@ui.ButtonLink("primary", "sm", tournamentLink(t)) {
-				{ i18n.T(ctx, "global.buttons.see") }
+	}
+	@ui.TdAction() {
+		if isArchived {
+			@ui.ButtonAction("outline", "sm", templ.Attributes{
+				"hx-patch":  fmt.Sprintf("/tournament/%d/unarchive", t.Id),
+				"hx-target": "#archived-section",
+				"hx-swap":   "outerHTML",
+			}) {
+				{ i18n.T(ctx, "page.tournament.unarchive") }
 			}
-		}
-		@ui.TdAction() {
+		} else {
 			@ui.ButtonAction("outline", "sm", templ.Attributes{
 				"hx-patch":  fmt.Sprintf("/tournament/%d/archive", t.Id),
 				"hx-target": "#archived-section",
@@ -45,14 +53,20 @@ templ TournamentRow(t tournamentModel.Tournament) {
 				{ i18n.T(ctx, "page.tournament.archive") }
 			}
 		}
-		@ui.TdAction() {
-			@ui.ButtonAction("danger", "sm", templ.Attributes{
-				"hx-delete":  "/tournament/" + fmt.Sprintf("%d", t.Id),
-				"hx-confirm": i18n.T(ctx, "page.tournament.confirm-delete"),
-			}) {
-				{ i18n.T(ctx, "global.buttons.delete") }
-			}
+	}
+	@ui.TdAction() {
+		@ui.ButtonAction("danger", "sm", templ.Attributes{
+			"hx-delete":  "/tournament/" + fmt.Sprintf("%d", t.Id),
+			"hx-confirm": i18n.T(ctx, "page.tournament.confirm-delete"),
+		}) {
+			{ i18n.T(ctx, "global.buttons.delete") }
 		}
+	}
+}
+
+templ TournamentRow(t tournamentModel.Tournament) {
+	<tr id={ fmt.Sprintf("tournament-row-%d", t.Id) }>
+		@TournamentRowCells(t, false)
 	</tr>
 }
 
@@ -63,37 +77,7 @@ templ TournamentRowOOB(t tournamentModel.Tournament) {
 	<table style="display:none">
 		<tbody>
 			<tr hx-swap-oob="afterbegin:#active-tournament-tbody">
-				@ui.TdPrimary() {
-					{ t.Name }
-				}
-				@ui.Td() {
-					{ t.StageType }
-				}
-				@ui.Td() {
-					@StatusBadge(t.Status)
-				}
-				@ui.TdAction() {
-					@ui.ButtonLink("primary", "sm", tournamentLink(t)) {
-						{ i18n.T(ctx, "global.buttons.see") }
-					}
-				}
-				@ui.TdAction() {
-					@ui.ButtonAction("outline", "sm", templ.Attributes{
-						"hx-patch":  fmt.Sprintf("/tournament/%d/archive", t.Id),
-						"hx-target": "#archived-section",
-						"hx-swap":   "outerHTML",
-					}) {
-						{ i18n.T(ctx, "page.tournament.archive") }
-					}
-				}
-				@ui.TdAction() {
-					@ui.ButtonAction("danger", "sm", templ.Attributes{
-						"hx-delete":  "/tournament/" + fmt.Sprintf("%d", t.Id),
-						"hx-confirm": i18n.T(ctx, "page.tournament.confirm-delete"),
-					}) {
-						{ i18n.T(ctx, "global.buttons.delete") }
-					}
-				}
+				@TournamentRowCells(t, false)
 			</tr>
 		</tbody>
 	</table>
@@ -123,37 +107,7 @@ templ ArchiveTournamentResponse(t tournamentModel.Tournament, archivedTournament
 
 templ ArchivedTournamentRow(t tournamentModel.Tournament) {
 	<tr class="opacity-50">
-		@ui.TdPrimary() {
-			{ t.Name }
-		}
-		@ui.Td() {
-			{ t.StageType }
-		}
-		@ui.Td() {
-			@StatusBadge(t.Status)
-		}
-		@ui.TdAction() {
-			@ui.ButtonLink("primary", "sm", tournamentLink(t)) {
-				{ i18n.T(ctx, "global.buttons.see") }
-			}
-		}
-		@ui.TdAction() {
-			@ui.ButtonAction("outline", "sm", templ.Attributes{
-				"hx-patch":  fmt.Sprintf("/tournament/%d/unarchive", t.Id),
-				"hx-target": "#archived-section",
-				"hx-swap":   "outerHTML",
-			}) {
-				{ i18n.T(ctx, "page.tournament.unarchive") }
-			}
-		}
-		@ui.TdAction() {
-			@ui.ButtonAction("danger", "sm", templ.Attributes{
-				"hx-delete":  "/tournament/" + fmt.Sprintf("%d", t.Id),
-				"hx-confirm": i18n.T(ctx, "page.tournament.confirm-delete"),
-			}) {
-				{ i18n.T(ctx, "global.buttons.delete") }
-			}
-		}
+		@TournamentRowCells(t, true)
 	</tr>
 }
 
@@ -178,24 +132,28 @@ templ StatusBadge(status string) {
 	}
 }
 
+templ TournamentTableHeader() {
+	@ui.TableHead("default") {
+		@ui.Tr() {
+			@ui.Th() {
+				{ i18n.T(ctx, "global.table.name") }
+			}
+			@ui.Th() {
+				{ i18n.T(ctx, "page.tournament-list.stage") }
+			}
+			@ui.Th() {
+				{ i18n.T(ctx, "page.tournament.status.label") }
+			}
+			@ui.ThEmpty()
+			@ui.ThEmpty()
+			@ui.ThEmpty()
+		}
+	}
+}
+
 templ TournamentTable(tournaments []tournamentModel.Tournament) {
 	@ui.Table("default") {
-		@ui.TableHead("default") {
-			@ui.Tr() {
-				@ui.Th() {
-					{ i18n.T(ctx, "global.table.name") }
-				}
-				@ui.Th() {
-					{ i18n.T(ctx, "page.tournament-list.stage") }
-				}
-				@ui.Th() {
-					{ i18n.T(ctx, "page.tournament.status.label") }
-				}
-				@ui.ThEmpty()
-				@ui.ThEmpty()
-				@ui.ThEmpty()
-			}
-		}
+		@TournamentTableHeader()
 		@ui.TableBody(templ.Attributes{
 			"id":        "active-tournament-tbody",
 			"hx-swap":   "outerHTML swap:0.5s",
@@ -233,22 +191,7 @@ templ ArchivedTournamentSection(tournaments []tournamentModel.Tournament) {
 			}
 		</div>
 		@ui.Table("default") {
-			@ui.TableHead("default") {
-				@ui.Tr() {
-					@ui.Th() {
-						{ i18n.T(ctx, "global.table.name") }
-					}
-					@ui.Th() {
-						{ i18n.T(ctx, "page.tournament-list.stage") }
-					}
-					@ui.Th() {
-						{ i18n.T(ctx, "page.tournament.status.label") }
-					}
-					@ui.ThEmpty()
-					@ui.ThEmpty()
-					@ui.ThEmpty()
-				}
-			}
+			@TournamentTableHeader()
 			@ui.TableBody(templ.Attributes{
 				"hx-swap":   "outerHTML swap:0.5s",
 				"hx-target": "closest tr",

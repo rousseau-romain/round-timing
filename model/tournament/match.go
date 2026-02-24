@@ -72,26 +72,59 @@ func GetMatchesByTournament(ctx context.Context, idTournament int) ([]Tournament
 		}
 		matches = append(matches, m)
 	}
-	// fmt.Printf("%+v\n", matches)
-
-	// b, _ := json.MarshalIndent(matches, "", "  ")
-	// fmt.Println(string(b))
 	return matches, rows.Err()
 }
 
-func GetTournamentMatch(ctx context.Context, id int) (TournamentMatch, error) {
-	m := TournamentMatch{}
-	err := db.QueryRowContext(ctx,
-		`SELECT id, id_tournament, id_team1, id_team2,
-			id_team_winner, bo_format, score_team1, score_team2,
-			kills_team1, kills_team2,
-			round, position, status, created_at
-		FROM tournament_match WHERE id = ?`, id).
-		Scan(&m.Id, &m.IdTournament, &m.IdTeam1, &m.IdTeam2,
+func GetMatchesByTournamentAndRound(ctx context.Context, idTournament int, round int) ([]TournamentMatchWithNames, error) {
+	query := `
+		SELECT
+			m.id, m.id_tournament, m.id_team1, m.id_team2,
+			m.id_team_winner, m.bo_format, m.score_team1, m.score_team2,
+			m.kills_team1, m.kills_team2,
+			m.round, m.position, m.status, m.created_at,
+			COALESCE(t1.name, ''), COALESCE(t2.name, ''), COALESCE(tw.name, '')
+		FROM tournament_match m
+		LEFT JOIN tournament_team t1 ON t1.id = m.id_team1
+		LEFT JOIN tournament_team t2 ON t2.id = m.id_team2
+		LEFT JOIN tournament_team tw ON tw.id = m.id_team_winner
+		WHERE m.id_tournament = ? AND m.round = ?
+		ORDER BY m.position
+	`
+	rows, err := db.QueryContext(ctx, query, idTournament, round)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var matches []TournamentMatchWithNames
+	for rows.Next() {
+		var m TournamentMatchWithNames
+		if err := rows.Scan(&m.Id, &m.IdTournament, &m.IdTeam1, &m.IdTeam2,
 			&m.IdTeamWinner, &m.BoFormat, &m.ScoreTeam1, &m.ScoreTeam2,
 			&m.KillsTeam1, &m.KillsTeam2,
-			&m.Round, &m.Position, &m.Status, &m.CreatedAt)
+			&m.Round, &m.Position, &m.Status, &m.CreatedAt,
+			&m.Team1Name, &m.Team2Name, &m.WinnerName); err != nil {
+			return matches, err
+		}
+		matches = append(matches, m)
+	}
+	return matches, rows.Err()
+}
+
+const matchColumns = "id, id_tournament, id_team1, id_team2, id_team_winner, bo_format, score_team1, score_team2, kills_team1, kills_team2, round, position, status, created_at"
+
+func scanTournamentMatch(scanner interface{ Scan(...any) error }) (TournamentMatch, error) {
+	var m TournamentMatch
+	err := scanner.Scan(&m.Id, &m.IdTournament, &m.IdTeam1, &m.IdTeam2,
+		&m.IdTeamWinner, &m.BoFormat, &m.ScoreTeam1, &m.ScoreTeam2,
+		&m.KillsTeam1, &m.KillsTeam2,
+		&m.Round, &m.Position, &m.Status, &m.CreatedAt)
 	return m, err
+}
+
+func GetTournamentMatch(ctx context.Context, id int) (TournamentMatch, error) {
+	return scanTournamentMatch(db.QueryRowContext(ctx,
+		"SELECT "+matchColumns+" FROM tournament_match WHERE id = ?", id))
 }
 
 func CreateTournamentMatch(ctx context.Context, m TournamentMatchCreate) (int, error) {
@@ -107,6 +140,11 @@ func CreateTournamentMatch(ctx context.Context, m TournamentMatchCreate) (int, e
 
 func UpdateMatchBo(ctx context.Context, idMatch int, boFormat int) error {
 	_, err := db.ExecContext(ctx, "UPDATE tournament_match SET bo_format = ? WHERE id = ?", boFormat, idMatch)
+	return err
+}
+
+func UpdateMatchsBo(ctx context.Context, idTournament int, round int, boFormat int) error {
+	_, err := db.ExecContext(ctx, "UPDATE tournament_match SET bo_format = ? WHERE id_tournament = ? AND round = ?", boFormat, idTournament, round)
 	return err
 }
 
@@ -215,19 +253,9 @@ func GetAvailableTeamsForTournament(ctx context.Context, idTournament int, idUse
 }
 
 func GetMatchByRoundAndPosition(ctx context.Context, idTournament int, round int, position int) (TournamentMatch, error) {
-	m := TournamentMatch{}
-	err := db.QueryRowContext(ctx,
-		`SELECT id, id_tournament, id_team1, id_team2,
-			id_team_winner, bo_format, score_team1, score_team2,
-			kills_team1, kills_team2,
-			round, position, status, created_at
-		FROM tournament_match WHERE id_tournament = ? AND round = ? AND position = ?`,
-		idTournament, round, position).
-		Scan(&m.Id, &m.IdTournament, &m.IdTeam1, &m.IdTeam2,
-			&m.IdTeamWinner, &m.BoFormat, &m.ScoreTeam1, &m.ScoreTeam2,
-			&m.KillsTeam1, &m.KillsTeam2,
-			&m.Round, &m.Position, &m.Status, &m.CreatedAt)
-	return m, err
+	return scanTournamentMatch(db.QueryRowContext(ctx,
+		"SELECT "+matchColumns+" FROM tournament_match WHERE id_tournament = ? AND round = ? AND position = ?",
+		idTournament, round, position))
 }
 
 func GetMaxRound(ctx context.Context, idTournament int) (int, error) {
@@ -287,29 +315,26 @@ func DeleteTournamentMatchesByTournament(ctx context.Context, idTournament int) 
 	return err
 }
 
-func IncrementMatchKills(ctx context.Context, idMatch int, team int, delta int) error {
-	col := "kills_team1"
+func incrementMatchField(ctx context.Context, idMatch int, fieldPrefix string, team int, delta int) error {
+	col := fieldPrefix + "_team1"
 	if team == 2 {
-		col = "kills_team2"
+		col = fieldPrefix + "_team2"
 	}
 	query := fmt.Sprintf(
 		"UPDATE tournament_match SET %s = GREATEST(0, %s + ?) WHERE id = ?", col, col)
 	_, err := db.ExecContext(ctx, query, delta, idMatch)
 	return err
+}
+
+func IncrementMatchKills(ctx context.Context, idMatch int, team int, delta int) error {
+	return incrementMatchField(ctx, idMatch, "kills", team, delta)
+}
+
+func IncrementMatchScore(ctx context.Context, idMatch int, team int, delta int) error {
+	return incrementMatchField(ctx, idMatch, "score", team, delta)
 }
 
 func UpdateMatchStatus(ctx context.Context, idMatch int, status string) error {
 	_, err := db.ExecContext(ctx, "UPDATE tournament_match SET status = ? WHERE id = ?", status, idMatch)
-	return err
-}
-
-func IncrementMatchScore(ctx context.Context, idMatch int, team int, delta int) error {
-	col := "score_team1"
-	if team == 2 {
-		col = "score_team2"
-	}
-	query := fmt.Sprintf(
-		"UPDATE tournament_match SET %s = GREATEST(0, %s + ?) WHERE id = ?", col, col)
-	_, err := db.ExecContext(ctx, query, delta, idMatch)
 	return err
 }

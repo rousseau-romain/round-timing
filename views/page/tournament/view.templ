@@ -88,6 +88,44 @@ templ TeamCompositionCard(team tournamentModel.Team, teamPlayers []tournamentMod
 	</div>
 }
 
+templ BracketIncrementControl(endpoint string, team int, value int, cssClass string) {
+	<div class={ cssClass }>
+		<button
+			hx-patch={ endpoint }
+			hx-vals={ fmt.Sprintf(`{"team":"%d","delta":"-1"}`, team) }
+			hx-target="#matches-section"
+			hx-swap="outerHTML"
+		>-</button>
+		<span>{ fmt.Sprintf("%d", value) }</span>
+		<button
+			hx-patch={ endpoint }
+			hx-vals={ fmt.Sprintf(`{"team":"%d","delta":"1"}`, team) }
+			hx-target="#matches-section"
+			hx-swap="outerHTML"
+		>+</button>
+	</div>
+}
+
+templ TableIncrementControl(endpoint string, team int, value int) {
+	<div class="flex gap-1 items-center">
+		<button
+			hx-patch={ endpoint }
+			hx-vals={ fmt.Sprintf(`{"team":"%d","delta":"-1"}`, team) }
+			hx-target="#matches-section"
+			hx-swap="outerHTML"
+			class="py-0.5 px-2 text-sm rounded border hover:bg-gray-100 dark:hover:bg-gray-700"
+		>-</button>
+		<span class="w-6 text-sm font-medium text-center">{ fmt.Sprintf("%d", value) }</span>
+		<button
+			hx-patch={ endpoint }
+			hx-vals={ fmt.Sprintf(`{"team":"%d","delta":"1"}`, team) }
+			hx-target="#matches-section"
+			hx-swap="outerHTML"
+			class="py-0.5 px-2 text-sm rounded border hover:bg-gray-100 dark:hover:bg-gray-700"
+		>+</button>
+	</div>
+}
+
 templ MatchStatusBadge(status string) {
 	switch status {
 		case "pending":
@@ -261,11 +299,33 @@ templ bracketRounds(rounds [][]tournamentModel.TournamentMatchWithNames, tournam
 		for roundNum, roundMatches := range rounds {
 			<div class="bracket-round">
 				<div class="bracket-round-header">
-					if roundLabelKey(roundNum, len(rounds), stageType) != "" {
-						{ i18n.T(ctx, roundLabelKey(roundNum, len(rounds), stageType)) }
-					} else {
-						{ fmt.Sprintf("%s %d", i18n.T(ctx, "global.round"), roundNum+1) }
-					}
+					<div class="flex gap-1 justify-center items-center">
+						<span>
+							if roundLabelKey(roundNum, len(rounds), stageType) != "" {
+								{ i18n.T(ctx, roundLabelKey(roundNum, len(rounds), stageType)) }
+							} else {
+								{ fmt.Sprintf("%s %d", i18n.T(ctx, "global.round"), roundNum+1) }
+							}
+						</span>
+						if !readOnly && roundHasRealMatches(roundMatches) {
+							<input
+								type="number"
+								name="bo_format"
+								min="1"
+								value={ fmt.Sprintf("%d", roundBoFormat(roundMatches)) }
+								class="p-0.5 w-12 text-xs text-center rounded border dark:bg-gray-800 dark:border-gray-600"
+								hx-patch={ fmt.Sprintf("/tournament/%d/round/%d/bo", idTournament, roundNum+1) }
+								hx-target="#matches-section"
+								hx-swap="outerHTML"
+								hx-trigger="change"
+								title="BO format"
+							/>
+						} else if roundHasRealMatches(roundMatches) {
+							<span>
+								{ fmt.Sprintf("BO%d", roundBoFormat(roundMatches)) }
+							</span>
+						}
+					</div>
 				</div>
 				<div class="bracket-round-matches">
 					for i, m := range roundMatches {
@@ -313,36 +373,8 @@ templ bracketRounds(rounds [][]tournamentModel.TournamentMatchWithNames, tournam
 									</span>
 									if !isByeMatch(m) {
 										if isMatchScoreEditable(m, readOnly) {
-											<div class="bracket-kills">
-												<button
-													hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id) }
-													hx-vals={ `{"team":"1","delta":"-1"}` }
-													hx-target="#matches-section"
-													hx-swap="outerHTML"
-												>-</button>
-												<span>{ fmt.Sprintf("%d", m.KillsTeam1) }</span>
-												<button
-													hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id) }
-													hx-vals={ `{"team":"1","delta":"1"}` }
-													hx-target="#matches-section"
-													hx-swap="outerHTML"
-												>+</button>
-											</div>
-											<div class="bracket-score">
-												<button
-													hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id) }
-													hx-vals={ `{"team":"1","delta":"-1"}` }
-													hx-target="#matches-section"
-													hx-swap="outerHTML"
-												>-</button>
-												<span>{ fmt.Sprintf("%d", m.ScoreTeam1) }</span>
-												<button
-													hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id) }
-													hx-vals={ `{"team":"1","delta":"1"}` }
-													hx-target="#matches-section"
-													hx-swap="outerHTML"
-												>+</button>
-											</div>
+											@BracketIncrementControl(fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id), 1, m.KillsTeam1, "bracket-kills")
+											@BracketIncrementControl(fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id), 1, m.ScoreTeam1, "bracket-score")
 										} else {
 											<span class="bracket-kills-text">{ fmt.Sprintf("%d", m.KillsTeam1) }</span>
 											<span class="bracket-score-text">{ fmt.Sprintf("%d", m.ScoreTeam1) }</span>
@@ -393,36 +425,8 @@ templ bracketRounds(rounds [][]tournamentModel.TournamentMatchWithNames, tournam
 									</span>
 									if !isByeMatch(m) {
 										if isMatchScoreEditable(m, readOnly) {
-											<div class="bracket-kills">
-												<button
-													hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id) }
-													hx-vals={ `{"team":"2","delta":"-1"}` }
-													hx-target="#matches-section"
-													hx-swap="outerHTML"
-												>-</button>
-												<span>{ fmt.Sprintf("%d", m.KillsTeam2) }</span>
-												<button
-													hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id) }
-													hx-vals={ `{"team":"2","delta":"1"}` }
-													hx-target="#matches-section"
-													hx-swap="outerHTML"
-												>+</button>
-											</div>
-											<div class="bracket-score">
-												<button
-													hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id) }
-													hx-vals={ `{"team":"2","delta":"-1"}` }
-													hx-target="#matches-section"
-													hx-swap="outerHTML"
-												>-</button>
-												<span>{ fmt.Sprintf("%d", m.ScoreTeam2) }</span>
-												<button
-													hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id) }
-													hx-vals={ `{"team":"2","delta":"1"}` }
-													hx-target="#matches-section"
-													hx-swap="outerHTML"
-												>+</button>
-											</div>
+											@BracketIncrementControl(fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id), 2, m.KillsTeam2, "bracket-kills")
+											@BracketIncrementControl(fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id), 2, m.ScoreTeam2, "bracket-score")
 										} else {
 											<span class="bracket-kills-text">{ fmt.Sprintf("%d", m.KillsTeam2) }</span>
 											<span class="bracket-score-text">{ fmt.Sprintf("%d", m.ScoreTeam2) }</span>
@@ -491,94 +495,24 @@ templ MatchRow(m tournamentModel.TournamentMatchWithNames, idTournament int, rea
 		}
 		@ui.TdCompact() {
 			<div class="flex flex-col gap-1">
-				<div class="flex gap-1 items-center">
-					if !readOnly && m.Status != "finished" {
-						<button
-							hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id) }
-							hx-vals={ `{"team":"1","delta":"-1"}` }
-							hx-target="#matches-section"
-							hx-swap="outerHTML"
-							class="py-0.5 px-2 text-sm rounded border hover:bg-gray-100 dark:hover:bg-gray-700"
-						>-</button>
-					}
+				if !readOnly && m.Status != "finished" {
+					@TableIncrementControl(fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id), 1, m.ScoreTeam1)
+					@TableIncrementControl(fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id), 2, m.ScoreTeam2)
+				} else {
 					<span class="w-6 text-sm font-medium text-center">{ fmt.Sprintf("%d", m.ScoreTeam1) }</span>
-					if !readOnly && m.Status != "finished" {
-						<button
-							hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id) }
-							hx-vals={ `{"team":"1","delta":"1"}` }
-							hx-target="#matches-section"
-							hx-swap="outerHTML"
-							class="py-0.5 px-2 text-sm rounded border hover:bg-gray-100 dark:hover:bg-gray-700"
-						>+</button>
-					}
-				</div>
-				<div class="flex gap-1 items-center">
-					if !readOnly && m.Status != "finished" {
-						<button
-							hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id) }
-							hx-vals={ `{"team":"2","delta":"-1"}` }
-							hx-target="#matches-section"
-							hx-swap="outerHTML"
-							class="py-0.5 px-2 text-sm rounded border hover:bg-gray-100 dark:hover:bg-gray-700"
-						>-</button>
-					}
 					<span class="w-6 text-sm font-medium text-center">{ fmt.Sprintf("%d", m.ScoreTeam2) }</span>
-					if !readOnly && m.Status != "finished" {
-						<button
-							hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/score", idTournament, m.Id) }
-							hx-vals={ `{"team":"2","delta":"1"}` }
-							hx-target="#matches-section"
-							hx-swap="outerHTML"
-							class="py-0.5 px-2 text-sm rounded border hover:bg-gray-100 dark:hover:bg-gray-700"
-						>+</button>
-					}
-				</div>
+				}
 			</div>
 		}
 		@ui.TdCompact() {
 			<div class="flex flex-col gap-1">
-				<div class="flex gap-1 items-center">
-					if !readOnly && m.Status != "finished" {
-						<button
-							hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id) }
-							hx-vals={ `{"team":"1","delta":"-1"}` }
-							hx-target="#matches-section"
-							hx-swap="outerHTML"
-							class="py-0.5 px-2 text-sm rounded border hover:bg-gray-100 dark:hover:bg-gray-700"
-						>-</button>
-					}
+				if !readOnly && m.Status != "finished" {
+					@TableIncrementControl(fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id), 1, m.KillsTeam1)
+					@TableIncrementControl(fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id), 2, m.KillsTeam2)
+				} else {
 					<span class="w-6 text-sm font-medium text-center">{ fmt.Sprintf("%d", m.KillsTeam1) }</span>
-					if !readOnly && m.Status != "finished" {
-						<button
-							hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id) }
-							hx-vals={ `{"team":"1","delta":"1"}` }
-							hx-target="#matches-section"
-							hx-swap="outerHTML"
-							class="py-0.5 px-2 text-sm rounded border hover:bg-gray-100 dark:hover:bg-gray-700"
-						>+</button>
-					}
-				</div>
-				<div class="flex gap-1 items-center">
-					if !readOnly && m.Status != "finished" {
-						<button
-							hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id) }
-							hx-vals={ `{"team":"2","delta":"-1"}` }
-							hx-target="#matches-section"
-							hx-swap="outerHTML"
-							class="py-0.5 px-2 text-sm rounded border hover:bg-gray-100 dark:hover:bg-gray-700"
-						>-</button>
-					}
 					<span class="w-6 text-sm font-medium text-center">{ fmt.Sprintf("%d", m.KillsTeam2) }</span>
-					if !readOnly && m.Status != "finished" {
-						<button
-							hx-patch={ fmt.Sprintf("/tournament/%d/match/%d/kills", idTournament, m.Id) }
-							hx-vals={ `{"team":"2","delta":"1"}` }
-							hx-target="#matches-section"
-							hx-swap="outerHTML"
-							class="py-0.5 px-2 text-sm rounded border hover:bg-gray-100 dark:hover:bg-gray-700"
-						>+</button>
-					}
-				</div>
+				}
 			</div>
 		}
 		@ui.TdCompact() {
@@ -1039,6 +973,24 @@ func winnerSpacerBottomStyle(rounds [][]tournamentModel.TournamentMatchWithNames
 		v = 1
 	}
 	return fmt.Sprintf("flex: %d", v)
+}
+
+func roundBoFormat(matches []tournamentModel.TournamentMatchWithNames) int {
+	for _, m := range matches {
+		if m.Id != 0 {
+			return m.BoFormat
+		}
+	}
+	return 1
+}
+
+func roundHasRealMatches(matches []tournamentModel.TournamentMatchWithNames) bool {
+	for _, m := range matches {
+		if m.Id != 0 {
+			return true
+		}
+	}
+	return false
 }
 
 func roundLabelKey(roundNum int, maxR int, stageType string) string {

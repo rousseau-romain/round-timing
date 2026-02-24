@@ -37,6 +37,7 @@ func registerTournamentRoutes(r *mux.Router, handler *handlersTournament.Handler
 	r.Handle("/tournament/{idTournament:[0-9]+}/match/{idMatch:[0-9]+}/score", middleware.RequireAuthAndHisTournament(handler.HandleUpdateMatchScore, authService, logger)).Methods("POST")
 	r.Handle("/tournament/{idTournament:[0-9]+}/match/{idMatch:[0-9]+}/score", middleware.RequireAuthAndHisTournament(handler.HandleIncrementMatchScore, authService, logger)).Methods("PATCH")
 	r.Handle("/tournament/{idTournament:[0-9]+}/match/{idMatch:[0-9]+}/bo", middleware.RequireAuthAndHisTournament(handler.HandleEditMatchBo, authService, logger)).Methods("PATCH")
+	r.Handle("/tournament/{idTournament:[0-9]+}/round/{round:[0-9]+}/bo", middleware.RequireAuthAndHisTournament(handler.HandleUpdateRoundBo, authService, logger)).Methods("PATCH")
 	r.Handle("/tournament/{idTournament:[0-9]+}/match/{idMatch:[0-9]+}/kills", middleware.RequireAuthAndHisTournament(handler.HandleUpdateMatchKills, authService, logger)).Methods("PATCH")
 	r.Handle("/tournament/{idTournament:[0-9]+}/match/{idMatch:[0-9]+}/status", middleware.RequireAuthAndHisTournament(handler.HandleUpdateMatchStatus, authService, logger)).Methods("PATCH")
 	r.Handle("/tournament/{idTournament:[0-9]+}/match/{idMatch:[0-9]+}", middleware.RequireAuthAndHisTournament(handler.HandleDeleteMatch, authService, logger)).Methods("DELETE")
